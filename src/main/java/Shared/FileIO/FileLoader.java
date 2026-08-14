@@ -23,7 +23,7 @@ public class FileLoader {
         String line;
         while ((line = reader.readLine()) != null) {
             if (!line.endsWith("\n")) {
-                line = line + "\n";
+                line = line.concat("\n");
             }
 
             buffer.append(line);

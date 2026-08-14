@@ -90,7 +90,7 @@ public class ListFileBuffer implements FileBuffer {
             return;
         }
 
-        List<String> lines = StringUtility.splitAfterDelimiter(content, "\n");
+        List<String> lines = StringUtility.splitAfterDelimiter(content, '\n');
         assert !lines.isEmpty();
         lines.set(0, beforeInsert + lines.getFirst());
         if (lines.getLast().endsWith("\n")) {
@@ -108,7 +108,7 @@ public class ListFileBuffer implements FileBuffer {
 
     @Override
     public void append(String content) {
-        List<String> lines = StringUtility.splitAfterDelimiter(content, "\n");
+        List<String> lines = StringUtility.splitAfterDelimiter(content, '\n');
         assert !lines.isEmpty();
 
         if (!lines.getLast().endsWith("\n")) {
