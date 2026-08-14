@@ -41,6 +41,13 @@ public class ListFileBuffer implements FileBuffer {
         if (position.paragraph() < 0 || position.paragraph() > paragraphs.size()) {
             throw new InvalidPosition("paragraph " + position.paragraph() + " is out of range");
         }
+        if (position.paragraph() == paragraphs.size()) {
+            if (position.character() != 0) {
+                throw new InvalidPosition("character must be 0 when paragraph indicates adding a new line");
+            }
+            return;
+        }
+
         if (position.character() < 0 || position.character() >= paragraphs.get(position.paragraph()).length()) {
             throw new InvalidPosition("character " + position.character() + " is out of range");
         }
@@ -51,6 +58,11 @@ public class ListFileBuffer implements FileBuffer {
         checkPosition(position);
 
         if (content == null || content.isEmpty()) {
+            return;
+        }
+
+        if (position.paragraph() == paragraphs.size()) {
+            append(content);
             return;
         }
 
@@ -90,8 +102,11 @@ public class ListFileBuffer implements FileBuffer {
 
     @Override
     public void append(String content) {
-        TextPosition position = new TextPosition(paragraphs.size(), 0);
-        insert(content, position);
+        if (!content.endsWith("\n")) {
+            content = content.concat("\n");
+        }
+
+        paragraphs.add(content);
     }
 
     @Override
@@ -117,7 +132,7 @@ public class ListFileBuffer implements FileBuffer {
         }
 
         if (paragraphs.isEmpty()) {
-            paragraphs.add("");
+            paragraphs.add("\n");
         }
     }
 

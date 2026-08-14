@@ -44,6 +44,9 @@ class FileBufferTest {
             assertEquals("Line B\n", fileBuffer.readParagraph(1));
             assertTrue(fileBuffer.readParagraph(2).startsWith("Line CStart:"));
 
+            fileBuffer.append("Line D");
+            assertEquals("Line D\n", fileBuffer.readParagraph(fileBuffer.length() - 1));
+
             // Inserting an empty string (buffer state should not change)
             String beforeEmpty = fileBuffer.readParagraph(0);
             fileBuffer.insert("", new TextPosition(0, 0));
@@ -114,7 +117,7 @@ class FileBufferTest {
             // Delete full buffer content
             int lastRowLen = fileBuffer.readParagraph(0).length();
             fileBuffer.delete(new TextPosition(0, 0), new TextPosition(0, lastRowLen));
-            assertEquals("", fileBuffer.readParagraph(0));
+            assertEquals("\n", fileBuffer.readParagraph(0));
         }
     }
 
