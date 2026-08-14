@@ -14,14 +14,21 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
 
     private long wordCount = 0;
     private long characterCount = 0;
-    private long paragraphCount = 1;
+    private long paragraphCount = 0;
 
     public WrapperMetadataTracker(FileBuffer buffer) {
         assert buffer != null;
         assert !(buffer instanceof WrapperMetadataTracker);
 
-        //TODO: if buffer not empty do one full parse here
         this.buffer = buffer;
+
+        if (buffer.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < buffer.length(); i++) {
+            changeCounts("", buffer.readParagraph(i));
+        }
     }
 
     private void changeWordCount(String before, String after) {
@@ -148,7 +155,7 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
 
     @Override
     public void clear() {
-        paragraphCount = 1;
+        paragraphCount = 0;
         wordCount = 0;
         characterCount = 0;
 

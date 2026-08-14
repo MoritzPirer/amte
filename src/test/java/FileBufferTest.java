@@ -9,7 +9,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 class FileBufferTest {
     private FileBuffer[] getImplementations() {
         return new FileBuffer[]{
@@ -57,6 +56,11 @@ class FileBufferTest {
             // Inserting a null string (should have no effect)
             fileBuffer.insert(null, new TextPosition(0, 0));
             assertEquals(beforeEmpty, fileBuffer.readParagraph(0));
+
+            fileBuffer.clear();
+            fileBuffer.append("Test");
+            System.out.println(fileBuffer.readParagraph(0));
+            assertEquals(1, fileBuffer.length());
         }
     }
 
@@ -119,7 +123,7 @@ class FileBufferTest {
             // Delete full buffer content
             int lastRowLen = fileBuffer.readParagraph(0).length();
             fileBuffer.delete(new TextPosition(0, 0), new TextPosition(0, lastRowLen));
-            assertEquals("\n", fileBuffer.readParagraph(0));
+            assertTrue(fileBuffer.isEmpty());
         }
     }
 

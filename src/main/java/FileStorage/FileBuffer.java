@@ -7,7 +7,6 @@ import java.util.List;
 /**
  * Defines the outline of a Container that supports reading and modifying text addressed by paragraphs and
  * the character within that paragraph. Paragraphs are ended by a newline (added implicitly where necessary).
- * The buffer will always have at least one paragraph (i.e. an empty buffer still contains one empty paragraph "\n")
  */
 public interface FileBuffer {
     /**
@@ -35,7 +34,7 @@ public interface FileBuffer {
     void delete(TextPosition start, TextPosition end) throws InvalidPosition;
 
     /**
-     * delete the entire buffer. After calling this, the buffer will contain one paragraph containing only a newline character
+     * delete the entire buffer.
      */
     void clear();
 
@@ -46,7 +45,7 @@ public interface FileBuffer {
      * @param end the first position after teh read. Must be after start. If this is not a position in the buffer,
      *            the read will get as close to that position as possible
      * @return a list where each element is one paragraph that was read
-     * @throws InvalidPosition if start is not a valid position in th ebuffer or if start is equal to or after end
+     * @throws InvalidPosition if start is not a valid position in the buffer or if start is equal to or after end
      */
     List<String> readRange(TextPosition start, TextPosition end) throws InvalidPosition;
 
@@ -71,8 +70,7 @@ public interface FileBuffer {
     int lengthOfParagraph(int paragraphIndex) throws InvalidPosition;
 
     /**
-     * checks if the buffer is empty. Note that the buffer will always contain at least one paragraph containing at least the newline character.
-     * I.e. a buffer containing only one newline is considered empty
+     * checks if the buffer is empty.
      * @return true if the buffer is empty, false otherwise
      */
     boolean isEmpty();

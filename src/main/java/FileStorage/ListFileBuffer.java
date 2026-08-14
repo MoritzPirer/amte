@@ -72,6 +72,10 @@ public class ListFileBuffer implements FileBuffer {
             return;
         }
 
+        if (paragraphs.isEmpty()) {
+            paragraphs.add("\n");
+        }
+
         String currentLine = paragraphs.get(position.paragraph());
         String beforeInsert = currentLine.substring(0, position.character());
         String afterInsert = currentLine.substring(position.character());
@@ -140,16 +144,11 @@ public class ListFileBuffer implements FileBuffer {
         if (!beforeDelete.isEmpty() || !afterDelete.isEmpty()) {
             paragraphs.add(start.paragraph(), beforeDelete + afterDelete);
         }
-
-        if (paragraphs.isEmpty()) {
-            paragraphs.add("\n");
-        }
     }
 
     @Override
     public void clear() {
         paragraphs.clear();
-        paragraphs.add("\n");
     }
 
     /**
@@ -228,6 +227,6 @@ public class ListFileBuffer implements FileBuffer {
 
     @Override
     public boolean isEmpty() {
-        return paragraphs.isEmpty() || (paragraphs.size() == 1 && paragraphs.getFirst().isEmpty());
+        return paragraphs.isEmpty(); //|| (paragraphs.size() == 1 && paragraphs.getFirst().isEmpty());
     }
 }
