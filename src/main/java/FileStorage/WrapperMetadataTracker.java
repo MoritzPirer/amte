@@ -11,9 +11,10 @@ import java.util.List;
  */
 public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
     private final FileBuffer buffer;
+
     private long wordCount = 0;
     private long characterCount = 0;
-    private long paragraphCount = 0;
+    private long paragraphCount = 1;
 
     public WrapperMetadataTracker(FileBuffer buffer) {
         assert buffer != null;
@@ -29,7 +30,7 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
     }
 
     private void changeCharacterCount(String before, String after) {
-        int changeAmount = after.length() - before.length();
+        int changeAmount = StringUtility.countCharactersBlacklisted(after, "\n") - StringUtility.countCharactersBlacklisted(before, "\n");
         characterCount += changeAmount;
     }
 
@@ -44,23 +45,35 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
         changeCharacterCount(before, after);
     }
 
+    private void checkPosition(TextPosition position) throws InvalidPosition {
+        if (position.paragraph() < 0 || position.paragraph() > buffer.length()) {
+            throw new InvalidPosition("paragraph " + position.paragraph() + " is out of range");
+        }
+        if (position.paragraph() == buffer.length()) {
+            if (position.character() != 0) {
+                throw new InvalidPosition("character must be 0 when paragraph indicates adding a new line");
+            }
+            return;
+        }
+        if (position.character() < 0 || position.character() >= buffer.lengthOfParagraph(position.paragraph())) {
+            throw new InvalidPosition("character " + position.character() + " is out of range");
+        }
+    }
+
     @Override
     public void insert(String content, TextPosition position) throws InvalidPosition {
-        if (!content.endsWith("\n")) {
-            content = content + "\n";
-        }
+        checkPosition(position);
 
         String before = buffer.readParagraph(position.paragraph());
         String after = content;
+
         if (!before.isEmpty()) {
             after = before.substring(0, position.character())
             + content
             + before.substring(position.character());
         }
 
-        System.out.println(after + " -> " + StringUtility.countWords(after));
         changeCounts(before, after);
-
         buffer.insert(content, position);
     }
 
@@ -69,35 +82,77 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
         if (!content.endsWith("\n")) {
             content = content + "\n";
         }
+
         changeCounts("", content);
         buffer.append(content);
     }
 
     @Override
     public void delete(TextPosition start, TextPosition end) throws InvalidPosition {
+        checkPosition(start);
+
         if (!end.isAfter(start)) {
             throw new InvalidPosition("start is after end");
         }
-        for (int currentRow = start.paragraph(); currentRow <= end.paragraph(); currentRow++) {
-            String before = buffer.readParagraph(currentRow);
-            String after = "";
 
-            if (currentRow == start.paragraph() && currentRow == end.paragraph()) {
-                // inline delete
-                after = before.substring(0, start.character()) + before.substring(end.character());
-            }
-            else if (currentRow == start.paragraph()) {
-                after = before.substring(0, start.character());
-            }
-            else if (currentRow == end.paragraph()) {
-                after = before.substring(end.character());
-            }
-
-            changeCounts(before, after);
+        if (start.paragraph() == end.paragraph()) {
+            inlineDelete(start, end);
+        }
+        else {
+            multiLineDelete(start, end);
         }
 
-
         buffer.delete(start, end);
+    }
+
+    /**
+     * delete all characters between start (inclusive) and end (exclusive), assuming start and row ar in the same paragraph
+     * @param start the first character to delete
+     * @param end the first character after the deletion
+     */
+    private void inlineDelete(TextPosition start, TextPosition end) {
+        assert start.paragraph() == end.paragraph();
+
+        String lineBeforeDelete = buffer.readParagraph(start.paragraph());
+        String beforeDeletedContent = lineBeforeDelete.substring(0, start.character());
+        String afterDeletedContent = lineBeforeDelete.substring(end.character());
+
+        String lineAfterDelete = beforeDeletedContent + afterDeletedContent;
+
+        changeWordCount(lineBeforeDelete, lineAfterDelete);
+        changeCharacterCount(lineBeforeDelete, lineAfterDelete);
+    }
+
+    /**
+     * delete all characters between start (inclusive) and end (exclusive), assuming end is on a different paragraph
+     * @param start the first character to delete
+     * @param end the first character after the deletion
+     */
+    private void multiLineDelete(TextPosition start, TextPosition end) {
+        assert start.paragraph() < end.paragraph();
+
+        String beforeDeletedContent = buffer.readParagraph(start.paragraph()).substring(0, start.character());
+        String afterDeletedContent = buffer.readParagraph(end.paragraph()).substring(end.character());
+        String lineAfterDelete = beforeDeletedContent + afterDeletedContent;
+
+        for (int i = start.paragraph(); i <= end.paragraph(); i++) {
+            changeWordCount(buffer.readParagraph(i), "");
+            changeCharacterCount(buffer.readParagraph(i), "");
+            paragraphCount--;
+        }
+
+        changeWordCount("", lineAfterDelete);
+        changeCharacterCount("", lineAfterDelete);
+        paragraphCount++;
+    }
+
+    @Override
+    public void clear() {
+        paragraphCount = 1;
+        wordCount = 0;
+        characterCount = 0;
+
+        buffer.clear();
     }
 
     @Override

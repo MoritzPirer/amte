@@ -3,7 +3,6 @@ package FileStorage;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
-import javax.swing.text.Position;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +31,14 @@ public class ListFileBuffer implements FileBuffer {
     }
 
     private void debugShowState() {
+        System.err.println("\nState:");
         for (String paragraph : paragraphs) {
-            System.err.println(paragraph);
+            if  (paragraph.endsWith("\n")) {
+                System.out.println(paragraph.substring(0, paragraph.length() - 1).concat("\\n"));
+            }
+            else {
+                System.err.println(paragraph);
+            }
         }
     }
 
@@ -41,6 +46,7 @@ public class ListFileBuffer implements FileBuffer {
         if (position.paragraph() < 0 || position.paragraph() > paragraphs.size()) {
             throw new InvalidPosition("paragraph " + position.paragraph() + " is out of range");
         }
+
         if (position.paragraph() == paragraphs.size()) {
             if (position.character() != 0) {
                 throw new InvalidPosition("character must be 0 when paragraph indicates adding a new line");
@@ -102,11 +108,15 @@ public class ListFileBuffer implements FileBuffer {
 
     @Override
     public void append(String content) {
-        if (!content.endsWith("\n")) {
-            content = content.concat("\n");
+        List<String> lines = StringUtility.splitAfterDelimiter(content, "\n");
+        assert !lines.isEmpty();
+
+        if (!lines.getLast().endsWith("\n")) {
+            lines.set(lines.size() - 1, lines.getLast().concat("\n"));
         }
 
-        paragraphs.add(content);
+        paragraphs.addAll(lines);
+        debugEnforceInvariants();
     }
 
     @Override
@@ -136,22 +146,33 @@ public class ListFileBuffer implements FileBuffer {
         }
     }
 
+    @Override
+    public void clear() {
+        paragraphs.clear();
+        paragraphs.add("\n");
+    }
+
+    /**
+     * finds a position in the buffer that is as close as possible to the given end. If the paragraph does not exist,
+     * the last position in the buffer is used. if the paragraph is valid but the column is not, the last character in that paragraph is used
+     * @param end the possibly invalid end to correct
+     * @return the corrected end
+     */
     private TextPosition getDeletionEnd(TextPosition end) {
         TextPosition deletionEnd;
         if (end.paragraph() >= paragraphs.size()) {
-            // snap end to last char
             deletionEnd = new TextPosition(
                     paragraphs.size() - 1,
                     paragraphs.getLast().length() - 1
             );
         }
         else if (end.character() >= paragraphs.get(end.paragraph()).length()) {
-            // snap end to last char of paragraph
             deletionEnd = new TextPosition(end.paragraph(), paragraphs.get(end.paragraph()).length());
         }
         else {
             deletionEnd = end;
         }
+
         return deletionEnd;
     }
 
@@ -209,5 +230,4 @@ public class ListFileBuffer implements FileBuffer {
     public boolean isEmpty() {
         return paragraphs.isEmpty() || (paragraphs.size() == 1 && paragraphs.getFirst().isEmpty());
     }
-
 }

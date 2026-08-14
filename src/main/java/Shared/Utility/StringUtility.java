@@ -50,11 +50,21 @@ public class StringUtility {
 
             lines.add(line);
         }
-        if (start <= content.length()) {
+        if (start < content.length()) {
             lines.add(content.substring(start));
         }
 
-        //System.out.println(content + " split into " + lines);
         return lines;
+    }
+
+    public static int countCharactersBlacklisted(String text, String blacklist) {
+        int count = 0;
+        for (char c : text.toCharArray()) {
+            if (!blacklist.contains(String.valueOf(c))) {
+                count++;
+            }
+        }
+
+        return count;
     }
 }
