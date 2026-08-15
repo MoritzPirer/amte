@@ -71,7 +71,11 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
     public void insert(String content, TextPosition position) throws InvalidPosition {
         checkPosition(position);
 
-        String before = buffer.readParagraph(position.paragraph());
+        if (buffer.isEmpty()) {
+            append(content);
+            return;
+        }
+        String before = buffer.length() == position.paragraph()? "" : buffer.readParagraph(position.paragraph());
         String after = content;
 
         if (!before.isEmpty()) {

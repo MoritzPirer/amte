@@ -14,7 +14,7 @@ public class ListFileBuffer implements FileBuffer {
 
     public ListFileBuffer() {
         paragraphs = new ArrayList<>();
-        paragraphs.add("\n");
+        //paragraphs.add("\n");
     }
 
     private void debugEnforceInvariants() {
