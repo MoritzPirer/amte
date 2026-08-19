@@ -1,0 +1,19 @@
+package Controller.View;
+
+public enum RenderStyle {
+    TEXT,
+
+    WEAK_HIGHLIGHT,
+    MEDIUM_HIGHLIGHT,
+    STRONG_HIGHLIGHT,
+
+    FILE_CREATED,
+    FILE_MODIFIED,
+    FILE_SAVED,
+
+    CODE_BUILTIN,
+    CODE_KEYWORD,
+    CODE_STRING_LITERAL,
+    CODE_NUMBER_LITERAL,
+    CODE_COMMENT;
+}
