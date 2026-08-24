@@ -1,42 +1,77 @@
 package FileStorage;
 
-import Shared.Position;
+import Shared.TextPosition;
 
 import java.util.List;
 
+/**
+ * Defines the outline of a Container that supports reading and modifying text addressed by paragraphs and
+ * the character within that paragraph. Paragraphs are ended by a newline (added implicitly where necessary).
+ */
 public interface FileBuffer {
     /**
-     * inserts the given content into the buffer at the specified position
-     * @param content the content to add. May be multiple paragraphs separated by newlines, but these will be treated as
-     *                distinct rows in future method calls
-     * @param position the position to start inserting at. Row must be in range (0 - number of rows), column must be in range (0 - length of row)
-     * @throws InvalidPosition if the given position is out of range
+     * inserts the content at the given position.
+     * @param content the content to add. May contain newlines to create new lines.
+     * @param position the position to insert in. If the paragraph is in the range [0, n-1] (with n being the number of paragraphs),
+     *                 then the column specifies where in that paragraph the insertion starts. If the paragraph is n, the column has
+     *                 to be 0, which will act as if append() had been called.
+     * @throws InvalidPosition if the paragraph is not in the range [0, n] or if the column is not in the range [0, m-1]
      */
-    void insert(String content, Position position) throws InvalidPosition;
+    void insert(String content, TextPosition position) throws InvalidPosition;
 
     /**
-     * Deletes the content between the two positions, including the start but excluding the end.
-     * Deleting the newline at the end of a row concatenates rows
-     * @param start the position of the first character to be deleted
-     * @param end the position after the last character to be deleted. Can be a non-existent position but must be after start
-     * @throws InvalidPosition if start is not a valid position or end comes before start
+     * appends the content to the end of the buffer, starting in a new paragraph
+     * @param content the content to add. May contain newlines to create multiple lines
      */
-    void delete(Position start, Position end) throws InvalidPosition;
+    void append(String content);
 
     /**
-     * reads the content between the two positions, including the start but excluding the end.
-     * @param start the first position to read
-     * @param end the position after the last character to read. Can be a non-existent position but must be after start
-     * @return a list where each entry is a string containing one row of the buffer
-     * @throws InvalidPosition if start is not a valid position or end comes before start
+     * deletes the content beginning at start and going up to the character before end
+     * @param start the first position being deleted. Must be a valid position in the buffer
+     * @param end the first position after the deletion. If this is not a position in the buffer, the deletion will get as close to that position as possible.
+     * @throws InvalidPosition if start is not a valid position in the buffer or if start is equal to or is after end
      */
-    List<String> readRange(Position start, Position end) throws InvalidPosition;
+    void delete(TextPosition start, TextPosition end) throws InvalidPosition;
 
     /**
-     * reads the entirety of a line from the buffer
-     * @param row the row to read
-     * @return the row at the given index
-     * @throws InvalidPosition if row is not a valid index in the buffer
+     * delete the entire buffer.
      */
-    String readLine(int row) throws InvalidPosition;
+    void clear();
+
+    /**
+     * reads the content of the buffer beginning at start and going up to the character before end. Each paragraph is
+     * returned as one entry in the list
+     * @param start the first position being read. Must be a valid position in the buffer
+     * @param end the first position after teh read. Must be after start. If this is not a position in the buffer,
+     *            the read will get as close to that position as possible
+     * @return a list where each element is one paragraph that was read
+     * @throws InvalidPosition if start is not a valid position in the buffer or if start is equal to or after end
+     */
+    List<String> readRange(TextPosition start, TextPosition end) throws InvalidPosition;
+
+    /**
+     * reads a single paragraph from the buffer
+     * @param paragraphIndex the index of the paragraph to read
+     * @return the content of the requested paragraph
+     * @throws InvalidPosition if paragraphIndex is negative or greater than or equal to the value returned by FileBuffer.length()
+     */
+    String readParagraph(int paragraphIndex) throws InvalidPosition;
+
+    /**
+     * @return the number of paragraphs in the buffer
+     */
+    int length();
+
+    /**
+     * @param paragraphIndex the paragraph to find the length of
+     * @return the length of the requested paragraph
+     * @throws InvalidPosition if paragraphIndex is negative or greater than or equal to the value returned by FileBuffer.length()
+     */
+    int lengthOfParagraph(int paragraphIndex) throws InvalidPosition;
+
+    /**
+     * checks if the buffer is empty.
+     * @return true if the buffer is empty, false otherwise
+     */
+    boolean isEmpty();
 }
