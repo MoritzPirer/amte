@@ -6,6 +6,7 @@ import Controller.View.ViewComponent;
 import FileStorage.TextFile;
 import Shared.Size;
 import Shared.TextPosition;
+import org.w3c.dom.Text;
 
 import java.util.Arrays;
 
@@ -125,5 +126,17 @@ public class ViewPort {
         visualLine += lineOfCursorInParagraph;
 
         return new TextPosition(visualLine, cursor.character() % size.width());
+    }
+
+    public String readRange(TextPosition start, TextPosition end) {
+        return file.readRange(start, end);
+    }
+
+    public void deleteRange(TextPosition start, TextPosition end) {
+        file.deleteRange(start, end);
+    }
+
+    public int lengthOfParagraph(int paragraphIndex) {
+        return file.lengthOfParagraph(paragraphIndex);
     }
 }

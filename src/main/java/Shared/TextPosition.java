@@ -25,4 +25,8 @@ public record TextPosition(int paragraph, int character) {
     public boolean equals(TextPosition position) {
         return paragraph == position.paragraph() && character == position.character();
     }
+
+    public boolean equals(int paragraph, int character) {
+        return paragraph == this.paragraph() && character == this.character();
+    }
 }

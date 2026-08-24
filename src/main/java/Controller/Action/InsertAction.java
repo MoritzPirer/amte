@@ -40,6 +40,8 @@ public class InsertAction implements Action {
     }
 
     @Override
-    public void undo(ViewPort viewPort) {}
+    public void undo(ViewPort viewPort) {
+        //TODO WHEN [adding undo and redo functionality] DO [implement this function]
+    }
 
 }

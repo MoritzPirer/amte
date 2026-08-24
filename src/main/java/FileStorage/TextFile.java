@@ -6,6 +6,8 @@ import Controller.View.Style;
 import Controller.View.TextSpan;
 import Shared.TextPosition;
 
+import java.util.List;
+
 public class TextFile {
     private final String filePath;
     private final String fileName;
@@ -41,7 +43,26 @@ public class TextFile {
         return new Line(new TextSpan[]{span});
     }
 
+    public String readRange(TextPosition start, TextPosition end) {
+        //TODO WHEN [anytime] DO [rewrite FileBuffer interface (and corresponding tests) to return String, not List<String>]
+        List<String> list = buffer.readRange(start, end);
+        StringBuilder builder = new StringBuilder();
+        for (String string : list) {
+            builder.append(string);
+        }
+
+        return builder.toString();
+    }
+
+    public void deleteRange(TextPosition start, TextPosition end) {
+        buffer.delete(start, end);
+    }
+
     public int length() {
         return buffer.length();
+    }
+
+    public int lengthOfParagraph(int paragraphIndex) {
+        return buffer.lengthOfParagraph(paragraphIndex);
     }
 }
