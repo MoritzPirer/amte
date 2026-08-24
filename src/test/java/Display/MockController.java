@@ -1,6 +1,6 @@
 package Display;
 
-import Controller.Controller;
+import Controller.Controller.Controller;
 import Controller.Input;
 import Controller.SizeConfiguration;
 import Controller.View.*;
@@ -69,7 +69,7 @@ public class MockController implements Controller {
 
     @Override
     public void applyInput(Input input) {
-        if (input.character() == 'q') {
+        if (input.isCharacter() && input.getCharacter() == 'q') {
             isRunning = false;
         }
     }

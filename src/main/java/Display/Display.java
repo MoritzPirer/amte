@@ -1,6 +1,7 @@
 package Display;
 
-import Controller.Controller;
+import Controller.Controller.Controller;
+import Controller.Controller.ModalController;
 import Controller.View.View;
 import Controller.Input;
 import Controller.SizeConfiguration;
@@ -9,6 +10,12 @@ import java.io.IOException;
 
 public abstract class Display {
     protected Controller controller;
+
+    public static void main(String[] args) {
+        Controller controller = new ModalController();
+        Display display = new LanternaDisplay(controller);
+        display.run();
+    }
 
     public Display(Controller controller) {
         this.controller = controller;
@@ -21,10 +28,9 @@ public abstract class Display {
             while (controller.isRunning()) {
                 updateSize();
                 redraw();
-                parseInput();
-                System.out.println("ping");
-                Thread.sleep(50);
-                //Delay here?
+                if (parseInput()) {
+                    Thread.sleep(50);
+                }
             }
 
             destroy();
@@ -47,11 +53,14 @@ public abstract class Display {
         render(view);
     }
 
-    private void parseInput() throws IOException {
+    private boolean parseInput() throws IOException {
         Input input = checkInput();
         if (input != null) {
             controller.applyInput(input);
+            return false;
         }
+
+        return true;
     }
 
     abstract protected void init() throws IOException;

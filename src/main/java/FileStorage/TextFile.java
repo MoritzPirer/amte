@@ -1,5 +1,9 @@
 package FileStorage;
 
+import Controller.View.Line;
+import Controller.View.RenderStyle;
+import Controller.View.Style;
+import Controller.View.TextSpan;
 import Shared.TextPosition;
 
 public class TextFile {
@@ -30,8 +34,11 @@ public class TextFile {
         }
     }
 
-    public String readParagraph(int paragraphIndex) {
-        return buffer.readParagraph(paragraphIndex);
+    public Line readParagraph(int paragraphIndex) {
+        //TODO WHEN [Rendering Component is being implemented] DO [rewrite this function to retrieve Style from Rendering Component]
+        Style style = new Style(false, false, RenderStyle.TEXT);
+        TextSpan span = new TextSpan(style, buffer.readParagraph(paragraphIndex));
+        return new Line(new TextSpan[]{span});
     }
 
     public int length() {
