@@ -3,7 +3,6 @@ package Controller;
 import Controller.View.Line;
 import Controller.View.TextSpan;
 import Controller.View.ViewComponent;
-import FileStorage.ReadableBuffer;
 import FileStorage.TextFile;
 import Shared.Direction;
 import Shared.Size;
@@ -24,10 +23,6 @@ public class ViewPort {
 
         cursor = new Cursor(new TextPosition(0, 0), file.getBuffer());
         top = new TextPosition(0, 0);
-    }
-
-    private static int visualLinesNeeded(String paragraph, Size size) {
-        return visualLinesNeeded(paragraph.length(), size.width());
     }
 
     private static int visualLinesNeeded(Line line, Size size) {

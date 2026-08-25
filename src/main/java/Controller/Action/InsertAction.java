@@ -35,6 +35,7 @@ public class InsertAction implements Action {
         String lastLine = content.substring(content.lastIndexOf('\n') + 1);
         return new TextPosition(position.paragraph() + paragraphsAdded, lastLine.length());
     }
+
     @Override
     public boolean canBeUndone() {
         return true;

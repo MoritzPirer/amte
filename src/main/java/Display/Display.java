@@ -63,11 +63,25 @@ public abstract class Display {
         return true;
     }
 
+    /**
+     * the first method of the implementation that will be called. Should do any setup needed for the display
+     * to be usable
+     * @throws IOException if setup went wrong in a way that makes it impossible to start the editor
+     */
     abstract protected void init() throws IOException;
+
+    /**
+     * the last method of the implementation that will be called. Should release any resources that need manual release.
+     * @throws IOException if cleanup went wrong.
+     */
     abstract protected void destroy() throws IOException;
 
-
+    /**
+     * finds the size of the components at the time of creation
+     * @return the SizeConfiguration with the initial size of components
+     */
     abstract protected SizeConfiguration initialSizeConfiguration();
+
     /**
      * checks if the size of the window has changed and returns the new division of the window if so.
      * @return the new SizeConfiguration, or null if the Size has not changed

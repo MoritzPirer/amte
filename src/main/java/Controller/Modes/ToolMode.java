@@ -10,7 +10,7 @@ import Controller.ViewPort;
 import FileStorage.TextFile;
 import Shared.Direction;
 
-public class ToolMode implements ModeState {
+class ToolMode implements ModeState {
     private final ModeManager modeManager;
 
     public ToolMode(ModeManager modeManager) {

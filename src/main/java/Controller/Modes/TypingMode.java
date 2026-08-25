@@ -5,11 +5,12 @@ import Controller.Action.DeleteAction;
 import Controller.Action.InsertAction;
 import Controller.Action.NullAction;
 import Controller.Input;
+import Controller.SpecialInput;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 
-public class TypingMode implements ModeState {
+class TypingMode implements ModeState {
     private final ModeManager modeManager;
 
     public TypingMode(ModeManager modeManager) {
@@ -22,31 +23,17 @@ public class TypingMode implements ModeState {
             return new InsertAction(String.valueOf(input.getCharacter()), viewPort.getLogicalCursorPosition());
         }
 
-        assert input.isSpecialInput();
+        return parseSpecialInput(input.getSpecialInput(), viewPort, file);
+    }
 
-        switch (input.getSpecialInput()) {
+    private Action parseSpecialInput(SpecialInput input, ViewPort viewPort, TextFile file) {
+        switch (input) {
             case ESCAPE -> {
                 modeManager.setMode(new ToolMode(modeManager));
                 return new NullAction();
             }
             case BACK_SPACE -> {
-                TextPosition cursor = viewPort.getLogicalCursorPosition();
-                if (cursor.equals(0,0)) {
-                    return new NullAction();
-                }
-
-                TextPosition start;
-                if (cursor.character() == 0) {
-                    start = new TextPosition(
-                        cursor.paragraph() - 1,
-                        file.lengthOfParagraph(cursor.paragraph() - 1) - 1
-                    );
-                }
-                else {
-                    start = new TextPosition(cursor.paragraph(), cursor.character() - 1);
-                }
-
-                return new DeleteAction(start, cursor);
+                return createBackSpaceAction(viewPort, file);
             }
             case ENTER -> {
                 return new InsertAction("\n",  viewPort.getLogicalCursorPosition());
@@ -55,6 +42,27 @@ public class TypingMode implements ModeState {
                 return new NullAction();
             }
         }
+    }
+
+    private Action createBackSpaceAction(ViewPort viewPort, TextFile file) {
+        TextPosition cursor = viewPort.getLogicalCursorPosition();
+
+        if (cursor.equals(0,0)) {
+            return new NullAction();
+        }
+
+        TextPosition start;
+        if (cursor.character() > 0) {
+            start = new TextPosition(cursor.paragraph(), cursor.character() - 1);
+        }
+        else {
+            start = new TextPosition(
+                cursor.paragraph() - 1,
+                file.lengthOfParagraph(cursor.paragraph() - 1) - 1
+            );
+        }
+
+        return new DeleteAction(start, cursor);
     }
 
     @Override

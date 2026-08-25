@@ -73,6 +73,7 @@ public class LanternaDisplay extends Display {
 
         return divideScreen(screenSize);
     }
+
     @Override
     protected SizeConfiguration checkSizeConfiguration() {
         TerminalSize newSize = screen.doResizeIfNecessary();
@@ -143,10 +144,12 @@ public class LanternaDisplay extends Display {
     @Override
     protected void render(View view) throws IOException {
         screen.clear();
+
         //renderComponent(view.numberPanel(), new TextPosition(0, 0), new TextColor.RGB(128, 128, 128));
         renderComponent(view.textArea(), new TextPosition(0, NUMBER_PANEL_WIDTH), null);
         renderComponent(view.uiPanel(), new TextPosition(screenSize.height() - UI_PANEL_HEIGHT, 0), new TextColor.RGB(128, 0, 128));
-        renderCursor(view.visualCursorPosition(), new TextPosition(0, NUMBER_PANEL_WIDTH));
+        renderCursor(view.cursorPositionInTextArea(), new TextPosition(0, NUMBER_PANEL_WIDTH));
+
         screen.refresh();
     }
 

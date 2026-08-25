@@ -43,9 +43,9 @@ public class ModalController implements Controller{
         ViewComponent textArea = viewPort.getTextArea(sizeConfiguration.textAreaSize());
         ViewComponent numberPanel = viewPort.getNumberPanel(sizeConfiguration.numberingSize());
         ViewComponent uiPanel = getUiPanel();
-        TextPosition visualCursorPosition = viewPort.getVisualCursorPosition(sizeConfiguration.textAreaSize());
-        //TODO WHEN [anytime] DO [add cursor position to View class, retrieve screen position from Viewport]
-        return new View(textArea, uiPanel, numberPanel, visualCursorPosition);
+        TextPosition cursorPositionInText = viewPort.getVisualCursorPosition(sizeConfiguration.textAreaSize());
+
+        return new View(textArea, uiPanel, numberPanel, cursorPositionInText);
     }
 
     private ViewComponent getUiPanel() {

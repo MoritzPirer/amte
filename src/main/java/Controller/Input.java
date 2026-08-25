@@ -1,12 +1,10 @@
 package Controller;
 
-import java.util.Optional;
-
 public class Input {
     private final Character character;
     private final SpecialInput specialInput;
-    public Input(char character) {
 
+    public Input(char character) {
         this.character = character;
         this.specialInput = null;
     }
