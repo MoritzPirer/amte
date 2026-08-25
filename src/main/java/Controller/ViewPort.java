@@ -3,7 +3,7 @@ package Controller;
 import Controller.View.Line;
 import Controller.View.TextSpan;
 import Controller.View.ViewComponent;
-import FileStorage.ReadOnlyBufferView;
+import FileStorage.ReadableBuffer;
 import FileStorage.TextFile;
 import Shared.Direction;
 import Shared.Size;
@@ -22,7 +22,7 @@ public class ViewPort {
     public ViewPort(TextFile file) {
         this.file = file;
 
-        cursor = new Cursor(new TextPosition(0, 0), new ReadOnlyBufferView(file.getBuffer()));
+        cursor = new Cursor(new TextPosition(0, 0), file.getBuffer());
         top = new TextPosition(0, 0);
     }
 

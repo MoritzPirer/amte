@@ -1,17 +1,17 @@
 package Controller;
 
-import FileStorage.ReadOnlyBufferView;
+import FileStorage.ReadableBuffer;
 import Shared.Direction;
 import Shared.TextPosition;
 
 
 public class Cursor {
     private TextPosition position;
-    private final ReadOnlyBufferView view;
+    private final ReadableBuffer buffer;
 
-    public Cursor(TextPosition position, ReadOnlyBufferView view) {
+    public Cursor(TextPosition position, ReadableBuffer buffer) {
         this.position = position;
-        this.view = view;
+        this.buffer = buffer;
     }
 
     public TextPosition getPosition() {
@@ -38,22 +38,22 @@ public class Cursor {
         else {
             position = new TextPosition(
                 position.paragraph() - 1,
-                Math.min(view.lengthOfParagraph(position.paragraph() - 1) - 1, position.character())
+                Math.min(buffer.lengthOfParagraph(position.paragraph() - 1) - 1, position.character())
             );
         }
     }
 
     private void moveDown() {
-        if (position.paragraph() == view.length() - 1) {
+        if (position.paragraph() == buffer.length() - 1) {
             position = new TextPosition(
-                view.length() - 1,
-                view.lengthOfParagraph(view.length() - 1) - 1
+                buffer.length() - 1,
+                buffer.lengthOfParagraph(buffer.length() - 1) - 1
             );
         }
         else {
             position = new TextPosition(
                 position.paragraph() + 1,
-                Math.min(view.lengthOfParagraph(position.paragraph() + 1) - 1, position.character())
+                Math.min(buffer.lengthOfParagraph(position.paragraph() + 1) - 1, position.character())
             );
         }
     }
@@ -65,7 +65,7 @@ public class Cursor {
             }
             position = new TextPosition(
                 position.paragraph() - 1,
-                view.lengthOfParagraph(position.paragraph() - 1) - 1
+                buffer.lengthOfParagraph(position.paragraph() - 1) - 1
             );
         }
         else {
@@ -74,8 +74,8 @@ public class Cursor {
     }
 
     private void moveRight() {
-        if (position.character() == view.lengthOfParagraph(position.paragraph()) - 1) {
-            if (position.paragraph() == view.length() - 1) {
+        if (position.character() == buffer.lengthOfParagraph(position.paragraph()) - 1) {
+            if (position.paragraph() == buffer.length() - 1) {
                 return;
             }
 
