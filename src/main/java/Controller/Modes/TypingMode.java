@@ -48,6 +48,9 @@ public class TypingMode implements ModeState {
 
                 return new DeleteAction(start, cursor);
             }
+            case ENTER -> {
+                return new InsertAction("\n",  viewPort.getLogicalCursorPosition());
+            }
             default -> {
                 return new NullAction();
             }
