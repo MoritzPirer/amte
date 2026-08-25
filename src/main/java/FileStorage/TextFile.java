@@ -25,6 +25,10 @@ public class TextFile {
         saveState = SaveState.MODIFIED; //TEMP
     }
 
+    public FileBuffer getBuffer() {
+        return buffer;
+    }
+
     public void insert(String content, TextPosition position) {
         buffer.insert(content, position);
         markAsModified();

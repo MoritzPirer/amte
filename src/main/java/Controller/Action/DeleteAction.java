@@ -2,6 +2,7 @@ package Controller.Action;
 
 
 import Controller.ViewPort;
+import FileStorage.TextFile;
 import Shared.TextPosition;
 
 public class DeleteAction implements Action {
@@ -15,9 +16,9 @@ public class DeleteAction implements Action {
     }
 
     @Override
-    public void apply(ViewPort viewPort) {
-        content = viewPort.readRange(start, end);
-        viewPort.deleteRange(start, end);
+    public void apply(ViewPort viewPort, TextFile file) {
+        content = file.readRange(start, end);
+        file.deleteRange(start, end);
 
         viewPort.moveCursorTo(start);
     }
@@ -28,7 +29,7 @@ public class DeleteAction implements Action {
     }
 
     @Override
-    public void undo(ViewPort viewPort) {
+    public void undo(ViewPort viewPort, TextFile file) {
         assert content != null;
         //TODO WHEN [adding undo and redo functionality] DO [implement this function]
     }

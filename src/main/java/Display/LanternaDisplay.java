@@ -234,8 +234,8 @@ public class LanternaDisplay extends Display {
      */
     private void renderCursor(TextPosition visualCursorPosition, TextPosition topLeft) {
         TextPosition absolute = new TextPosition(
-                visualCursorPosition.paragraph() + topLeft.paragraph(),
-                visualCursorPosition.character() + topLeft.character()
+            visualCursorPosition.paragraph() + topLeft.paragraph(),
+            visualCursorPosition.character() + topLeft.character()
         );
 
         TextCharacter character = screen.getBackCharacter(absolute.character(), absolute.paragraph()); // read from second buffer

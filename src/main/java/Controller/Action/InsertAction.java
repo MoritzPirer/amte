@@ -1,6 +1,7 @@
 package Controller.Action;
 
 import Controller.ViewPort;
+import FileStorage.TextFile;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
@@ -14,8 +15,8 @@ public class InsertAction implements Action {
     }
 
     @Override
-    public void apply(ViewPort viewPort) {
-        viewPort.insert(content);
+    public void apply(ViewPort viewPort, TextFile file) {
+        file.insert(content, viewPort.getLogicalCursorPosition());
         TextPosition firstAfterInsert = findPositionAfterInsert();
         viewPort.moveCursorTo(firstAfterInsert);
     }
@@ -40,7 +41,7 @@ public class InsertAction implements Action {
     }
 
     @Override
-    public void undo(ViewPort viewPort) {
+    public void undo(ViewPort viewPort, TextFile file) {
         //TODO WHEN [adding undo and redo functionality] DO [implement this function]
     }
 

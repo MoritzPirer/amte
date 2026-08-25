@@ -3,17 +3,18 @@ package Controller;
 import Controller.View.Line;
 import Controller.View.TextSpan;
 import Controller.View.ViewComponent;
+import FileStorage.ReadOnlyBufferView;
 import FileStorage.TextFile;
+import Shared.Direction;
 import Shared.Size;
 import Shared.TextPosition;
-import org.w3c.dom.Text;
 
 import java.util.Arrays;
 
 public class ViewPort {
     private final TextFile file;
 
-    private TextPosition cursor;
+    private final Cursor cursor;
     private TextPosition top;
 
     private boolean isRunning = true;
@@ -21,14 +22,7 @@ public class ViewPort {
     public ViewPort(TextFile file) {
         this.file = file;
 
-        cursor = new TextPosition(0, 0);
-        top = new TextPosition(0, 0);
-    }
-
-    public ViewPort(TextFile file, Size size) {
-        this.file = file;
-
-        cursor = new TextPosition(0, 0);
+        cursor = new Cursor(new TextPosition(0, 0), new ReadOnlyBufferView(file.getBuffer()));
         top = new TextPosition(0, 0);
     }
 
@@ -51,12 +45,17 @@ public class ViewPort {
         return fullLinesNeeded + (hasPartialLine ? 1 : 0);
     }
 
-    public void insert(String content) {
-        file.insert(content, cursor);
+    public void moveCursorTo(TextPosition position) {
+        cursor.moveTo(position);
+
     }
 
-    public void moveCursorTo(TextPosition position) {
-        cursor = position;
+    public void moveCursor(Direction direction) {
+        cursor.move(direction);
+    }
+
+    private void updateTopIfNeeded() {
+
     }
 
     public boolean isRunning() {
@@ -102,13 +101,13 @@ public class ViewPort {
     }
 
     public TextPosition getLogicalCursorPosition() {
-        return cursor;
+        return cursor.getPosition();
     }
 
     public TextPosition getVisualCursorPosition(Size size) {
         int visualLine = 0;
         boolean isFirstParagraph = true;
-        for (int index = top.paragraph(); index < cursor.paragraph(); index++) {
+        for (int index = top.paragraph(); index < cursor.getPosition().paragraph(); index++) {
             Line currentParagraph = file.readParagraph(index);
             if (isFirstParagraph) {
                 currentParagraph = currentParagraph.dropFirstNCharacters(top.character());
@@ -119,24 +118,12 @@ public class ViewPort {
             visualLine += visualLinesOfParagraph;
         }
 
-        int lineOfCursorInParagraph = visualLinesNeeded(cursor.character(), size.width());
-        if (cursor.character() % size.width() != 0 || cursor.character() == 0) {
+        int lineOfCursorInParagraph = visualLinesNeeded(cursor.getPosition().character(), size.width());
+        if (cursor.getPosition().character() % size.width() != 0 || cursor.getPosition().character() == 0) {
             lineOfCursorInParagraph--;
         }
         visualLine += lineOfCursorInParagraph;
 
-        return new TextPosition(visualLine, cursor.character() % size.width());
-    }
-
-    public String readRange(TextPosition start, TextPosition end) {
-        return file.readRange(start, end);
-    }
-
-    public void deleteRange(TextPosition start, TextPosition end) {
-        file.deleteRange(start, end);
-    }
-
-    public int lengthOfParagraph(int paragraphIndex) {
-        return file.lengthOfParagraph(paragraphIndex);
+        return new TextPosition(visualLine, cursor.getPosition().character() % size.width());
     }
 }

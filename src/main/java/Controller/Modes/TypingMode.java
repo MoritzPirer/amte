@@ -6,6 +6,7 @@ import Controller.Action.InsertAction;
 import Controller.Action.NullAction;
 import Controller.Input;
 import Controller.ViewPort;
+import FileStorage.TextFile;
 import Shared.TextPosition;
 
 public class TypingMode implements ModeState {
@@ -16,7 +17,7 @@ public class TypingMode implements ModeState {
     }
 
     @Override
-    public Action parseInput(Input input, ViewPort viewPort) {
+    public Action parseInput(Input input, ViewPort viewPort, TextFile file) {
         if (input.isCharacter()) {
             return new InsertAction(String.valueOf(input.getCharacter()), viewPort.getLogicalCursorPosition());
         }
@@ -38,7 +39,8 @@ public class TypingMode implements ModeState {
                 if (cursor.character() == 0) {
                     start = new TextPosition(
                         cursor.paragraph() - 1,
-                        viewPort.lengthOfParagraph(cursor.paragraph()));
+                        file.lengthOfParagraph(cursor.paragraph() - 1) - 1
+                    );
                 }
                 else {
                     start = new TextPosition(cursor.paragraph(), cursor.character() - 1);

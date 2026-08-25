@@ -34,8 +34,8 @@ public class ModalController implements Controller{
 
     @Override
     public void applyInput(Input input) {
-        Action action = modeManager.parseInput(input, viewPort);
-        action.apply(viewPort);
+        Action action = modeManager.parseInput(input, viewPort, file);
+        action.apply(viewPort, file);
     }
 
     @Override

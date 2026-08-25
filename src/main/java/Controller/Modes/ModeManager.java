@@ -3,6 +3,7 @@ package Controller.Modes;
 import Controller.Action.Action;
 import Controller.Input;
 import Controller.ViewPort;
+import FileStorage.TextFile;
 
 public class ModeManager {
     private ModeState currentMode;
@@ -11,8 +12,8 @@ public class ModeManager {
         currentMode = new ToolMode(this);
     }
 
-    public Action parseInput(Input input, ViewPort viewPort) {
-        return currentMode.parseInput(input, viewPort);
+    public Action parseInput(Input input, ViewPort viewPort, TextFile file) {
+        return currentMode.parseInput(input, viewPort, file);
     }
 
     public String getName() {
