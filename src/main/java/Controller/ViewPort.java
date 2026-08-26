@@ -15,6 +15,7 @@ public class ViewPort {
 
     private final Cursor cursor;
     private TextPosition top;
+    private Size size;
 
     private boolean isRunning = true;
 
@@ -42,15 +43,35 @@ public class ViewPort {
 
     public void moveCursorTo(TextPosition position) {
         cursor.moveTo(position);
-
+        updateTopIfNeeded();
     }
 
     public void moveCursor(Direction direction) {
         cursor.move(direction);
+        updateTopIfNeeded();
     }
 
     private void updateTopIfNeeded() {
+        int linesAboveCursor = getVisualCursorPosition(size).paragraph() - 1;
+        int highestAllowedCursorLine = (int) Math.floor(0.3f * size.height());
+        int lowestAllowedCursorLine = (int) Math.ceil(0.6f * size.height());
 
+        if (linesAboveCursor <= highestAllowedCursorLine) {
+            int moveTopUpBy = highestAllowedCursorLine - linesAboveCursor;
+            TextPosition position = new TextPosition(top.paragraph() - moveTopUpBy, 0);
+            if (position.paragraph() >= 0) {
+                top = position;
+            }
+        }
+        else if (linesAboveCursor >= lowestAllowedCursorLine) {
+            int moveTopDownBy = linesAboveCursor - lowestAllowedCursorLine;
+            TextPosition position = new TextPosition(top.paragraph() + moveTopDownBy, 0);
+            if (position.paragraph() < file.length()) {
+                top = position;
+            }
+            //cursor is too far down
+            // move top down until in middle third
+        }
     }
 
     public boolean isRunning() {
@@ -62,6 +83,7 @@ public class ViewPort {
     }
 
     public ViewComponent getTextArea(Size size) {
+        this.size = size;
         Line[] lines = new Line[size.height()];
         int visualLinesUsed = 0;
 

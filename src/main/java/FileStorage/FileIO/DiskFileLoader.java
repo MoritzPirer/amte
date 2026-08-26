@@ -11,17 +11,16 @@ import java.security.InvalidParameterException;
 
 public class DiskFileLoader implements FileLoader {
     @Override
-    public void save(String path, FileBuffer buffer) throws IOException {
-        if (path == null || path.isEmpty()) {
-            throw new InvalidParameterException("path was null or empty");
+    public void save(Path path, FileBuffer buffer) throws IOException {
+        if (path == null) {
+            throw new InvalidParameterException("path was null");
         }
         if (buffer == null) {
             throw new InvalidParameterException("buffer was null");
         }
 
-        Path filePath = Paths.get(path);
 
-        try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
             for (int paragraph = 0; paragraph < buffer.length(); paragraph++) {
                 String content = buffer.readParagraph(paragraph);
 

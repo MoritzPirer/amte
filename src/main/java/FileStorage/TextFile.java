@@ -4,12 +4,16 @@ import Controller.View.Line;
 import Controller.View.RenderStyle;
 import Controller.View.Style;
 import Controller.View.TextSpan;
+import FileStorage.FileIO.DiskFileLoader;
+import FileStorage.FileIO.FileLoader;
 import Shared.TextPosition;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public class TextFile {
-    private final String filePath;
+    private final Path filePath;
     private final String fileName;
 
     private final FileBuffer buffer;
@@ -17,12 +21,26 @@ public class TextFile {
 
     private SaveState saveState;
 
-    public TextFile(String filePath, String fileName, FileBuffer buffer, FileMetadataTracker tracker) {
+    public TextFile(Path filePath, String fileName, FileBuffer buffer, FileMetadataTracker tracker) {
         this.filePath = filePath;
         this.fileName = fileName;
         this.buffer = buffer;
         this.tracker = tracker;
         saveState = SaveState.MODIFIED; //TEMP
+    }
+
+    public void save() {
+        FileLoader loader = new DiskFileLoader();
+        try {
+            loader.save(filePath, buffer);
+            saveState = SaveState.SAVED;
+        } catch (IOException ignored) {
+            // user will be informed that saving failed based on saveState
+        }
+    }
+
+    public boolean isSaved() {
+        return saveState == SaveState.SAVED;
     }
 
     public FileBuffer getBuffer() {

@@ -7,7 +7,12 @@ import Controller.Input;
 import Controller.ViewPort;
 import Controller.SizeConfiguration;
 import FileStorage.*;
+import FileStorage.FileIO.DiskFileLoader;
 import Shared.TextPosition;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ModalController implements Controller{
     private TextFile file = null; //NOTE: will be used to access metadata like word- and character count
@@ -19,10 +24,29 @@ public class ModalController implements Controller{
         FileBuffer buffer = new ListFileBuffer();
         FileMetadataTracker tracker = new WrapperMetadataTracker(buffer);
 
-        TextFile file = new TextFile("", "hardcoded", tracker.getTrackedFileBuffer(), tracker);
+        TextFile file = new TextFile(null, "hardcoded", tracker.getTrackedFileBuffer(), tracker);
         file.insert("Would thee like some hardcoded file contents, perchance?", new TextPosition(0, 0));
         file.insert("a SECOND paragraph? Daring today, are we?", new TextPosition(1, 0));
         file.insert("what if we - and bear with me here for just a brief moment - who hardcoded some file contents that are, quite frankly, on the long side, just to see the splitting logic working. You know, as a treat!", new TextPosition(2, 0));
+        this.viewPort = new ViewPort(file);
+        this.file = file;
+    }
+
+    public ModalController(String filePath) {
+        FileBuffer buffer = new ListFileBuffer();
+        try {
+            new DiskFileLoader().load(filePath, buffer);
+        }
+        catch (IOException e) {
+            buffer.clear();
+            buffer.append("Error while loading file!");
+            buffer.append(e.getMessage());
+        }
+        FileMetadataTracker tracker = new WrapperMetadataTracker(buffer);
+
+        Path path = Paths.get(filePath);
+        String fileName = path.getFileName().toString();
+        TextFile file = new TextFile(path, fileName, tracker.getTrackedFileBuffer(), tracker);
         this.viewPort = new ViewPort(file);
         this.file = file;
     }

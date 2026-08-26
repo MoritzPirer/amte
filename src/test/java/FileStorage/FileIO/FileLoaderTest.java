@@ -90,7 +90,7 @@ class FileLoaderTest {
             FileBuffer buffer = new ListFileBuffer();
             buffer.append("Line 1\nLine 2\nLine 3");
 
-            fileLoader.save(SAVE_FILE, buffer);
+            fileLoader.save(Path.of(SAVE_FILE), buffer);
 
             buffer.clear();
             fileLoader.load(SAVE_FILE, buffer);
@@ -109,7 +109,7 @@ class FileLoaderTest {
             FileBuffer buffer = new ListFileBuffer();
             buffer.append("hello, world!");
 
-            fileLoader.save(path, buffer);
+            fileLoader.save(Path.of(path), buffer);
             assertTrue(new File(path).exists());
         }
     }
@@ -119,7 +119,7 @@ class FileLoaderTest {
         final String saveFile = tempDir.resolve("SaveEmptyFile.txt").toString();
 
         for (FileLoader fileLoader : getImplementations()) {
-            fileLoader.save(saveFile, new ListFileBuffer());
+            fileLoader.save(Path.of(saveFile), new ListFileBuffer());
 
             FileBuffer verificationBuffer = new ListFileBuffer();
             fileLoader.load(saveFile, verificationBuffer);
@@ -132,7 +132,7 @@ class FileLoaderTest {
         final String SAVE_FILE = tempDir.resolve("testSaveNull.txt").toString();
 
         for (FileLoader fileLoader : getImplementations()) {
-            assertThrows(Exception.class, () -> fileLoader.save(SAVE_FILE, null));
+            assertThrows(Exception.class, () -> fileLoader.save(Path.of(SAVE_FILE), null));
             assertThrows(Exception.class, () -> fileLoader.save(null, new ListFileBuffer()));
         }
     }

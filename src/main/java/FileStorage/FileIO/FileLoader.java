@@ -3,6 +3,7 @@ package FileStorage.FileIO;
 import FileStorage.FileBuffer;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 public interface FileLoader {
     /**
@@ -11,7 +12,7 @@ public interface FileLoader {
      * @param buffer the buffer to write
      * @throws IOException if writing failed
      */
-    void save(String path, FileBuffer buffer) throws IOException;
+    void save(Path path, FileBuffer buffer) throws IOException;
 
     /**
      * Reads the contents of the file located at path into buffer. Existing contents of buffer will be cleared.

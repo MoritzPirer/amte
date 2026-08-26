@@ -12,7 +12,17 @@ public abstract class Display {
     protected Controller controller;
 
     public static void main(String[] args) {
-        Controller controller = new ModalController();
+        if (args.length > 1) {
+            System.out.println("Start without arguments or with a single file path!");
+            return;
+        }
+        Controller controller;
+        if (args.length == 1) {
+            controller = new ModalController(args[0]);
+        }
+        else {
+            controller = new ModalController();
+        }
         Display display = new LanternaDisplay(controller);
         display.run();
     }

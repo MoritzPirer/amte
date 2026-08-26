@@ -1,9 +1,6 @@
 package Controller.Modes;
 
-import Controller.Action.Action;
-import Controller.Action.MoveAction;
-import Controller.Action.NullAction;
-import Controller.Action.QuitAction;
+import Controller.Action.*;
 import Controller.Input;
 import Controller.SpecialInput;
 import Controller.ViewPort;
@@ -56,6 +53,10 @@ class ToolMode implements ModeState {
             case 'q' -> {
                 //TODO WHEN [CommandMode is being implemented] DO [move quitting into CommandMode]
                 return new QuitAction();
+            }
+            case 's' -> {
+                //TODO WHEN [CommandMode is being implemented] DO [move quitting into CommandMode]
+                return new SaveAction();
             }
             case 'h' -> {
                 return new MoveAction(Direction.LEFT);
