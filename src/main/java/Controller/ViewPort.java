@@ -1,12 +1,14 @@
 package Controller;
 
 import Controller.View.Line;
+import Controller.View.Style;
 import Controller.View.TextSpan;
 import Controller.View.ViewComponent;
 import FileStorage.TextFile;
 import Shared.Direction;
 import Shared.Size;
 import Shared.TextPosition;
+import Shared.Utility.StringUtility;
 
 import java.util.Arrays;
 
@@ -15,7 +17,7 @@ public class ViewPort {
 
     private final Cursor cursor;
     private TextPosition top;
-    private Size size;
+    private Size textAreaSize;
 
     private boolean isRunning = true;
 
@@ -52,9 +54,9 @@ public class ViewPort {
     }
 
     private void updateTopIfNeeded() {
-        int linesAboveCursor = getVisualCursorPosition(size).paragraph() - 1;
-        int highestAllowedCursorLine = (int) Math.floor(0.3f * size.height());
-        int lowestAllowedCursorLine = (int) Math.ceil(0.6f * size.height());
+        int linesAboveCursor = getVisualCursorPosition(textAreaSize).paragraph() - 1;
+        int highestAllowedCursorLine = (int) Math.floor(0.3f * textAreaSize.height());
+        int lowestAllowedCursorLine = (int) Math.ceil(0.6f * textAreaSize.height());
 
         if (linesAboveCursor <= highestAllowedCursorLine) {
             int moveTopUpBy = highestAllowedCursorLine - linesAboveCursor;
@@ -83,7 +85,8 @@ public class ViewPort {
     }
 
     public ViewComponent getTextArea(Size size) {
-        this.size = size;
+        this.textAreaSize = size;
+
         Line[] lines = new Line[size.height()];
         int visualLinesUsed = 0;
 
@@ -114,7 +117,70 @@ public class ViewPort {
     }
 
     public ViewComponent getNumberPanel(Size size) {
-        return null;
+        Line[] lines = new Line[size.height()];
+
+        int visualLinesUsed = 0;
+
+        int currentIndex = top.paragraph();
+        boolean isFirstParagraph = true;
+        while (visualLinesUsed < size.height()) {
+            if (file.length() <= currentIndex) {
+                Arrays.fill(lines, visualLinesUsed, lines.length, new Line(new TextSpan[0]));
+                break;
+            }
+
+            Line currentParagraph = file.readParagraph(currentIndex);
+            if (isFirstParagraph) {
+                currentParagraph = currentParagraph.dropFirstNCharacters(top.character());
+                isFirstParagraph = false;
+            }
+
+            int visualLines = visualLinesNeeded(currentParagraph.length(), textAreaSize.width());
+            String content = generateLineNumber(currentIndex, size.width());
+            lines[visualLinesUsed] = new Line(new TextSpan[]{new TextSpan(Style.getNumberingStyle(), content)});
+
+            int remainingVisualLines = size.height() - visualLinesUsed;
+            for (int i = 1; i < Math.min(visualLines, remainingVisualLines); i++) {
+                lines[visualLinesUsed + i] = new Line(new TextSpan[]{});
+            }
+
+            visualLinesUsed += visualLines;
+            currentIndex++;
+        }
+
+        return new ViewComponent(size, lines);
+    }
+
+    /**
+     * format the number to be displayed for the given paragraph
+     * @param paragraphIndex the (0-indexed) paragraph to format the number of
+     * @param width the width to pad to
+     * @return the formatted number
+     */
+    private String generateLineNumber(int paragraphIndex, int width) {
+        boolean doRelativeNumbers = false; //TODO WHEN [Adding settings] DO [connect to settings]
+        int number;
+        boolean isCursorLine;
+        if (doRelativeNumbers) {
+            if (paragraphIndex == cursor.getPosition().paragraph()) {
+                number = paragraphIndex;
+                isCursorLine = true;
+            }
+            else {
+                number = Math.abs(paragraphIndex - cursor.getPosition().paragraph());
+                isCursorLine = false;
+            }
+        }
+        else {
+            number = paragraphIndex + 1;
+            isCursorLine = (paragraphIndex == cursor.getPosition().paragraph());
+        }
+
+        String numberString = String.valueOf(number);
+        if (isCursorLine) {
+            return StringUtility.rightAlign(numberString, width);
+        }
+        return StringUtility.leftAlign(numberString, width);
     }
 
     public TextPosition getLogicalCursorPosition() {

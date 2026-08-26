@@ -91,4 +91,22 @@ public class StringUtility {
 
         return count;
     }
+
+    public static String leftAlign(String text, int length) {
+        if (text.length() >= length) {
+            return text.substring(0, length);
+        }
+
+        int padAmount = length - text.length();
+        return text + " ".repeat(padAmount);
+    }
+
+    public static String rightAlign(String text, int length) {
+        if (text.length() >= length) {
+            return text;
+        }
+
+        int padAmount = length - text.length();
+        return " ".repeat(padAmount) + text;
+    }
 }

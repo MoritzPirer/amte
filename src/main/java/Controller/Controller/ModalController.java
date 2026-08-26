@@ -74,7 +74,7 @@ public class ModalController implements Controller{
 
     private ViewComponent getUiPanel() {
         //TEMP
-        return new ViewComponent(sizeConfiguration.uiSize(), new Line[]{new Line(new TextSpan[]{new TextSpan(new Style(false, false, RenderStyle.TEXT), modeManager.getName())})});
+        return new ViewComponent(sizeConfiguration.uiSize(), new Line[]{new Line(new TextSpan[]{new TextSpan(new Style(false, false, RenderStyle.TEXT), String.valueOf(viewPort.getLogicalCursorPosition()))})});
     }
 
     @Override

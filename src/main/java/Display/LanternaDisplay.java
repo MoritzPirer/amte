@@ -145,7 +145,7 @@ public class LanternaDisplay extends Display {
     protected void render(View view) throws IOException {
         screen.clear();
 
-        //renderComponent(view.numberPanel(), new TextPosition(0, 0), new TextColor.RGB(128, 128, 128));
+        renderComponent(view.numberPanel(), new TextPosition(0, 0), new TextColor.RGB(128, 128, 128));
         renderComponent(view.textArea(), new TextPosition(0, NUMBER_PANEL_WIDTH), null);
         renderComponent(view.uiPanel(), new TextPosition(screenSize.height() - UI_PANEL_HEIGHT, 0), new TextColor.RGB(128, 0, 128));
         renderCursor(view.cursorPositionInTextArea(), new TextPosition(0, NUMBER_PANEL_WIDTH));
