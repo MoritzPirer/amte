@@ -1,6 +1,11 @@
 package Shared;
 
 public record TextPosition(int paragraph, int character) {
+    @Override
+    public String toString() {
+        //WARNING: exposed to the user through UI panel. do not change for debugging purposes
+        return "(" + paragraph + ":" + character + ")";
+    }
 
     public boolean isBefore(TextPosition position) {
         if (paragraph < position.paragraph()) {

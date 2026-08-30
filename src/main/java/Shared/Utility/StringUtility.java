@@ -5,6 +5,35 @@ import java.util.List;
 
 public class StringUtility {
 
+
+    /**
+     * counts the number of times target occurs in text
+     * @param text the string to search through
+     * @param target the character to search for
+     * @param beginIndex the (inclusive) index at which to start counting
+     * @param endIndex the (exclusive) index at which to stop counting
+     * @return the number of occurrences
+     */
+    public static int countOccurrences(String text, char target, int beginIndex, int endIndex) {
+        if (beginIndex < 0
+            || (beginIndex >= text.length() && !text.isEmpty())
+            || endIndex < beginIndex
+            || endIndex > text.length()) {
+            throw new IllegalArgumentException("beginIndex (" + beginIndex + ") or endIndex (" + endIndex + ") out of bounds");
+        }
+
+        int count = 0;
+
+        for (int i = beginIndex; i < endIndex; i++) {
+            char current = text.charAt(i);
+            if (current == target) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
     /**
      * counts the number of times target occurs in text
      * @param text the string to search through
@@ -12,15 +41,7 @@ public class StringUtility {
      * @return the number of occurrences
      */
     public static int countOccurrences(String text, char target) {
-        int count = 0;
-
-        for (char current : text.toCharArray()) {
-            if (current == target) {
-                count++;
-            }
-        }
-
-        return count;
+        return countOccurrences(text, target, 0, text.length());
     }
 
     /**

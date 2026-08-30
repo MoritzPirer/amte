@@ -5,9 +5,11 @@ import Controller.View.Style;
 import Controller.View.TextSpan;
 import Controller.View.ViewComponent;
 import FileStorage.TextFile;
+import Settings.SettingsMaster;
 import Shared.Direction;
 import Shared.Size;
 import Shared.TextPosition;
+import Shared.Utility.MathUtility;
 import Shared.Utility.StringUtility;
 
 import java.util.Arrays;
@@ -158,10 +160,9 @@ public class ViewPort {
      * @return the formatted number
      */
     private String generateLineNumber(int paragraphIndex, int width) {
-        boolean doRelativeNumbers = false; //TODO WHEN [Adding settings] DO [connect to settings]
         int number;
         boolean isCursorLine;
-        if (doRelativeNumbers) {
+        if (SettingsMaster.instance().getBoolean("doRelativeNumbers")) {
             if (paragraphIndex == cursor.getPosition().paragraph()) {
                 number = paragraphIndex;
                 isCursorLine = true;
@@ -201,12 +202,39 @@ public class ViewPort {
             visualLine += visualLinesOfParagraph;
         }
 
-        int lineOfCursorInParagraph = visualLinesNeeded(cursor.getPosition().character(), size.width());
+
+
+        int lineOfCursorInParagraph = visualLinesNeeded(
+                tabAwareColumn(cursor.getPosition().paragraph(),cursor.getPosition().character()),
+                size.width()
+        );
         if (cursor.getPosition().character() % size.width() != 0 || cursor.getPosition().character() == 0) {
             lineOfCursorInParagraph--;
         }
         visualLine += lineOfCursorInParagraph;
 
         return new TextPosition(visualLine, cursor.getPosition().character() % size.width());
+    }
+
+    private int tabAwareColumn(int paragraphIndex, int logicalColumn) {
+        int tabWidth = SettingsMaster.instance().getInt("tabWidth");
+        Line paragraph = file.readParagraph(paragraphIndex);
+        int column = 0;
+        for (TextSpan span : paragraph.textSpans()) {
+            for (char current : span.text().toCharArray()) {
+                if (current == '\t') {
+                    column += MathUtility.nextMultipleOf(column, tabWidth);
+                }
+                else {
+                    column++;
+                }
+
+                if (--logicalColumn == 0) {
+                    return column;
+                }
+            }
+        }
+
+        return column;
     }
 }

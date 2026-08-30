@@ -21,12 +21,16 @@ public class TextFile {
 
     private SaveState saveState;
 
-    public TextFile(Path filePath, String fileName, FileBuffer buffer, FileMetadataTracker tracker) {
+    public TextFile(Path filePath, String fileName, FileBuffer buffer, FileMetadataTracker tracker, SaveState saveState) {
         this.filePath = filePath;
         this.fileName = fileName;
         this.buffer = buffer;
         this.tracker = tracker;
-        saveState = SaveState.MODIFIED; //TEMP
+        this.saveState = saveState;
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 
     public void save() {
@@ -41,6 +45,10 @@ public class TextFile {
 
     public boolean isSaved() {
         return saveState == SaveState.SAVED;
+    }
+
+    public SaveState getSaveState() {
+        return saveState;
     }
 
     public FileBuffer getBuffer() {
@@ -78,6 +86,7 @@ public class TextFile {
 
     public void deleteRange(TextPosition start, TextPosition end) {
         buffer.delete(start, end);
+        markAsModified();
     }
 
     public int length() {
@@ -86,5 +95,18 @@ public class TextFile {
 
     public int lengthOfParagraph(int paragraphIndex) {
         return buffer.lengthOfParagraph(paragraphIndex);
+    }
+
+    public int getWordCount() {
+        //TODO WHEN [anytime] DO [change tracker interface to return int instead of long]
+        return (int) tracker.getWordCount();
+    }
+
+    public int getCharacterCount() {
+        return (int) tracker.getCharacterCount();
+    }
+
+    public int getParagraphCount() {
+        return (int) tracker.getParagraphCount();
     }
 }
