@@ -87,7 +87,7 @@ public class ModalController implements Controller{
         spans.add(getCursorPositionIndicator());
         spans.addAll(Arrays.asList(getMetadataCounts()));
 
-        spans = addSeperator(spans);
+        spans = addSeparator(spans);
         Line[] lines = reorganizeUiRows(spans);
 
         return new ViewComponent(sizeConfiguration.uiSize(), lines);
@@ -191,7 +191,7 @@ public class ModalController implements Controller{
         return textSpans.toArray(new TextSpan[0]);
     }
 
-    private List<TextSpan> addSeperator(List<TextSpan> textSpans) {
+    private List<TextSpan> addSeparator(List<TextSpan> textSpans) {
         final TextSpan seperator = new TextSpan(new Style(false, false, RenderStyle.TEXT), " | ");
 
         List<TextSpan> spans = new ArrayList<>();
