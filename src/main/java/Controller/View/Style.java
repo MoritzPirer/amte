@@ -4,7 +4,7 @@ import FileStorage.SaveState;
 
 public record Style(boolean isItalic, boolean isBold, RenderStyle renderStyle) {
     public static Style getNumberingStyle() {
-        return new Style(true, false, RenderStyle.WEAK_HIGHLIGHT);
+        return new Style(true, false, RenderStyle.TEXT);
     }
     public static Style getFileNameStyle() {
         return new Style(false, false, RenderStyle.WEAK_HIGHLIGHT);

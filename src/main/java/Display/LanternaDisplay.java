@@ -1,5 +1,7 @@
 package Display;
 
+import ColorTheme.ColorMaster;
+import ColorTheme.ColorSetup;
 import Controller.Controller.Controller;
 import Controller.Input;
 import Controller.SpecialInput;
@@ -8,6 +10,7 @@ import Controller.View.*;
 import Settings.SettingsMaster;
 import Shared.Size;
 import Shared.TextPosition;
+import Shared.Utility.MathUtility;
 import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextCharacter;
@@ -23,7 +26,7 @@ import java.awt.*;
 import java.io.IOException;
 
 public class LanternaDisplay extends Display {
-    private static final int UI_PANEL_HEIGHT = 5;
+    private static final int UI_PANEL_HEIGHT = 3;
     private static final int NUMBER_PANEL_WIDTH = 5;
     private static final TextColor CURSOR_BACKGROUND = new TextColor.RGB(255, 255, 255);
     private static final TextColor CURSOR_FOREGROUND = new TextColor.RGB(0, 0, 0);
@@ -148,20 +151,33 @@ public class LanternaDisplay extends Display {
     protected void render(View view) throws IOException {
         screen.clear();
 
-        renderComponent(view.numberPanel(), new TextPosition(0, 0), new TextColor.RGB(128, 128, 128));
-        renderComponent(view.textArea(), textAreaTopLeft, null);
-        renderComponent(view.uiPanel(), new TextPosition(screenSize.height() - UI_PANEL_HEIGHT, 0), new TextColor.RGB(128, 0, 128));
+        renderComponent(view.numberPanel(), new TextPosition(0, 0), "numberPanel");
+        renderComponent(view.textArea(), textAreaTopLeft, "textArea");
+        renderComponent(
+            new ViewComponent(
+                new Size(1, screenSize.width()),
+                new Line[0]
+            ),
+            new TextPosition(screenSize.height() - UI_PANEL_HEIGHT - 1, 0),
+            "uiPanel"
+        );
+        renderComponent(view.uiPanel(), new TextPosition(screenSize.height() - UI_PANEL_HEIGHT, 0), "uiPanel");
         renderCursor(view.cursorPositionInTextArea(), new TextPosition(0, NUMBER_PANEL_WIDTH));
 
         screen.refresh();
     }
 
-    private void renderComponent(ViewComponent component, TextPosition topLeft, TextColor backgroundColor) {
+    private void renderComponent(ViewComponent component, TextPosition topLeft, String defaultKey) {
         // TODO WHEN [Settings AND Rendering is implemented] DO [Refactor this function to render colorless based on user preference]
+
+        ColorSetup defaultSetup = ColorMaster.getInstance().get(defaultKey);
+        TextColor defaultForeground = hexToTextColor(defaultSetup.foreground());
+        TextColor defaultBackground = hexToTextColor(defaultSetup.background());
 
         for (int i = 0; i < component.size().height(); i++) {
             int screenRow = topLeft.paragraph() + i;
-            graphics.setBackgroundColor(backgroundColor);
+            graphics.setForegroundColor(defaultForeground);
+            graphics.setBackgroundColor(defaultBackground);
             graphics.putString(topLeft.character(), screenRow, " ".repeat(component.size().width()));
 
             if (i >= component.lines().length) {
@@ -174,63 +190,47 @@ public class LanternaDisplay extends Display {
             for (TextSpan span : line.textSpans()) {
                 applyStyle(span.style());
                 graphics.putString(screenColumn, screenRow, span.text());
-                graphics.setBackgroundColor(backgroundColor);
+                graphics.setForegroundColor(defaultForeground);
+                graphics.setBackgroundColor(defaultBackground);
                 screenColumn += span.text().length();
             }
         }
     }
 
+    private TextColor hexToTextColor(String hex) {
+        int red = Integer.parseInt(hex.substring(0, 2), 16);
+        int green = Integer.parseInt(hex.substring(2, 4), 16);
+        int blue = Integer.parseInt(hex.substring(4, 6), 16);
+
+        return new TextColor.RGB(red, green, blue);
+    }
+
     private void applyStyle(Style style) {
         graphics.clearModifiers();
 
-        if (style.isBold()) {
+        ColorSetup setup = ColorMaster.getInstance().get(style.renderStyle().toString());
+
+        if (style.isBold() || setup.isBold()) {
             graphics.enableModifiers(SGR.BOLD);
         }
-        if (style.isItalic()) {
+        if (style.isItalic() || setup.isItalic()) {
             graphics.enableModifiers(SGR.ITALIC);
         }
 
-        // this will change when getForegroundColor / getBackgroundColor change
-        Color foregroundColor = getForegroundColor(style.renderStyle());
-        TextColor foregroundTextColor = new TextColor.RGB(foregroundColor.getRed(), foregroundColor.getGreen(), foregroundColor.getBlue());
-        graphics.setForegroundColor(foregroundTextColor);
+        String foregroundString = setup.foreground();
+        if (!foregroundString.isEmpty()) {
+            Color foregroundColor = MathUtility.hexToColor(setup.foreground());
+            TextColor foregroundTextColor = new TextColor.RGB(foregroundColor.getRed(), foregroundColor.getGreen(), foregroundColor.getBlue());
+            graphics.setForegroundColor(foregroundTextColor);
+        }
 
-        Color backgroundColor = getBackgroundColor(style.renderStyle());
-        if (backgroundColor != null) {
+        String backgroundString = setup.background();
+        if (!backgroundString.isEmpty()) {
+            Color backgroundColor = MathUtility.hexToColor(setup.background());
             TextColor backgroundTextColor = new TextColor.RGB(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue());
             graphics.setBackgroundColor(backgroundTextColor);
         }
-    }
 
-    /**
-     * this will eventually be controlled via color objects defined by color theme settings (either force reload or restart needed)
-     */
-    private Color getForegroundColor(RenderStyle style) {
-        return switch (style) {
-            case TEXT -> Color.white;
-            case WEAK_HIGHLIGHT -> Color.cyan;
-            case MEDIUM_HIGHLIGHT -> Color.magenta;
-            case STRONG_HIGHLIGHT -> Color.WHITE;
-            case FILE_CREATED -> Color.RED;
-            case FILE_MODIFIED -> Color.orange;
-            case FILE_SAVED -> Color.green;
-            case CODE_BUILTIN -> Color.cyan;
-            case CODE_KEYWORD -> Color.red;
-            case CODE_STRING_LITERAL -> Color.blue;
-            case CODE_NUMBER_LITERAL -> Color.yellow;
-            case CODE_COMMENT -> Color.gray;
-        };
-    }
-
-    /**
-     * this will eventually be controlled via color objects defined by color theme settings (either force reload or restart needed)
-     */
-    private Color getBackgroundColor(RenderStyle style) {
-        return switch (style) {
-            case CODE_BUILTIN, CODE_COMMENT, CODE_NUMBER_LITERAL, CODE_STRING_LITERAL, CODE_KEYWORD -> Color.darkGray;
-            case STRONG_HIGHLIGHT -> Color.cyan;
-            default -> null;
-        };
     }
 
     /**

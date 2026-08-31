@@ -1,5 +1,6 @@
 package Settings;
 
+import Shared.Utility.FileParsingUtility;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,18 +21,26 @@ class JsonSettingsLoader implements SettingsLoader {
             return new DefaultSettings();
         }
 
-        String jsonString = readFile(path);
-        String[] items = splitIntoItems(jsonString);
+        String jsonString;
+        try {
+            jsonString = FileParsingUtility.readFile(path);
+        }
+        catch (IOException e) {
+            return new DefaultSettings();
+        }
+
+        String[] items = FileParsingUtility.splitIntoItems(jsonString);
 
         Map<String, Boolean> booleanSettings = new HashMap<>();
         Map<String, Integer> intSettings = new HashMap<>();
         Map<String, RestrictedValue<Integer>> restrictedIntSettings = new HashMap<>();
+        Map<String, String> stringSettings = new HashMap<>();
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
         for (String itemString : items) {
             try {
-                SettingItem item = objectMapper.readValue(itemString, SettingItem.class);
-                addToMap(item, booleanSettings, intSettings, restrictedIntSettings);
+                SettingItem item = mapper.readValue(itemString, SettingItem.class);
+                addToMap(item, booleanSettings, intSettings, restrictedIntSettings, stringSettings);
             }
             catch (JacksonException ignored) {
                 //skip invalid settings
@@ -42,38 +51,17 @@ class JsonSettingsLoader implements SettingsLoader {
                 booleanSettings,
                 intSettings,
                 restrictedIntSettings,
+                stringSettings,
                 new DefaultSettings()
         );
-    }
-
-    private String readFile(Path path) {
-        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
-            StringBuilder builder = new StringBuilder();
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-            }
-
-            return builder.toString();
-        }
-        catch (IOException e) {
-            return null;
-        }
-    }
-
-    private String[] splitIntoItems(String jsonString) {
-        jsonString = jsonString.substring(1, jsonString.length() - 1); // remove outer brackets
-
-        //split at every "},{", but only consume the comma
-        return jsonString.split("(?<=\\{)\\s*,\\s*(?=\\{)");
     }
 
     private void addToMap(
         SettingItem item,
         Map<String, Boolean> booleanSettings,
         Map<String, Integer> intSettings,
-        Map<String, RestrictedValue<Integer>> restrictedIntSettings) {
+        Map<String, RestrictedValue<Integer>> restrictedIntSettings,
+        Map<String, String> stringSettings) {
 
         try {
             switch (item.type()) {
@@ -85,6 +73,9 @@ class JsonSettingsLoader implements SettingsLoader {
                 }
                 case "restrictedInteger" -> {
                     addToRestrictedIntegerMap(item, restrictedIntSettings);
+                }
+                case "string" -> {
+                    stringSettings.put(item.key(), item.value());
                 }
                 default -> {}
             }

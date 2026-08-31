@@ -7,7 +7,8 @@ class DefaultSettings implements SettingStorage {
     private final Map<String, Boolean> booleanSettings;
     private final Map<String, Integer> intSettings = new HashMap<>();
     private final Map<String, RestrictedValue<Integer>> restrictedIntSettings;
-    private final Map<String, RestrictedValue<String>> stringSettings = new HashMap<>();
+    private final Map<String, String> stringSettings;
+    private final Map<String, RestrictedValue<String>> restrictedStringSettings = new HashMap<>();
 
     public DefaultSettings() {
         booleanSettings = new HashMap<>();
@@ -25,6 +26,8 @@ class DefaultSettings implements SettingStorage {
         restrictedIntSettings = new HashMap<>();
         restrictedIntSettings.put("tabWidth", new RestrictedValue<>(4, new Integer[]{2, 4}));
 
+        stringSettings = new HashMap<>();
+        stringSettings.put("activeColorTheme", "default.json");
 
     }
     @Override
@@ -50,6 +53,13 @@ class DefaultSettings implements SettingStorage {
 
     @Override
     public String getString(String key) {
-        return "";
+        if (stringSettings.containsKey(key)) {
+            return stringSettings.get(key);
+        }
+        if (restrictedStringSettings.containsKey(key)) {
+            return restrictedStringSettings.get(key).get();
+        }
+
+        throw new IllegalArgumentException("No such key: " + key);
     }
 }

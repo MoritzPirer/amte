@@ -1,5 +1,7 @@
 package Shared.Utility;
 
+import java.awt.*;
+
 public class MathUtility {
     /**
      * finds the smallest number larger than n that is a multiple of multiple
@@ -9,5 +11,9 @@ public class MathUtility {
      */
     public static int nextMultipleOf(int n, int multiple) {
         return n + (multiple - n % multiple);
+    }
+
+    public static Color hexToColor(String hex) {
+        return new Color(Integer.parseInt(hex, 16));
     }
 }
