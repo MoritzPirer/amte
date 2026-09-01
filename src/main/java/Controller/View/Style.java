@@ -4,7 +4,7 @@ import FileStorage.SaveState;
 
 public record Style(boolean isItalic, boolean isBold, RenderStyle renderStyle) {
     public static Style getNumberingStyle() {
-        return new Style(true, false, RenderStyle.TEXT);
+        return new Style(false, false, RenderStyle.TEXT);
     }
     public static Style getFileNameStyle() {
         return new Style(false, false, RenderStyle.WEAK_HIGHLIGHT);
@@ -27,7 +27,7 @@ public record Style(boolean isItalic, boolean isBold, RenderStyle renderStyle) {
     }
 
     public static Style getModeIndicatorStyle() {
-        return new Style(false, false, RenderStyle.STRONG_HIGHLIGHT);
+        return new Style(false, true, RenderStyle.STRONG_HIGHLIGHT);
     }
 
     public static Style getMetadataStyle() {

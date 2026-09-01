@@ -7,16 +7,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class JsonColorThemeLoader implements ColorThemeLoader {
+class JsonColorThemeLoader implements ColorThemeLoader {
 
     @Override
     public ColorTheme load(Path path) {
         if (!Files.exists(path)) {
-            return new ColorTheme(new HashMap<>());
+            return new ColorTheme(new ArrayList<LoadedColorSetup>());
         }
 
         String[] items;
@@ -25,15 +26,15 @@ public class JsonColorThemeLoader implements ColorThemeLoader {
             items = FileParsingUtility.splitIntoItems(jsonString);
         }
         catch (IOException e) {
-            return new ColorTheme(new HashMap<>());
+            return new ColorTheme(new ArrayList<LoadedColorSetup>());
         }
 
-        Map<String, ColorSetup> colors = new HashMap<>();
+        List<LoadedColorSetup> colors = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
         for (String itemString : items) {
             try {
-                ColorSetup item = mapper.readValue(itemString, ColorSetup.class);
-                colors.put(item.key(), item);
+                LoadedColorSetup item = mapper.readValue(itemString, LoadedColorSetup.class);
+                colors.add(item);
             }
             catch (JacksonException ignored) {
             }

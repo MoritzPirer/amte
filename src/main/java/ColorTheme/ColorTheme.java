@@ -1,14 +1,38 @@
 package ColorTheme;
 
+import Shared.Utility.MathUtility;
+
 import java.awt.*;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ColorTheme {
     private final Map<String, ColorSetup> colors;
-    private static final ColorSetup defaultSetup = new ColorSetup("", "FFFFFF", "000000", false, false);
+    private static final ColorSetup defaultSetup = new ColorSetup(
+        "",
+        Color.WHITE,
+        Color.BLACK,
+        false,
+        false
+    );
 
-    public ColorTheme(Map<String, ColorSetup> colors) {
-        this.colors = colors;
+    ColorTheme(List<LoadedColorSetup> colors) {
+        this.colors = new HashMap<>();
+        for (LoadedColorSetup color : colors) {
+            Color foreground = MathUtility.hexToColor(color.foreground());
+            Color background = MathUtility.hexToColor(color.background());
+
+            this.colors.put(
+                color.key(),
+                new ColorSetup(color.key(),
+                    foreground,
+                    background,
+                    color.isItalic(),
+                    color.isBold()
+                )
+            );
+        }
     }
 
     public ColorSetup get(String key) {
@@ -16,6 +40,7 @@ public class ColorTheme {
             return colors.get(key);
         }
 
+        System.err.println("falling back to default for unknown key " + key);
         return defaultSetup;
     }
 }

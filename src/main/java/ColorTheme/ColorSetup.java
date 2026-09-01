@@ -1,5 +1,7 @@
 package ColorTheme;
 
 
-public record ColorSetup(String key, String foreground, String background, boolean isItalic, boolean isBold) {
+import java.awt.*;
+
+public record ColorSetup(String key, Color foreground, Color background, boolean isItalic, boolean isBold) {
 }

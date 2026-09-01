@@ -14,6 +14,14 @@ public class MathUtility {
     }
 
     public static Color hexToColor(String hex) {
+        if (hex.isEmpty()) {
+            return null;
+        }
+
+        if (hex.startsWith("#")) {
+            hex = hex.substring(1);
+        }
+
         return new Color(Integer.parseInt(hex, 16));
     }
 }

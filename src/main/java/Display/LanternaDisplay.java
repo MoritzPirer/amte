@@ -10,7 +10,6 @@ import Controller.View.*;
 import Settings.SettingsMaster;
 import Shared.Size;
 import Shared.TextPosition;
-import Shared.Utility.MathUtility;
 import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextCharacter;
@@ -27,11 +26,16 @@ import java.io.IOException;
 
 public class LanternaDisplay extends Display {
     private static final int UI_PANEL_HEIGHT = 3;
+    private static final int UI_PANEL_PADDING = 1;
     private static final int NUMBER_PANEL_WIDTH = 5;
+    private static final int NUMBER_PANEL_PADDING = 1;
+    private static final int TEXT_AREA_PADDING = 1;
+
     private static final TextColor CURSOR_BACKGROUND = new TextColor.RGB(255, 255, 255);
     private static final TextColor CURSOR_FOREGROUND = new TextColor.RGB(0, 0, 0);
 
     private TextPosition textAreaTopLeft;
+    private ScreenArrangement screenArrangement;
 
     private Screen screen = null;
     private TextGraphics graphics = null;
@@ -97,21 +101,42 @@ public class LanternaDisplay extends Display {
     }
 
     private SizeConfiguration divideScreen(Size screenSize) {
-        Size uiPanelSize = new Size(UI_PANEL_HEIGHT, screenSize.width());
+        ScreenElement uiPanel = new ScreenElement(
+            new Size(UI_PANEL_HEIGHT, screenSize.width() - 2 * UI_PANEL_PADDING),
+            new Size(UI_PANEL_HEIGHT + UI_PANEL_PADDING, screenSize.width()),
+            new TextPosition(screenSize.height() - UI_PANEL_HEIGHT, UI_PANEL_PADDING),
+            new TextPosition(screenSize.height() - UI_PANEL_HEIGHT - UI_PANEL_PADDING, 0)
+        );
 
-        Size numberPanelSize;
+        ScreenElement numberPanel;
         if (SettingsMaster.instance().getBoolean("showNumbers")) {
-            numberPanelSize = new Size(screenSize.height() - uiPanelSize.height(), NUMBER_PANEL_WIDTH);
-            textAreaTopLeft = new TextPosition(0, NUMBER_PANEL_WIDTH);
+            int numberPanelHeight = screenSize.height() - uiPanel.paddedSize().height();
+            numberPanel = new ScreenElement(
+                new Size(numberPanelHeight, NUMBER_PANEL_WIDTH - NUMBER_PANEL_PADDING),
+                new Size(numberPanelHeight, NUMBER_PANEL_WIDTH),
+                new TextPosition(0, 0),
+                new TextPosition(0, 0)
+            );
         }
         else {
-            numberPanelSize = new Size(0, 0);
-            textAreaTopLeft = new TextPosition(0, 0);
+            numberPanel = new ScreenElement(
+                new Size(0, 0),
+                new Size(0, 0),
+                new TextPosition(0, 0),
+                new TextPosition(0, 0)
+            );
         }
 
-        Size textAreaSize = new Size(screenSize.height() - uiPanelSize.height(), screenSize.width() - numberPanelSize.width());
+        ScreenElement textArea = new ScreenElement(
+            new Size(numberPanel.paddedSize().height(), screenSize.width() - numberPanel.paddedSize().width() - UI_PANEL_PADDING),
+            new Size(numberPanel.paddedSize().height(), screenSize.width() - numberPanel.paddedSize().width()),
+            new TextPosition(0, numberPanel.paddedSize().width() + UI_PANEL_PADDING),
+            new TextPosition(0, numberPanel.paddedSize().width())
+        );
 
-        return new SizeConfiguration(screenSize, textAreaSize, uiPanelSize, numberPanelSize);
+        this.screenArrangement = new ScreenArrangement(textArea, numberPanel, uiPanel);
+
+        return screenArrangement.getSizeConfiguration();
     }
 
     @Override
@@ -151,58 +176,42 @@ public class LanternaDisplay extends Display {
     protected void render(View view) throws IOException {
         screen.clear();
 
-        renderComponent(view.numberPanel(), new TextPosition(0, 0), "numberPanel");
-        renderComponent(view.textArea(), textAreaTopLeft, "textArea");
-        renderComponent(
-            new ViewComponent(
-                new Size(1, screenSize.width()),
-                new Line[0]
-            ),
-            new TextPosition(screenSize.height() - UI_PANEL_HEIGHT - 1, 0),
-            "uiPanel"
-        );
-        renderComponent(view.uiPanel(), new TextPosition(screenSize.height() - UI_PANEL_HEIGHT, 0), "uiPanel");
-        renderCursor(view.cursorPositionInTextArea(), new TextPosition(0, NUMBER_PANEL_WIDTH));
+        renderComponent(view.numberPanel(), screenArrangement.numberPanel(), "numberPanel");
+        renderComponent(view.textArea(), screenArrangement.textArea(), "textArea");
+        renderComponent(view.uiPanel(), screenArrangement.uiPanel(), "uiPanel");
+        renderCursor(view.cursorPositionInTextArea(), screenArrangement.textArea().contentTopLeft());
 
         screen.refresh();
     }
 
-    private void renderComponent(ViewComponent component, TextPosition topLeft, String defaultKey) {
-        // TODO WHEN [Settings AND Rendering is implemented] DO [Refactor this function to render colorless based on user preference]
-
+    private void renderComponent(ViewComponent component, ScreenElement element, String defaultKey) {
         ColorSetup defaultSetup = ColorMaster.getInstance().get(defaultKey);
-        TextColor defaultForeground = hexToTextColor(defaultSetup.foreground());
-        TextColor defaultBackground = hexToTextColor(defaultSetup.background());
+        TextColor defaultForeground = toTextColor(defaultSetup.foreground());
+        TextColor defaultBackground = toTextColor(defaultSetup.background());
 
-        for (int i = 0; i < component.size().height(); i++) {
-            int screenRow = topLeft.paragraph() + i;
-            graphics.setForegroundColor(defaultForeground);
-            graphics.setBackgroundColor(defaultBackground);
-            graphics.putString(topLeft.character(), screenRow, " ".repeat(component.size().width()));
+        fillBackground(element, defaultBackground);
 
-            if (i >= component.lines().length) {
-                continue;
-            }
+        for (int i = 0; i < component.lines().length; i++) {
+            int screenRow = element.contentTopLeft().paragraph() + i;
 
             Line line = component.lines()[i];
-            int screenColumn = topLeft.character();
-
-            for (TextSpan span : line.textSpans()) {
-                applyStyle(span.style());
-                graphics.putString(screenColumn, screenRow, span.text());
-                graphics.setForegroundColor(defaultForeground);
-                graphics.setBackgroundColor(defaultBackground);
-                screenColumn += span.text().length();
-            }
+            TextPosition lineStart = new TextPosition(screenRow, element.contentTopLeft().character());
+            drawLine(line, lineStart, defaultForeground, defaultBackground);
         }
     }
 
-    private TextColor hexToTextColor(String hex) {
-        int red = Integer.parseInt(hex.substring(0, 2), 16);
-        int green = Integer.parseInt(hex.substring(2, 4), 16);
-        int blue = Integer.parseInt(hex.substring(4, 6), 16);
+    private void fillBackground(ScreenElement element, TextColor defaultBackground) {
+        graphics.setBackgroundColor(defaultBackground);
+        String string = " ".repeat(element.paddedSize().width());
 
-        return new TextColor.RGB(red, green, blue);
+        for (int i = 0; i < element.paddedSize().height(); i++) {
+            int screenRow = i + element.elementTopLeft().paragraph();
+            graphics.putString(element.elementTopLeft().character(), screenRow, string);
+        }
+    }
+
+    private TextColor toTextColor(Color color) {
+        return new TextColor.RGB(color.getRed(), color.getGreen(), color.getBlue());
     }
 
     private void applyStyle(Style style) {
@@ -217,20 +226,29 @@ public class LanternaDisplay extends Display {
             graphics.enableModifiers(SGR.ITALIC);
         }
 
-        String foregroundString = setup.foreground();
-        if (!foregroundString.isEmpty()) {
-            Color foregroundColor = MathUtility.hexToColor(setup.foreground());
-            TextColor foregroundTextColor = new TextColor.RGB(foregroundColor.getRed(), foregroundColor.getGreen(), foregroundColor.getBlue());
+        if (setup.foreground() != null) {
+            TextColor foregroundTextColor = toTextColor(setup.foreground());
             graphics.setForegroundColor(foregroundTextColor);
         }
 
-        String backgroundString = setup.background();
-        if (!backgroundString.isEmpty()) {
-            Color backgroundColor = MathUtility.hexToColor(setup.background());
-            TextColor backgroundTextColor = new TextColor.RGB(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue());
+        if (setup.background() != null) {
+            TextColor backgroundTextColor = toTextColor(setup.background());
             graphics.setBackgroundColor(backgroundTextColor);
         }
 
+    }
+
+    private void drawLine(Line line, TextPosition lineStart, TextColor defaultForeground, TextColor defaultBackground) {
+        int screenColumn = lineStart.character();
+
+        for (TextSpan span : line.textSpans()) {
+            graphics.setForegroundColor(defaultForeground);
+            graphics.setBackgroundColor(defaultBackground);
+
+            applyStyle(span.style());
+            graphics.putString(screenColumn, lineStart.paragraph(), span.text());
+            screenColumn += span.text().length();
+        }
     }
 
     /**
