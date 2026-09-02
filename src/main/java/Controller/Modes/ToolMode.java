@@ -6,6 +6,7 @@ import Controller.SpecialInput;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 import Shared.Direction;
+import Shared.TextPosition;
 
 class ToolMode implements ModeState {
     private final ModeManager modeManager;
@@ -18,6 +19,9 @@ class ToolMode implements ModeState {
     public Action parseInput(Input input, ViewPort viewPort, TextFile file) {
         if (input.isSpecialInput()) {
             return parseSpecialInput(input.getSpecialInput(), viewPort);
+        }
+        else if (input.isMousePosition()) {
+            return parseMouseInput(input.getMousePosition(), viewPort);
         }
         else {
             return parseCharacterInput(input.getCharacter(), viewPort);
@@ -40,10 +44,18 @@ class ToolMode implements ModeState {
             case ARROW_RIGHT -> {
                 return new MoveAction(Direction.RIGHT);
             }
+            case WINDOW_CLOSED -> {
+                return new QuitAction();
+            }
             default -> { }
         }
 
         return new NullAction();
+    }
+
+    private Action parseMouseInput(TextPosition visualMousePosition, ViewPort viewPort) {
+        TextPosition logicalPosition =  viewPort.visualToLogicalPosition(visualMousePosition);
+        return new JumpAction(logicalPosition);
     }
 
     //NOTE: viewPort will be used by later commands

@@ -10,15 +10,16 @@ import Controller.View.*;
 import Settings.SettingsMaster;
 import Shared.Size;
 import Shared.TextPosition;
-import com.googlecode.lanterna.SGR;
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.TextCharacter;
-import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.*;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.input.MouseAction;
+import com.googlecode.lanterna.input.MouseActionType;
 import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.MouseCaptureMode;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration;
 
 import java.awt.*;
@@ -53,6 +54,7 @@ public class LanternaDisplay extends Display {
         this.screen = new DefaultTerminalFactory()
             .setTerminalEmulatorTitle("strato")
             .setTerminalEmulatorFontConfiguration(c)
+            .setMouseCaptureMode(MouseCaptureMode.CLICK_RELEASE_DRAG)
             .createScreen();
 
         this.screen.startScreen();
@@ -140,18 +142,21 @@ public class LanternaDisplay extends Display {
 
     @Override
     protected Input checkInput() throws IOException {
+
         KeyStroke keyStroke = screen.pollInput();
 
         if (keyStroke == null) {
             return null;
         }
 
+        System.out.println(keyStroke);
         if (keyStroke.getKeyType() == KeyType.Character) {
             return new Input(keyStroke.getCharacter());
         }
         if (keyStroke.getKeyType() == KeyType.MouseEvent) {
-
+            return generateMouseInput(keyStroke);
         }
+
 
         SpecialInput input = switch (keyStroke.getKeyType()) {
             case ArrowUp ->  SpecialInput.ARROW_UP;
@@ -164,6 +169,7 @@ public class LanternaDisplay extends Display {
             case Tab -> SpecialInput.TAB;
             case ReverseTab -> SpecialInput.SHIFT_TAB;
             case Escape -> SpecialInput.ESCAPE;
+            case EOF -> SpecialInput.WINDOW_CLOSED;
             default -> null;
         };
 
@@ -172,6 +178,53 @@ public class LanternaDisplay extends Display {
         }
         
         return null;
+    }
+
+    private Input generateMouseInput(KeyStroke keyStroke) {
+        assert keyStroke instanceof MouseAction;
+
+        MouseAction mouseAction = (MouseAction) keyStroke;
+
+        return switch (mouseAction.getActionType()) {
+            case SCROLL_UP -> new Input(SpecialInput.ARROW_UP);
+            case SCROLL_DOWN -> new Input(SpecialInput.ARROW_DOWN);
+            case CLICK_DOWN -> processMouseClick(mouseAction);
+            default -> null; // can later try to handle dragging
+        };
+    }
+
+    private Input processMouseClick(MouseAction mouseAction) {
+        assert mouseAction.getActionType() == MouseActionType.CLICK_DOWN;
+
+        TextPosition position = toTextPosition(mouseAction.getPosition());
+
+        if (!isInTextArea(position)) {
+            return null;
+        }
+
+        TextPosition positionInTextArea = position.offset(0, -screenArrangement.numberPanel().paddedSize().width());
+        return new Input(positionInTextArea);
+    }
+
+    private TextPosition toTextPosition(TerminalPosition position) {
+        return new TextPosition(
+            position.getRow(),
+            position.getColumn()
+        );
+    }
+
+    private boolean isInTextArea(TextPosition position) {
+        TextPosition textAreaTopLeft = screenArrangement.textArea().contentTopLeft();
+        TextPosition textAreaBottomRight = textAreaTopLeft.offset(
+            screenArrangement.textArea().contentSize().height(),
+            screenArrangement.textArea().contentSize().width()
+        );
+
+        if (position.paragraph() < textAreaTopLeft.paragraph() || position.paragraph() > textAreaBottomRight.paragraph()) {
+            return false;
+        }
+
+        return position.character() >= textAreaTopLeft.character() && position.character() <= textAreaBottomRight.character();
     }
 
     @Override

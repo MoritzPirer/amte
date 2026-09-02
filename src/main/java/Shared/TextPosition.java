@@ -34,4 +34,11 @@ public record TextPosition(int paragraph, int character) {
     public boolean equals(int paragraph, int character) {
         return paragraph == this.paragraph() && character == this.character();
     }
+
+    public TextPosition offset(int paragraph, int character) {
+        return new TextPosition(
+            this.paragraph + paragraph,
+            this.character + character
+        );
+    }
 }

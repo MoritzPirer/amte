@@ -9,5 +9,5 @@ public enum SpecialInput {
     BACK_SPACE,
     TAB,
     SHIFT_TAB,
-    ESCAPE;
+    ESCAPE, WINDOW_CLOSED;
 }

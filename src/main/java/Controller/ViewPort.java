@@ -57,6 +57,7 @@ public class ViewPort {
 
     private void updateTopIfNeeded() {
         int linesAboveCursor = getVisualCursorPosition(textAreaSize).paragraph() - 1;
+        //TODO WHEN [anytime] DO [make these percentages customizable]
         int highestAllowedCursorLine = (int) Math.floor(0.3f * textAreaSize.height());
         int lowestAllowedCursorLine = (int) Math.ceil(0.6f * textAreaSize.height());
 
@@ -214,6 +215,48 @@ public class ViewPort {
         visualLine += lineOfCursorInParagraph;
 
         return new TextPosition(visualLine, cursor.getPosition().character() % size.width());
+    }
+
+    public TextPosition visualToLogicalPosition(TextPosition visualPosition) {
+        /*
+        starting from top
+        maintain counter of visual lines consumed
+        if VLC + lines of paragraph < visual paragraph consume paragraph
+        else find position in this paragraph
+        ALERT click outside of text -> snap to end of paragraph
+         */
+
+        int currentParagraph = top.paragraph();
+        int visualLinesConsumed = 0;
+
+        while (currentParagraph < file.length() && visualLinesConsumed < visualPosition.paragraph()) {
+            Line paragraph = file.readParagraph(currentParagraph);
+            int visualLinesNeeded = visualLinesNeeded(paragraph, textAreaSize);
+
+            if (visualLinesConsumed + visualLinesNeeded < visualPosition.paragraph()) {
+                visualLinesConsumed += visualLinesNeeded;
+                currentParagraph++;
+                continue;
+            }
+
+            int length = paragraph.length();
+            if (visualPosition.character() >= length) {
+                // click after end of paragraph
+                return new TextPosition(currentParagraph, length - 1);
+            }
+
+            int visualLinesInParagraph = visualPosition.paragraph() - visualLinesConsumed;
+            int column = visualLinesInParagraph * textAreaSize.width() + visualPosition.character();
+            TextPosition logicalPosition = new TextPosition(currentParagraph, column);
+            System.out.println("I think visual position " + visualPosition + " is logical position " + logicalPosition);
+            return logicalPosition;
+        }
+
+        int lastParagraph = file.length() - 1;
+        int lastCharacter = file.lengthOfParagraph(lastParagraph);
+
+        System.out.println("DEFAULTING TO END OF FILE");
+        return new TextPosition(lastParagraph, lastCharacter);
     }
 
     private int tabAwareColumn(int paragraphIndex, int logicalColumn) {
