@@ -30,6 +30,7 @@ public class LoadedSettings implements SettingStorage {
             return booleanSettings.get(key);
         }
 
+        System.out.println("falling back for boolean setting " + key);
         return fallback.getBoolean(key);
     }
 
@@ -42,6 +43,7 @@ public class LoadedSettings implements SettingStorage {
             return restrictedIntegerSettings.get(key).get();
         }
 
+        System.out.println("falling back for int setting " + key);
         return fallback.getInt(key);
     }
 
@@ -56,6 +58,7 @@ public class LoadedSettings implements SettingStorage {
         }
         */
 
+        System.out.println("falling back for string setting " + key);
         return fallback.getString(key);
     }
 }

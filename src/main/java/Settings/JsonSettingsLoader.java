@@ -75,7 +75,9 @@ class JsonSettingsLoader implements SettingsLoader {
                 case "string" -> {
                     stringSettings.put(item.key(), item.value());
                 }
-                default -> {}
+                default -> {
+                    System.out.println("ignoring unknown setting type " + item.type());
+                }
             }
         }
         catch (NumberFormatException ignored) {

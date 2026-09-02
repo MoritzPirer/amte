@@ -120,7 +120,7 @@ public class ViewPort {
 
     public ViewComponent getNumberPanel(Size size) {
         Line[] lines = new Line[size.height()];
-
+        
         int visualLinesUsed = 0;
 
         int currentIndex = top.paragraph();

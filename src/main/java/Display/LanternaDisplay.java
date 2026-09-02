@@ -34,14 +34,13 @@ public class LanternaDisplay extends Display {
     private static final TextColor CURSOR_BACKGROUND = new TextColor.RGB(255, 255, 255);
     private static final TextColor CURSOR_FOREGROUND = new TextColor.RGB(0, 0, 0);
 
-    private TextPosition textAreaTopLeft;
     private ScreenArrangement screenArrangement;
 
     private Screen screen = null;
     private TextGraphics graphics = null;
     Size screenSize;
 
-    LanternaDisplay(Controller controller) {
+    protected LanternaDisplay(Controller controller) {
         super(controller);
     }
 
@@ -128,9 +127,9 @@ public class LanternaDisplay extends Display {
         }
 
         ScreenElement textArea = new ScreenElement(
-            new Size(numberPanel.paddedSize().height(), screenSize.width() - numberPanel.paddedSize().width() - UI_PANEL_PADDING),
+            new Size(numberPanel.paddedSize().height(), screenSize.width() - numberPanel.paddedSize().width() - TEXT_AREA_PADDING),
             new Size(numberPanel.paddedSize().height(), screenSize.width() - numberPanel.paddedSize().width()),
-            new TextPosition(0, numberPanel.paddedSize().width() + UI_PANEL_PADDING),
+            new TextPosition(0, numberPanel.paddedSize().width() + TEXT_AREA_PADDING),
             new TextPosition(0, numberPanel.paddedSize().width())
         );
 
@@ -149,6 +148,9 @@ public class LanternaDisplay extends Display {
 
         if (keyStroke.getKeyType() == KeyType.Character) {
             return new Input(keyStroke.getCharacter());
+        }
+        if (keyStroke.getKeyType() == KeyType.MouseEvent) {
+
         }
 
         SpecialInput input = switch (keyStroke.getKeyType()) {
