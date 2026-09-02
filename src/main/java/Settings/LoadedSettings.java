@@ -9,6 +9,8 @@ public class LoadedSettings implements SettingStorage {
     private final Map<String, RestrictedValue<Integer>> restrictedIntegerSettings;
 
     private final Map<String, String> stringSettings;
+    private final Map<String, RestrictedValue<String>> restrictedStringSettings;
+
     private final SettingStorage fallback;
 
     LoadedSettings(
@@ -16,11 +18,13 @@ public class LoadedSettings implements SettingStorage {
         Map<String, Integer> integerSettings,
         Map<String, RestrictedValue<Integer>> restrictedIntegerSettings,
         Map<String, String> stringSettings,
+        Map<String, RestrictedValue<String>> restrictedStringSettings,
         SettingStorage fallback) {
         this.booleanSettings = booleanSettings;
         this.integerSettings = integerSettings;
         this.restrictedIntegerSettings = restrictedIntegerSettings;
         this.stringSettings = stringSettings;
+        this.restrictedStringSettings = restrictedStringSettings;
         this.fallback = fallback;
     }
 
@@ -52,11 +56,9 @@ public class LoadedSettings implements SettingStorage {
         if (stringSettings.containsKey(key)) {
             return stringSettings.get(key);
         }
-        /*
         if (restrictedStringSettings.containsKey(key)) {
             return restrictedStringSettings.get(key).get();
         }
-        */
 
         System.out.println("falling back for string setting " + key);
         return fallback.getString(key);

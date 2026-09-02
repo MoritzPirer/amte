@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 public class FileParsingUtility {
 
@@ -66,5 +69,38 @@ public class FileParsingUtility {
         ensureDirectoryExists(colorThemesFolder);
 
         return colorThemesFolder;
+    }
+
+    public static String getLanguageFolder() {
+        String languageFolder = getBaseFolder() + "languages/";
+        ensureDirectoryExists(languageFolder);
+
+        return languageFolder;
+    }
+
+    public static boolean isFolder(String path) {
+        Path folderPath = Paths.get(path);
+        if (!Files.exists(folderPath)) {
+            return false;
+        }
+
+        return Files.isDirectory(folderPath);
+    }
+
+    public static Path[] filesInFolder(Path path) {
+
+        File folder = path.toFile();
+
+        if (!folder.exists()) {
+            throw new IllegalArgumentException("Folder " + path + " does not exist");
+        }
+
+        File[] files = folder.listFiles();
+
+        assert files != null;
+
+        return Arrays.stream(files)
+            .map(File::toPath)
+            .toArray(Path[]::new);
     }
 }

@@ -3,14 +3,14 @@ package Settings;
 import java.util.HashMap;
 import java.util.Map;
 
-//NOTE: warnings only temporarily suppressed until more settings are added that require restricted strings or unrestricted numbers
+//NOTE: warnings only temporarily suppressed until more settings are added that require unrestricted numbers
 @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 class DefaultSettings implements SettingStorage {
     private final Map<String, Boolean> booleanSettings;
     private final Map<String, Integer> intSettings = new HashMap<>();
     private final Map<String, RestrictedValue<Integer>> restrictedIntSettings;
     private final Map<String, String> stringSettings;
-    private final Map<String, RestrictedValue<String>> restrictedStringSettings = new HashMap<>();
+    private final Map<String, RestrictedValue<String>> restrictedStringSettings;
 
     public DefaultSettings() {
         booleanSettings = new HashMap<>();
@@ -30,6 +30,9 @@ class DefaultSettings implements SettingStorage {
 
         stringSettings = new HashMap<>();
         stringSettings.put("activeColorTheme", "default.json");
+
+        restrictedStringSettings = new HashMap<>();
+        restrictedStringSettings.put("numberSeparator", new RestrictedValue<>(".", new String[]{" ", ",", "."}));
 
     }
     @Override

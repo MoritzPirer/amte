@@ -8,6 +8,7 @@ import Controller.Input;
 import Controller.SpecialInput;
 import Controller.ViewPort;
 import FileStorage.TextFile;
+import LanguageSupport.LanguageProvider;
 import Shared.TextPosition;
 
 class TypingMode implements ModeState {
@@ -67,7 +68,7 @@ class TypingMode implements ModeState {
 
     @Override
     public String getName() {
-        //TODO WHEN [Language Component is implemented] DO [Retrieve string from language support rather than hard-coding it]
-        return "TYPING";
+        LanguageProvider provider = new LanguageProvider();
+        return provider.get("modeIdentifierTyping");
     }
 }

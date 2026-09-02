@@ -1,6 +1,6 @@
 package ColorTheme;
 
-import Shared.Utility.MathUtility;
+import Shared.Utility.NumberUtility;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -20,8 +20,8 @@ public class ColorTheme {
     ColorTheme(List<LoadedColorSetup> colors) {
         this.colors = new HashMap<>();
         for (LoadedColorSetup color : colors) {
-            Color foreground = MathUtility.hexToColor(color.foreground());
-            Color background = MathUtility.hexToColor(color.background());
+            Color foreground = NumberUtility.hexToColor(color.foreground());
+            Color background = NumberUtility.hexToColor(color.background());
 
             this.colors.put(
                 color.key(),

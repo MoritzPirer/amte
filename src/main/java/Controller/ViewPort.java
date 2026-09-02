@@ -9,7 +9,7 @@ import Settings.SettingsMaster;
 import Shared.Direction;
 import Shared.Size;
 import Shared.TextPosition;
-import Shared.Utility.MathUtility;
+import Shared.Utility.NumberUtility;
 import Shared.Utility.StringUtility;
 
 import java.util.Arrays;
@@ -223,7 +223,7 @@ public class ViewPort {
         for (TextSpan span : paragraph.textSpans()) {
             for (char current : span.text().toCharArray()) {
                 if (current == '\t') {
-                    column += MathUtility.nextMultipleOf(column, tabWidth);
+                    column += NumberUtility.nextMultipleOf(column, tabWidth);
                 }
                 else {
                     column++;

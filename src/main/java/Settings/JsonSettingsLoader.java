@@ -33,12 +33,13 @@ class JsonSettingsLoader implements SettingsLoader {
         Map<String, Integer> intSettings = new HashMap<>();
         Map<String, RestrictedValue<Integer>> restrictedIntSettings = new HashMap<>();
         Map<String, String> stringSettings = new HashMap<>();
+        Map<String, RestrictedValue<String>> restrictedStringSettings = new HashMap<>();
 
         ObjectMapper mapper = new ObjectMapper();
         for (String itemString : items) {
             try {
                 SettingItem item = mapper.readValue(itemString, SettingItem.class);
-                addToMap(item, booleanSettings, intSettings, restrictedIntSettings, stringSettings);
+                addToMap(item, booleanSettings, intSettings, restrictedIntSettings, stringSettings, restrictedStringSettings);
             }
             catch (JacksonException ignored) {
                 //skip invalid settings
@@ -50,6 +51,7 @@ class JsonSettingsLoader implements SettingsLoader {
                 intSettings,
                 restrictedIntSettings,
                 stringSettings,
+                restrictedStringSettings,
                 new DefaultSettings()
         );
     }
@@ -59,7 +61,8 @@ class JsonSettingsLoader implements SettingsLoader {
         Map<String, Boolean> booleanSettings,
         Map<String, Integer> intSettings,
         Map<String, RestrictedValue<Integer>> restrictedIntSettings,
-        Map<String, String> stringSettings) {
+        Map<String, String> stringSettings,
+        Map<String, RestrictedValue<String>> restrictedStringSettings) {
 
         try {
             switch (item.type()) {
@@ -74,6 +77,9 @@ class JsonSettingsLoader implements SettingsLoader {
                 }
                 case "string" -> {
                     stringSettings.put(item.key(), item.value());
+                }
+                case "restrictedString" -> {
+                    addToRestrictedStringMap(item, restrictedStringSettings);
                 }
                 default -> {
                     System.out.println("ignoring unknown setting type " + item.type());
@@ -96,6 +102,13 @@ class JsonSettingsLoader implements SettingsLoader {
                 .toArray(Integer[]::new);
 
         restrictedIntSettings.put(item.key(), new RestrictedValue<>(value, options));
+    }
+
+    private void addToRestrictedStringMap(SettingItem item, Map<String, RestrictedValue<String>> restrictedStringSettings) {
+        if (item.options() == null || item.options().length == 0) {
+            return;
+        }
+        restrictedStringSettings.put(item.key(), new RestrictedValue<>(item.value(), item.options()));
     }
 
     @Override

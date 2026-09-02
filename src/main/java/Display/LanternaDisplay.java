@@ -111,9 +111,9 @@ public class LanternaDisplay extends Display {
         if (SettingsMaster.instance().getBoolean("showNumbers")) {
             int numberPanelHeight = screenSize.height() - uiPanel.paddedSize().height();
             numberPanel = new ScreenElement(
-                new Size(numberPanelHeight, NUMBER_PANEL_WIDTH - NUMBER_PANEL_PADDING),
+                new Size(numberPanelHeight, NUMBER_PANEL_WIDTH - 2 * NUMBER_PANEL_PADDING),
                 new Size(numberPanelHeight, NUMBER_PANEL_WIDTH),
-                new TextPosition(0, 0),
+                new TextPosition(0, NUMBER_PANEL_PADDING),
                 new TextPosition(0, 0)
             );
         }
@@ -187,7 +187,7 @@ public class LanternaDisplay extends Display {
     }
 
     private void renderComponent(ViewComponent component, ScreenElement element, String defaultKey) {
-        ColorSetup defaultSetup = ColorMaster.getInstance().get(defaultKey);
+        ColorSetup defaultSetup = ColorMaster.instance().get(defaultKey);
         TextColor defaultForeground = toTextColor(defaultSetup.foreground());
         TextColor defaultBackground = toTextColor(defaultSetup.background());
 
@@ -219,7 +219,7 @@ public class LanternaDisplay extends Display {
     private void applyStyle(Style style) {
         graphics.clearModifiers();
 
-        ColorSetup setup = ColorMaster.getInstance().get(style.renderStyle().toString());
+        ColorSetup setup = ColorMaster.instance().get(style.renderStyle().toString());
 
         if (style.isBold() || setup.isBold()) {
             graphics.enableModifiers(SGR.BOLD);

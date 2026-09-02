@@ -5,6 +5,7 @@ import Controller.Input;
 import Controller.SpecialInput;
 import Controller.ViewPort;
 import FileStorage.TextFile;
+import LanguageSupport.LanguageProvider;
 import Shared.Direction;
 
 class ToolMode implements ModeState {
@@ -19,10 +20,8 @@ class ToolMode implements ModeState {
         if (input.isSpecialInput()) {
             return parseSpecialInput(input.getSpecialInput(), viewPort);
         }
-        else {
-            return parseCharacterInput(input.getCharacter(), viewPort);
-        }
 
+        return parseCharacterInput(input.getCharacter(), viewPort);
     }
 
     //NOTE: viewPort will be used by later commands
@@ -80,7 +79,7 @@ class ToolMode implements ModeState {
 
     @Override
     public String getName() {
-        //TODO WHEN [Language Component is implemented] DO [Retrieve string from language support rather than hard-coding it]
-        return "TOOL";
+        LanguageProvider provider = new LanguageProvider();
+        return provider.get("modeIdentifierTool");
     }
 }

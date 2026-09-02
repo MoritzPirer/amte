@@ -15,7 +15,7 @@ public class ColorMaster {
         theme = new JsonColorThemeLoader().load(Path.of(colorThemePath));
     }
 
-    public static ColorMaster getInstance() {
+    public static ColorMaster instance() {
         if (instance == null) {
             instance = new ColorMaster();
         }
