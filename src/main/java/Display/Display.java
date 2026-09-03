@@ -52,7 +52,7 @@ public abstract class Display {
     }
 
     private void updateSize() {
-        SizeConfiguration sizeConfiguration = checkSizeConfiguration();
+        SizeConfiguration sizeConfiguration = checkSizeConfiguration(controller.getRecommendedNumberWidth());
         if (sizeConfiguration != null) {
             controller.updateSizeConfiguration(sizeConfiguration);
         }
@@ -96,7 +96,7 @@ public abstract class Display {
      * checks if the size of the window has changed and returns the new division of the window if so.
      * @return the new SizeConfiguration, or null if the Size has not changed
      */
-    abstract protected SizeConfiguration checkSizeConfiguration();
+    abstract protected SizeConfiguration checkSizeConfiguration(int recommendedNumberWidth);
 
     /**
      * check if the user has pressed a key. Should not block to wait for input

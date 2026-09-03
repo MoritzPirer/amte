@@ -27,7 +27,7 @@ public record Style(boolean isItalic, boolean isBold, RenderStyle renderStyle) {
     }
 
     public static Style getModeIndicatorStyle() {
-        return new Style(false, true, RenderStyle.STRONG_HIGHLIGHT);
+        return new Style(true, false, RenderStyle.STRONG_HIGHLIGHT);
     }
 
     public static Style getMetadataStyle() {

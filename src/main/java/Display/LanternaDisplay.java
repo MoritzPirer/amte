@@ -80,11 +80,11 @@ public class LanternaDisplay extends Display {
         TerminalSize size = screen.getTerminalSize();
         Size screenSize = new Size(size.getRows(), size.getColumns());
 
-        return divideScreen(screenSize);
+        return divideScreen(screenSize, 0);
     }
 
     @Override
-    protected SizeConfiguration checkSizeConfiguration() {
+    protected SizeConfiguration checkSizeConfiguration(int recommendedNumberWidth) {
         TerminalSize newSize = screen.doResizeIfNecessary();
         if (newSize == null) {
             return null;
@@ -96,10 +96,10 @@ public class LanternaDisplay extends Display {
         }
 
         screenSize = new Size(newSize.getRows(), newSize.getColumns());
-        return divideScreen(screenSize);
+        return divideScreen(screenSize, recommendedNumberWidth);
     }
 
-    private SizeConfiguration divideScreen(Size screenSize) {
+    private SizeConfiguration divideScreen(Size screenSize, int recommendedNumberWidth) {
         ScreenElement uiPanel = new ScreenElement(
             new Size(UI_PANEL_HEIGHT, screenSize.width() - 2 * UI_PANEL_PADDING),
             new Size(UI_PANEL_HEIGHT + UI_PANEL_PADDING, screenSize.width()),
@@ -109,10 +109,11 @@ public class LanternaDisplay extends Display {
 
         ScreenElement numberPanel;
         if (SettingsMaster.instance().getBoolean("showNumbers")) {
+            int numberPanelWidth = Math.max(recommendedNumberWidth + 2 * NUMBER_PANEL_PADDING, NUMBER_PANEL_WIDTH);
             int numberPanelHeight = screenSize.height() - uiPanel.paddedSize().height();
             numberPanel = new ScreenElement(
-                new Size(numberPanelHeight, NUMBER_PANEL_WIDTH - 2 * NUMBER_PANEL_PADDING),
-                new Size(numberPanelHeight, NUMBER_PANEL_WIDTH),
+                new Size(numberPanelHeight, numberPanelWidth - 2 * NUMBER_PANEL_PADDING),
+                new Size(numberPanelHeight, numberPanelWidth),
                 new TextPosition(0, NUMBER_PANEL_PADDING),
                 new TextPosition(0, 0)
             );
@@ -148,9 +149,6 @@ public class LanternaDisplay extends Display {
 
         if (keyStroke.getKeyType() == KeyType.Character) {
             return new Input(keyStroke.getCharacter());
-        }
-        if (keyStroke.getKeyType() == KeyType.MouseEvent) {
-
         }
 
         SpecialInput input = switch (keyStroke.getKeyType()) {

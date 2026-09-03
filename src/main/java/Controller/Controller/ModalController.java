@@ -216,6 +216,11 @@ public class ModalController implements Controller{
     }
 
     @Override
+    public int getRecommendedNumberWidth() {
+        return String.valueOf(file.length()).length();
+    }
+
+    @Override
     public void updateSizeConfiguration(SizeConfiguration sizeConfiguration) {
         this.sizeConfiguration = sizeConfiguration;
     }

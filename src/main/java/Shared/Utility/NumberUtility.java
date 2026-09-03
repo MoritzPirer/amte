@@ -53,7 +53,7 @@ public class NumberUtility {
             int digit = remaining % BASE;
             builder.append(digit);
 
-            if (++digitsInCurrentGroup == groupSize && remaining > BASE) {
+            if (++digitsInCurrentGroup == groupSize && remaining >= BASE) {
                 builder.append(separator);
                 digitsInCurrentGroup = 0;
             }

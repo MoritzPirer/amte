@@ -26,8 +26,8 @@ public class ViewPort {
     public ViewPort(TextFile file) {
         this.file = file;
 
-        cursor = new Cursor(new TextPosition(0, 0), file.getBuffer());
-        top = new TextPosition(0, 0);
+        cursor = new Cursor(new TextPosition(1, 0), file.getBuffer());
+        top = new TextPosition(1, 0);
     }
 
     private static int visualLinesNeeded(Line line, Size size) {

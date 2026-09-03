@@ -26,6 +26,7 @@ public interface Controller {
      */
     View getView();
 
+    int getRecommendedNumberWidth();
     /**
      * updates the stored size of individual components to account for window resizing
      * @param sizeConfiguration the sizes of the ui components
