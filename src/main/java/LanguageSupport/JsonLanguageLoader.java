@@ -11,19 +11,15 @@ import java.util.Map;
 
 class JsonLanguageLoader implements LanguageLoader {
     @Override
-    public Map<String, Language> loadAll(Path path) {
-        Map<String, Language> languages = new HashMap<>();
-
+    public boolean doesLanguageExist(String language) {
+        Path path = Path.of(FileParsingUtility.getLanguageFolder());
         for (Path filePath : FileParsingUtility.filesInFolder(path)) {
-            String languageName = languageFileName(filePath);
-            Language content = load(filePath);
-
-            if (content != null) {
-                languages.put(languageName, content);
+            if (language.equals(languageFileName(filePath))) {
+                return true;
             }
         }
 
-        return languages;
+        return false;
     }
 
     private String languageFileName(Path path) {
@@ -31,7 +27,10 @@ class JsonLanguageLoader implements LanguageLoader {
         return fileName.substring(0, fileName.lastIndexOf('.'));
     }
 
-    private Language load(Path path) {
+    @Override
+    public Language load(String language) {
+        Path path = Path.of(FileParsingUtility.getLanguageFolder() + language + ".json");
+
         String[] items;
         try {
             String jsonString = FileParsingUtility.readFile(path);

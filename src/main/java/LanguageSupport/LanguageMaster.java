@@ -3,18 +3,15 @@ package LanguageSupport;
 import Shared.Utility.FileParsingUtility;
 
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 
 class LanguageMaster {
     private static LanguageMaster instance = null;
 
-    private final Map<String, Language> languages;
+    private final Map<String, Language> languages = new HashMap<>();
 
-    private LanguageMaster() {
-        String languageFolder = FileParsingUtility.getLanguageFolder();
-
-        this.languages = new JsonLanguageLoader().loadAll(Path.of(languageFolder));
-    }
+    private LanguageMaster() { }
 
     public static LanguageMaster instance() {
         if (instance == null) {
@@ -25,7 +22,16 @@ class LanguageMaster {
     }
 
     public boolean isLanguageKnown(String language) {
-        return languages.containsKey(language);
+        if (languages.containsKey(language)) {
+            return true;
+        }
+        LanguageLoader loader = new JsonLanguageLoader();
+        if (loader.doesLanguageExist(language)) {
+            languages.put(language, loader.load(language));
+            return true;
+        }
+
+        return false;
     }
 
     public String get(String key, String language) {
