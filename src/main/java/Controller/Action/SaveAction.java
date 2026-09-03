@@ -7,6 +7,7 @@ import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 
 public class SaveAction implements Action {
+
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
         file.save();

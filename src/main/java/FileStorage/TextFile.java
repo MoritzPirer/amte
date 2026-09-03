@@ -8,13 +8,14 @@ import FileStorage.FileIO.DiskFileLoader;
 import FileStorage.FileIO.FileLoader;
 import Shared.TextPosition;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
 public class TextFile {
-    private final Path filePath;
-    private final String fileName;
+    private Path filePath;
+    private String fileName;
 
     private final FileBuffer buffer;
     private final FileMetadataTracker tracker;
@@ -29,11 +30,18 @@ public class TextFile {
         this.saveState = saveState;
     }
 
+    public void setFileName(String fileName) {
+        if (fileName != null && !fileName.isEmpty()) {
+            this.fileName = fileName;
+        }
+    }
     public String getFileName() {
         return fileName;
     }
 
     public void save() {
+        filePath = Path.of(filePath.getParent() + File.separator + fileName);
+
         FileLoader loader = new DiskFileLoader();
         try {
             loader.save(filePath, buffer);

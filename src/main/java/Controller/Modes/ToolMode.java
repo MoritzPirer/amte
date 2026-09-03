@@ -49,14 +49,6 @@ class ToolMode implements ModeState {
     private Action parseCharacterInput(char character, ViewPort viewPort) {
         switch (character) {
             case 'i' -> modeManager.setMode(new TypingMode(modeManager));
-            case 'q' -> {
-                //TODO WHEN [CommandMode is being implemented] DO [move quitting into CommandMode]
-                return new QuitAction();
-            }
-            case 's' -> {
-                //TODO WHEN [CommandMode is being implemented] DO [move quitting into CommandMode]
-                return new SaveAction();
-            }
             case 'h' -> {
                 return new MoveAction(Direction.LEFT);
             }

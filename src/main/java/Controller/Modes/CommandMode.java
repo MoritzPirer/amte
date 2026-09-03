@@ -1,22 +1,42 @@
 package Controller.Modes;
 
 
-import Controller.Action.Action;
-import Controller.Action.NotifyAction;
-import Controller.Action.NullAction;
+import Controller.Action.*;
 import Controller.Input;
 import Controller.SpecialInput;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class CommandMode implements ModeState {
     private final StringBuilder buffer;
     private final ModeManager modeManager;
+    private final Map<String, Action> simpleCommands;
 
     public CommandMode(ModeManager modeManager) {
         this.buffer = new StringBuilder();
         this.modeManager = modeManager;
+        this.simpleCommands = createSimpleCommands();
+    }
+
+    private Map<String, Action> createSimpleCommands() {
+        Map<String, Action> commands = new HashMap<>();
+
+        addWithAliases(commands, new SaveAction(), new String[]{"save", "s", "w"});
+        addWithAliases(commands, QuitAction.makeForceQuit(), new String[]{"exit", "forcequit", "force-quit", "force quit", "e"});
+        addWithAliases(commands, QuitAction.makeSoftQuit(), new String[]{"quit", "q", "close"});
+        addWithAliases(commands, new CompoundAction(new SaveAction(), QuitAction.makeSoftQuit()), new String[]{"save quit", "sq", "save-quit"});
+
+        return commands;
+    }
+
+    private void addWithAliases(Map<String, Action> commands, Action command, String[] aliases) {
+        for (String alias : aliases) {
+            commands.put(alias, command);
+        }
     }
 
     @Override
@@ -48,7 +68,28 @@ public class CommandMode implements ModeState {
     }
 
     private Action processCommand() {
-        return new NullAction();
+        String command = buffer.toString();
+        buffer.delete(0, buffer.length());
+
+        modeManager.setMode(new ToolMode(modeManager));
+
+        if (simpleCommands.containsKey(command)) {
+            return simpleCommands.get(command);
+        }
+
+        return processWithArguments(command);
+    }
+
+    private Action processWithArguments(String command) {
+        int firstSpace = command.indexOf(' ');
+        String keyword = command.substring(0, firstSpace);
+        String arguments = command.substring(firstSpace + 1);
+
+        //TODO language file
+        return switch (keyword) {
+            case "rename", "r" -> new RenameAction(arguments);
+            default -> new NotifyAction("Error: Unknown keyword");
+        };
     }
 
     private Action showUnfinishedCommand() {
