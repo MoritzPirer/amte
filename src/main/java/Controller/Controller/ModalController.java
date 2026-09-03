@@ -1,6 +1,7 @@
 package Controller.Controller;
 
 import Controller.Action.Action;
+import Controller.Action.NullAction;
 import Controller.Modes.ModeManager;
 import Controller.View.*;
 import Controller.Input;
@@ -68,17 +69,22 @@ public class ModalController implements Controller{
     @Override
     public void applyInput(Input input) {
         Action action = modeManager.parseInput(input, viewPort, file);
+        if (!(action instanceof NullAction)) {
+            viewPort.clearTemporaryMessages();
+        }
         action.apply(viewPort, file);
     }
 
     @Override
     public View getView() {
         ViewComponent textArea = viewPort.getTextArea(sizeConfiguration.textAreaSize());
-        ViewComponent numberPanel = viewPort.getNumberPanel(sizeConfiguration.numberingSize());
         ViewComponent uiPanel = getUiPanel();
+        ViewComponent numberPanel = viewPort.getNumberPanel(sizeConfiguration.numberingSize());
+        ViewComponent temporaryMessagePanel = viewPort.getTemporaryMessages();
         TextPosition cursorPositionInText = viewPort.getVisualCursorPosition(sizeConfiguration.textAreaSize());
 
-        return new View(textArea, uiPanel, numberPanel, cursorPositionInText);
+
+        return new View(textArea, uiPanel, numberPanel, temporaryMessagePanel, cursorPositionInText);
     }
 
     private ViewComponent getUiPanel() {

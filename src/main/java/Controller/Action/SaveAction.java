@@ -4,12 +4,19 @@ import Controller.ViewPort;
 import FileStorage.FileIO.DiskFileLoader;
 import FileStorage.FileIO.FileLoader;
 import FileStorage.TextFile;
+import LanguageSupport.LanguageProvider;
 
 public class SaveAction implements Action {
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
         file.save();
-        //TODO WHEN [temporary messages are implemented] DO [add a message confirming success / fail (check via file.isSaved())]
+        LanguageProvider provider = new LanguageProvider();
+        if (file.isSaved()) {
+            viewPort.addTemporaryMessage(provider.get("saveSuccess"));
+        }
+        else {
+            viewPort.addTemporaryMessage(provider.get("saveFail"));
+        }
     }
 
     @Override

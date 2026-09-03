@@ -69,6 +69,10 @@ class ToolMode implements ModeState {
             case 'l' -> {
                 return new MoveAction(Direction.RIGHT);
             }
+            case ':' -> {
+                modeManager.setMode(new CommandMode(modeManager));
+                return new NotifyAction(":");
+            }
             default -> {}
         }
 

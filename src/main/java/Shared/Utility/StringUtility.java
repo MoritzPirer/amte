@@ -130,4 +130,23 @@ public class StringUtility {
         int padAmount = length - text.length();
         return " ".repeat(padAmount) + text;
     }
+
+    public static List<String> splitByLength(String text, int maxLength) {
+        List<String> lines = new ArrayList<>();
+        int currentIndex = 0;
+
+        while (currentIndex < text.length()) {
+            int endIndex = currentIndex + maxLength;
+            if (endIndex > text.length()) {
+                lines.add(text.substring(currentIndex));
+            }
+            else {
+                lines.add(text.substring(currentIndex, endIndex));
+            }
+
+            currentIndex = endIndex;
+        }
+
+        return lines;
+    }
 }

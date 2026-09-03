@@ -179,9 +179,27 @@ public class LanternaDisplay extends Display {
         renderComponent(view.numberPanel(), screenArrangement.numberPanel(), "numberPanel");
         renderComponent(view.textArea(), screenArrangement.textArea(), "textArea");
         renderComponent(view.uiPanel(), screenArrangement.uiPanel(), "uiPanel");
+        renderTemporaryMessages(view.temporaryMessages(), screenArrangement);
         renderCursor(view.cursorPositionInTextArea(), screenArrangement.textArea().contentTopLeft());
 
         screen.refresh();
+    }
+
+    private void renderTemporaryMessages(ViewComponent temporaryMessages, ScreenArrangement screenArrangement) {
+        TextPosition temporaryMessagePosition = new TextPosition(
+                screenArrangement.textArea().elementTopLeft().paragraph()
+                        + screenArrangement.textArea().paddedSize().height() - temporaryMessages.size().height(),
+                screenArrangement.textArea().elementTopLeft().character()
+        );
+
+        ScreenElement temporaryMessagesElement = new ScreenElement(
+                temporaryMessages.size(),
+                temporaryMessages.size().grow(0, 1),
+                temporaryMessagePosition,
+                temporaryMessagePosition
+        );
+
+        renderComponent(temporaryMessages, temporaryMessagesElement, "temporaryMessages");
     }
 
     private void renderComponent(ViewComponent component, ScreenElement element, String defaultKey) {

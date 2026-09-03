@@ -12,7 +12,9 @@ import Shared.TextPosition;
 import Shared.Utility.NumberUtility;
 import Shared.Utility.StringUtility;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ViewPort {
     private final TextFile file;
@@ -20,6 +22,7 @@ public class ViewPort {
     private final Cursor cursor;
     private TextPosition top;
     private Size textAreaSize;
+    private final List<String> temporaryMessages = new ArrayList<>();
 
     private boolean isRunning = true;
 
@@ -236,5 +239,23 @@ public class ViewPort {
         }
 
         return column;
+    }
+
+    public void addTemporaryMessage(String message) {
+        temporaryMessages.addAll(StringUtility.splitByLength(message, textAreaSize.width()));
+    }
+
+    public void clearTemporaryMessages() {
+        temporaryMessages.clear();
+    }
+
+    public ViewComponent getTemporaryMessages() {
+        Size size = new Size(temporaryMessages.size(), textAreaSize.width());
+        Line[] lines = temporaryMessages.stream()
+            .map(message -> new TextSpan(Style.getTextStyle(), message))
+            .map(span -> new Line(new TextSpan[]{span}))
+            .toArray(Line[]::new);
+
+        return new ViewComponent(size, lines);
     }
 }

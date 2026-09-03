@@ -33,4 +33,8 @@ public record Style(boolean isItalic, boolean isBold, RenderStyle renderStyle) {
     public static Style getMetadataStyle() {
         return new Style(false, false, RenderStyle.TEXT);
     }
+
+    public static Style getTextStyle() {
+        return new Style(false, false, RenderStyle.TEXT);
+    }
 }
