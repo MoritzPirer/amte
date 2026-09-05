@@ -7,6 +7,7 @@ import Controller.ViewPort;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 import Shared.Direction;
+import Shared.TextPosition;
 
 class ToolMode implements ModeState {
     private final ModeManager modeManager;
@@ -21,7 +22,7 @@ class ToolMode implements ModeState {
             return parseSpecialInput(input.getSpecialInput(), viewPort);
         }
 
-        return parseCharacterInput(input.getCharacter(), viewPort);
+        return parseCharacterInput(input.getCharacter(), viewPort, file);
     }
 
     //NOTE: viewPort will be used by later commands
@@ -46,8 +47,12 @@ class ToolMode implements ModeState {
     }
 
     //NOTE: viewPort will be used by later commands
-    private Action parseCharacterInput(char character, ViewPort viewPort) {
+    private Action parseCharacterInput(char character, ViewPort viewPort, TextFile file) {
         switch (character) {
+            case 'a' -> {
+                modeManager.setMode(new TypingMode(modeManager));
+                return new MoveAction(Direction.RIGHT);
+            }
             case 'i' -> modeManager.setMode(new TypingMode(modeManager));
             case 'h' -> {
                 return new MoveAction(Direction.LEFT);
@@ -61,6 +66,27 @@ class ToolMode implements ModeState {
             case 'l' -> {
                 return new MoveAction(Direction.RIGHT);
             }
+            case 's' -> {
+                modeManager.setMode(new TypingMode(modeManager));
+                TextPosition cursor = viewPort.getLogicalCursorPosition();
+                TextPosition next = file.nextPosition(cursor);
+                return new DeleteAction(cursor, next);
+            }
+            case 'x' -> {
+                TextPosition cursor = viewPort.getLogicalCursorPosition();
+                TextPosition next = file.nextPosition(cursor);
+                return new DeleteAction(cursor, next);
+            }
+            case 'X' -> {
+                TextPosition cursor = viewPort.getLogicalCursorPosition();
+                TextPosition previous = file.previousPosition(cursor);
+                if (previous == null) {
+                    return new NullAction();
+                }
+
+                return new DeleteAction(previous, cursor);
+            }
+
             case ':' -> {
                 modeManager.setMode(new CommandMode(modeManager));
                 return new NotifyAction(":");

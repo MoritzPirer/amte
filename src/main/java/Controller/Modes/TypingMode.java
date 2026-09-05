@@ -47,23 +47,12 @@ class TypingMode implements ModeState {
 
     private Action createBackSpaceAction(ViewPort viewPort, TextFile file) {
         TextPosition cursor = viewPort.getLogicalCursorPosition();
-
-        if (cursor.equals(0,0)) {
+        TextPosition previous = file.previousPosition(cursor);
+        if (previous == null) {
             return new NullAction();
         }
 
-        TextPosition start;
-        if (cursor.character() > 0) {
-            start = new TextPosition(cursor.paragraph(), cursor.character() - 1);
-        }
-        else {
-            start = new TextPosition(
-                cursor.paragraph() - 1,
-                file.lengthOfParagraph(cursor.paragraph() - 1) - 1
-            );
-        }
-
-        return new DeleteAction(start, cursor);
+        return new DeleteAction(previous, cursor);
     }
 
     @Override

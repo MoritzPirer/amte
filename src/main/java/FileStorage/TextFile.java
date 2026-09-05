@@ -117,4 +117,23 @@ public class TextFile {
     public int getParagraphCount() {
         return (int) tracker.getParagraphCount();
     }
+
+    public TextPosition nextPosition(TextPosition position) {
+        if (position.paragraph() < buffer.length() && position.character() >= buffer.lengthOfParagraph(position.paragraph()) - 1) {
+            return new TextPosition(position.paragraph() + 1, 0);
+        }
+
+        return new TextPosition(position.paragraph(), position.character() + 1);
+    }
+
+    public TextPosition previousPosition(TextPosition position) {
+        if (position.equals(0, 0)) {
+            return null;
+        }
+        if (position.character() == 0) {
+            return new TextPosition(position.paragraph() - 1, buffer.lengthOfParagraph(position.paragraph() - 1) - 1);
+        }
+
+        return new TextPosition(position.paragraph(), position.character() - 1);
+    }
 }
