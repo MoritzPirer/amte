@@ -35,10 +35,6 @@ public class NumberUtility {
         }
     }
 
-    public static String formatNumber(int number) {
-        return formatNumber(number, " ", 3);
-    }
-
     public static String formatNumber(int number, String separator) {
         return formatNumber(number, separator, 3);
     }
@@ -46,6 +42,10 @@ public class NumberUtility {
     public static String formatNumber(int number, String separator, int groupSize) {
         final int BASE = 10;
 
+        if (number == 0) {
+            return "0";
+        }
+        
         StringBuilder builder = new StringBuilder();
         int remaining = number;
         int digitsInCurrentGroup = 0;
