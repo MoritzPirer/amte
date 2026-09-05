@@ -15,6 +15,7 @@ public class CommandMode implements ModeState {
     private final StringBuilder buffer;
     private final ModeManager modeManager;
     private final Map<String, Action> simpleCommands;
+    private final LanguageProvider provider = new LanguageProvider();
 
     public CommandMode(ModeManager modeManager) {
         this.buffer = new StringBuilder();
@@ -77,18 +78,23 @@ public class CommandMode implements ModeState {
             return simpleCommands.get(command);
         }
 
+        if  (!command.contains(" ")) {
+            return new NotifyAction(provider.get("unknownCommand"));
+        }
+
         return processWithArguments(command);
     }
 
     private Action processWithArguments(String command) {
         int firstSpace = command.indexOf(' ');
+        assert firstSpace != -1: "control flow should not allow a command without a space to reach this point";
+
         String keyword = command.substring(0, firstSpace);
         String arguments = command.substring(firstSpace + 1);
 
-        //TODO language file
         return switch (keyword) {
             case "rename", "r" -> new RenameAction(arguments);
-            default -> new NotifyAction("Error: Unknown keyword");
+            default -> new NotifyAction(provider.get("unknownCommand"));
         };
     }
 

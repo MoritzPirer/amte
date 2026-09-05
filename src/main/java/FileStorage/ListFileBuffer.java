@@ -14,32 +14,6 @@ public class ListFileBuffer implements FileBuffer {
 
     public ListFileBuffer() {
         paragraphs = new ArrayList<>();
-        //paragraphs.add("\n");
-    }
-
-    private void debugEnforceInvariants() {
-        if (paragraphs.isEmpty()) {
-            throw new RuntimeException("INVARIANT VIOLATED (always keep one paragraph)");
-        }
-
-        for (String paragraph : paragraphs) {
-            if (!paragraph.endsWith("\n")) {
-                debugShowState();
-                throw new RuntimeException("INVARIANT VIOLATED (paragraphs end with newline)");
-            }
-        }
-    }
-
-    private void debugShowState() {
-        System.err.println("\nState:");
-        for (String paragraph : paragraphs) {
-            if  (paragraph.endsWith("\n")) {
-                System.out.println(paragraph.substring(0, paragraph.length() - 1).concat("\\n"));
-            }
-            else {
-                System.err.println(paragraph);
-            }
-        }
     }
 
     private void checkPosition(TextPosition position) throws InvalidPosition {
@@ -72,10 +46,6 @@ public class ListFileBuffer implements FileBuffer {
             return;
         }
 
-        if (paragraphs.isEmpty()) {
-            paragraphs.add("\n");
-        }
-
         String currentLine = paragraphs.get(position.paragraph());
         String beforeInsert = currentLine.substring(0, position.character());
         String afterInsert = currentLine.substring(position.character());
@@ -83,14 +53,12 @@ public class ListFileBuffer implements FileBuffer {
         if (content.equals("\n")) {
             paragraphs.set(position.paragraph(), beforeInsert + "\n");
             paragraphs.add(position.paragraph() + 1, afterInsert);
-            debugEnforceInvariants();
             return;
         }
         else if (!content.contains("\n")) {
             // inline insert
             String result = beforeInsert + content + afterInsert;
             paragraphs.set(position.paragraph(), result);
-            debugEnforceInvariants();
             return;
         }
 
@@ -107,7 +75,6 @@ public class ListFileBuffer implements FileBuffer {
         paragraphs.remove(position.paragraph());
         paragraphs.addAll(position.paragraph(), lines);
 
-        debugEnforceInvariants();
     }
 
     @Override
@@ -120,7 +87,6 @@ public class ListFileBuffer implements FileBuffer {
         }
 
         paragraphs.addAll(lines);
-        debugEnforceInvariants();
     }
 
     @Override
@@ -227,6 +193,6 @@ public class ListFileBuffer implements FileBuffer {
 
     @Override
     public boolean isEmpty() {
-        return paragraphs.isEmpty(); //|| (paragraphs.size() == 1 && paragraphs.getFirst().isEmpty());
+        return paragraphs.isEmpty();
     }
 }

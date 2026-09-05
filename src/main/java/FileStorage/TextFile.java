@@ -119,6 +119,9 @@ public class TextFile {
     }
 
     public TextPosition nextPosition(TextPosition position) {
+        if (buffer.isEmpty()) {
+            return new TextPosition(position.paragraph(), position.character() + 1);
+        }
         if (position.paragraph() < buffer.length() && position.character() >= buffer.lengthOfParagraph(position.paragraph()) - 1) {
             return new TextPosition(position.paragraph() + 1, 0);
         }

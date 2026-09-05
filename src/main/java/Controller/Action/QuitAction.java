@@ -2,6 +2,7 @@ package Controller.Action;
 
 import Controller.ViewPort;
 import FileStorage.TextFile;
+import LanguageSupport.LanguageProvider;
 
 public class QuitAction implements Action {
     private final boolean abortOnUnsavedChanges;
@@ -26,8 +27,8 @@ public class QuitAction implements Action {
                 viewPort.stop();
             }
             else {
-                //TODO language file
-                viewPort.addTemporaryMessage("you have unsaved changes!");
+                LanguageProvider provider = new LanguageProvider();
+                viewPort.addTemporaryMessage(provider.get("softQuitAbort"));
             }
         }
         else {

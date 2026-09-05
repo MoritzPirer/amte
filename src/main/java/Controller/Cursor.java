@@ -44,6 +44,9 @@ public class Cursor {
     }
 
     private void moveDown() {
+        if (buffer.isEmpty()) {
+            return;
+        }
         if (position.paragraph() == buffer.length() - 1) {
             position = new TextPosition(
                 buffer.length() - 1,
@@ -74,6 +77,10 @@ public class Cursor {
     }
 
     private void moveRight() {
+        if (buffer.isEmpty()) {
+            return;
+        }
+
         if (position.character() == buffer.lengthOfParagraph(position.paragraph()) - 1) {
             if (position.paragraph() == buffer.length() - 1) {
                 return;

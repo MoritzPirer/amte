@@ -68,11 +68,19 @@ class ToolMode implements ModeState {
             }
             case 's' -> {
                 modeManager.setMode(new TypingMode(modeManager));
+                if (file.getBuffer().isEmpty()) {
+                    return new NullAction();
+                }
+                
                 TextPosition cursor = viewPort.getLogicalCursorPosition();
                 TextPosition next = file.nextPosition(cursor);
                 return new DeleteAction(cursor, next);
             }
             case 'x' -> {
+                if (file.getBuffer().isEmpty()) {
+                    return new NullAction();
+                }
+
                 TextPosition cursor = viewPort.getLogicalCursorPosition();
                 TextPosition next = file.nextPosition(cursor);
                 return new DeleteAction(cursor, next);

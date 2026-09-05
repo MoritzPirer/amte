@@ -192,6 +192,9 @@ public class ViewPort {
     }
 
     public TextPosition getVisualCursorPosition(Size size) {
+        if (file.length() == 0) {
+            return new TextPosition(0, 0);
+        }
         int visualLine = 0;
         boolean isFirstParagraph = true;
         for (int index = top.paragraph(); index < cursor.getPosition().paragraph(); index++) {
@@ -204,8 +207,6 @@ public class ViewPort {
             int visualLinesOfParagraph = visualLinesNeeded(currentParagraph, size);
             visualLine += visualLinesOfParagraph;
         }
-
-
 
         int lineOfCursorInParagraph = visualLinesNeeded(
                 tabAwareColumn(cursor.getPosition().paragraph(),cursor.getPosition().character()),

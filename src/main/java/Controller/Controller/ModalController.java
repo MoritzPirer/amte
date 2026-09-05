@@ -34,10 +34,7 @@ public class ModalController implements Controller{
 
         //TODO WHEN [anytime] DO [pass working directory as filepath s.t. it can be saved OR make FileLoader default to wd if filepath is null]
 
-        TextFile file = new TextFile(null, "hardcoded", tracker.getTrackedFileBuffer(), tracker, SaveState.CREATED);
-        file.insert("Would thee like some hardcoded file contents, perchance?", new TextPosition(0, 0));
-        file.insert("a SECOND paragraph? Daring today, are we?", new TextPosition(1, 0));
-        file.insert("what if we - and bear with me here for just a brief moment - who hardcoded some file contents that are, quite frankly, on the long side, just to see the splitting logic working. You know, as a treat!", new TextPosition(2, 0));
+        TextFile file = new TextFile(null, "", tracker.getTrackedFileBuffer(), tracker, SaveState.CREATED);
         this.viewPort = new ViewPort(file);
         this.file = file;
     }

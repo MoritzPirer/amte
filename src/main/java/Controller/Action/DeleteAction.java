@@ -17,6 +17,7 @@ public class DeleteAction implements Action {
 
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
+        System.out.println("Delete Action with start: " + start + " and end: " + end);
         content = file.readRange(start, end);
         file.deleteRange(start, end);
 
