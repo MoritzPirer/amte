@@ -5,7 +5,6 @@ import java.util.List;
 
 public class StringUtility {
 
-
     /**
      * counts the number of times target occurs in text
      * @param text the string to search through
@@ -113,24 +112,54 @@ public class StringUtility {
         return count;
     }
 
-    public static String leftAlign(String text, int length) {
+    /**
+     * contains a string of length *length* with the text as a prefix, filling additional characters with padding.
+     * if text is longer than length, text is returned
+     * @param text the text to left-align
+     * @param length the length to pad to
+     * @param padding the character to pad with
+     * @return the text left-aligned to length *length*, or text if length is less than the string's length
+     */
+    public static String leftAlign(String text, int length, char padding) {
         if (text.length() >= length) {
             return text.substring(0, length);
         }
 
         int padAmount = length - text.length();
-        return text + " ".repeat(padAmount);
+        return text + String.valueOf(padding).repeat(padAmount);
+
+    }
+    public static String leftAlign(String text, int length) {
+        return leftAlign(text, length, ' ');
     }
 
-    public static String rightAlign(String text, int length) {
+    /**
+     * contains a string of length *length* with the text as a suffix, filling additional characters with padding.
+     * if text is longer than length, text is returned
+     * @param text the text to right-align
+     * @param length the length to pad to
+     * @param padding the character to pad with
+     * @return the text right-aligned to length *length*, or text if length is less than the string's length
+     */
+    public static String rightAlign(String text, int length, char padding) {
         if (text.length() >= length) {
             return text;
         }
 
         int padAmount = length - text.length();
-        return " ".repeat(padAmount) + text;
+        return String.valueOf(padding).repeat(padAmount) + text;
     }
 
+    public static String rightAlign(String text, int length) {
+        return rightAlign(text, length, ' ');
+    }
+
+    /**
+     * splits the given text into a list of strings where each element is at most maxLength characters long
+     * @param text the text to split up
+     * @param maxLength how long each split up element may be at most
+     * @return a List of the split strings
+     */
     public static List<String> splitByLength(String text, int maxLength) {
         List<String> lines = new ArrayList<>();
         int currentIndex = 0;

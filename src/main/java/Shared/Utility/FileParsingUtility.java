@@ -57,6 +57,9 @@ public class FileParsingUtility {
         }
     }
 
+    /**
+     * @return a string containing a filepath to the data folder
+     */
     public static String getBaseFolder() {
         String baseFolder = System.getProperty("user.home") + File.separator + ".strato/";
         ensureDirectoryExists(baseFolder);
@@ -64,6 +67,9 @@ public class FileParsingUtility {
         return baseFolder;
     }
 
+    /**
+     * @return a string containing a filepath to the folder containing the color themes (a subfolder of the data folder)
+     */
     public static String getColorThemesFolder() {
         String colorThemesFolder = getBaseFolder() + "themes/";
         ensureDirectoryExists(colorThemesFolder);
@@ -71,6 +77,9 @@ public class FileParsingUtility {
         return colorThemesFolder;
     }
 
+    /**
+     * @return a string containing a filepath to the folder containing the language files (a subfolder of the data folder)
+     */
     public static String getLanguageFolder() {
         String languageFolder = getBaseFolder() + "languages/";
         ensureDirectoryExists(languageFolder);
@@ -78,18 +87,29 @@ public class FileParsingUtility {
         return languageFolder;
     }
 
-    public static boolean isFolder(String path) {
-        Path folderPath = Paths.get(path);
-        if (!Files.exists(folderPath)) {
+    /**
+     * check if a given path exists and points to a folder
+     * @param path the path to check
+     * @return false if the path doesn't exist or if it points to something other than a folder, true otherwise
+     */
+    public static boolean isFolder(Path path) {
+        if (!Files.exists(path)) {
             return false;
         }
 
-        return Files.isDirectory(folderPath);
+        return Files.isDirectory(path);
     }
 
+    /**
+     * given a path pointing to a folder, returns an array of paths to the files in that folder (NOT including files in subfolders)
+     * @param path the path to check
+     * @return an array of paths to folders
+     */
     public static Path[] filesInFolder(Path path) {
-
         File folder = path.toFile();
+        if (!folder.isDirectory()) {
+            return new Path[0];
+        }
 
         if (!folder.exists()) {
             throw new IllegalArgumentException("Folder " + path + " does not exist");

@@ -35,6 +35,13 @@ public record TextPosition(int paragraph, int character) {
         return paragraph == this.paragraph() && character == this.character();
     }
 
+    /**
+     * creates a new TextPosition that is offset from this by the given amount of paragraphs and columns.
+     * It is not guaranteed that the resulting position is positive
+     * @param paragraph how many paragraphs further down the new Position should be (negative value to go up)
+     * @param character how many columns further right the new Position should be (negative value to go left)
+     * @return the offset position
+     */
     public TextPosition offset(int paragraph, int character) {
         return new TextPosition(
             this.paragraph + paragraph,

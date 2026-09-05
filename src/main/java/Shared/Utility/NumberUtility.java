@@ -35,17 +35,21 @@ public class NumberUtility {
         }
     }
 
-    public static String formatNumber(int number, String separator) {
-        return formatNumber(number, separator, 3);
-    }
-
+    /**
+     * formats the given number into groups of up to groupSize digits, with each group being separated by separator.
+     * grouping starts from the right (i.e. only the leftmost group can have less than groupSize digits)
+     * @param number the number to format
+     * @param separator the separator to insert
+     * @param groupSize how many digits may be grouped together before a separator is inserted.
+     * @return the formatted number
+     */
     public static String formatNumber(int number, String separator, int groupSize) {
         final int BASE = 10;
 
         if (number == 0) {
             return "0";
         }
-        
+
         StringBuilder builder = new StringBuilder();
         int remaining = number;
         int digitsInCurrentGroup = 0;
@@ -66,5 +70,9 @@ public class NumberUtility {
         }
 
         return builder.reverse().toString();
+    }
+
+    public static String formatNumber(int number, String separator) {
+        return formatNumber(number, separator, 3);
     }
 }
