@@ -1,8 +1,6 @@
 package Settings;
 
-import java.util.Arrays;
-
-public class RestrictedValue<T> {
+class RestrictedValue<T> {
     private T value;
     private final T[] options;
 

@@ -17,21 +17,10 @@ public class ColorTheme {
         false
     );
 
-    ColorTheme(List<LoadedColorSetup> colors) {
+    ColorTheme(List<ColorSetup> colors) {
         this.colors = new HashMap<>();
-        for (LoadedColorSetup color : colors) {
-            Color foreground = NumberUtility.hexToColor(color.foreground());
-            Color background = NumberUtility.hexToColor(color.background());
-
-            this.colors.put(
-                color.key(),
-                new ColorSetup(color.key(),
-                    foreground,
-                    background,
-                    color.isItalic(),
-                    color.isBold()
-                )
-            );
+        for (ColorSetup color : colors) {
+            this.colors.put(color.key(), color);
         }
     }
 

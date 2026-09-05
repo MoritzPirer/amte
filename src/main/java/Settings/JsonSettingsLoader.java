@@ -13,6 +13,8 @@ import java.util.Map;
 
 class JsonSettingsLoader implements SettingsLoader {
 
+    public record SettingItem(String key, String type, String value, String[] options) { }
+
     @Override
     public SettingStorage load(Path path) {
         if (!Files.exists(path)) {

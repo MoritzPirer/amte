@@ -27,6 +27,8 @@ class JsonLanguageLoader implements LanguageLoader {
         return fileName.substring(0, fileName.lastIndexOf('.'));
     }
 
+    private record LanguageItem(String key, String value) {}
+
     @Override
     public Language load(String language) {
         Path path = Path.of(FileParsingUtility.getLanguageFolder() + language + ".json");
