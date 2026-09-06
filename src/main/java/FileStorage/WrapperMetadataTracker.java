@@ -142,6 +142,13 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
     private void multiLineDelete(TextPosition start, TextPosition end) {
         assert start.paragraph() < end.paragraph();
 
+        if (end.paragraph() >= buffer.length()) {
+            end = new TextPosition(
+                buffer.length() - 1,
+                buffer.lengthOfParagraph(buffer.length() - 1) - 1
+            );
+        }
+        
         String beforeDeletedContent = buffer.readParagraph(start.paragraph()).substring(0, start.character());
         String afterDeletedContent = buffer.readParagraph(end.paragraph()).substring(end.character());
         String lineAfterDelete = beforeDeletedContent + afterDeletedContent;

@@ -78,7 +78,7 @@ public class CommandMode implements ModeState {
             return simpleCommands.get(command);
         }
 
-        if  (!command.contains(" ")) {
+        if (!command.contains(" ")) {
             return new NotifyAction(provider.get("unknownCommand"));
         }
 

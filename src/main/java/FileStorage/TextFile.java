@@ -139,4 +139,16 @@ public class TextFile {
 
         return new TextPosition(position.paragraph(), position.character() - 1);
     }
+
+    public boolean positionExists(TextPosition position) {
+        if (position.paragraph() < 0 || position.paragraph() >= buffer.length()) {
+            return false;
+        }
+
+        if (position.character() < 0 || position.character() >= buffer.lengthOfParagraph(position.paragraph())) {
+            return false;
+        }
+
+        return true;
+    }
 }
