@@ -1,27 +1,31 @@
 package Controller.Action;
 
 
+import Controller.Action.Ranges.FixedRangeResolver;
+import Controller.Action.Ranges.Range;
+import Controller.Action.Ranges.RangeResolver;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 
 public class DeleteAction implements Action {
     private String content = null;
-    private final TextPosition start;
-    private final TextPosition end;
+    private final RangeResolver resolver;
 
+    public DeleteAction(RangeResolver resolver) {
+        this.resolver = resolver;
+    }
     public DeleteAction(TextPosition start, TextPosition end) {
-        this.start = start;
-        this.end = end;
+        this.resolver = new FixedRangeResolver(start, end);
     }
 
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
-        System.out.println("Delete Action with start: " + start + " and end: " + end);
-        content = file.readRange(start, end);
-        file.deleteRange(start, end);
+        Range range = resolver.resolve(viewPort, file);
+        content = file.readRange(range.start(), range.end());
+        file.deleteRange(range.start(), range.end());
 
-        viewPort.moveCursorTo(start);
+        viewPort.moveCursorTo(range.start());
     }
 
     @Override

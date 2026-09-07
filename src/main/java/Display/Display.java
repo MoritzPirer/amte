@@ -74,14 +74,14 @@ public abstract class Display {
     }
 
     /**
-     * the first method of the implementation that will be called. Should do any setup needed for the display
+     * the start method of the implementation that will be called. Should do any setup needed for the display
      * to be usable
      * @throws IOException if setup went wrong in a way that makes it impossible to start the editor
      */
     abstract protected void init() throws IOException;
 
     /**
-     * the last method of the implementation that will be called. Should release any resources that need manual release.
+     * the end method of the implementation that will be called. Should release any resources that need manual release.
      * @throws IOException if cleanup went wrong.
      */
     abstract protected void destroy() throws IOException;

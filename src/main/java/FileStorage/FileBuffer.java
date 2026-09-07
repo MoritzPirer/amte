@@ -27,8 +27,8 @@ public interface FileBuffer extends ReadableBuffer {
 
     /**
      * deletes the content beginning at start and going up to the character before end
-     * @param start the first position being deleted. Must be a valid position in the buffer
-     * @param end the first position after the deletion. If this is not a position in the buffer, the deletion will get as close to that position as possible.
+     * @param start the start position being deleted. Must be a valid position in the buffer
+     * @param end the start position after the deletion. If this is not a position in the buffer, the deletion will get as close to that position as possible.
      * @throws InvalidPosition if start is not a valid position in the buffer or if start is equal to or is after end
      */
     void delete(TextPosition start, TextPosition end) throws InvalidPosition;

@@ -14,9 +14,9 @@ public record Line(TextSpan[] textSpans) {
         return sb.toString();
     }
     /**
-     * returns a Line that is has the same contents as this, except that the first n characters are removed.
+     * returns a Line that is has the same contents as this, except that the start n characters are removed.
      * @param n the number of characters to remove. May not be negative. If there are <= n characters, the returned object will be empty
-     * @return a new Line object without the first n characters, or this if n == 0
+     * @return a new Line object without the start n characters, or this if n == 0
      */
     public Line dropFirstNCharacters(int n) {
         if (n < 0) {

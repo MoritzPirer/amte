@@ -118,8 +118,8 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
 
     /**
      * delete all characters between start (inclusive) and end (exclusive), assuming start and row ar in the same paragraph
-     * @param start the first character to delete
-     * @param end the first character after the deletion
+     * @param start the start character to delete
+     * @param end the start character after the deletion
      */
     private void inlineDelete(TextPosition start, TextPosition end) {
         assert start.paragraph() == end.paragraph();
@@ -136,8 +136,8 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
 
     /**
      * delete all characters between start (inclusive) and end (exclusive), assuming end is on a different paragraph
-     * @param start the first character to delete
-     * @param end the first character after the deletion
+     * @param start the start character to delete
+     * @param end the start character after the deletion
      */
     private void multiLineDelete(TextPosition start, TextPosition end) {
         assert start.paragraph() < end.paragraph();
@@ -148,7 +148,7 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
                 buffer.lengthOfParagraph(buffer.length() - 1) - 1
             );
         }
-        
+
         String beforeDeletedContent = buffer.readParagraph(start.paragraph()).substring(0, start.character());
         String afterDeletedContent = buffer.readParagraph(end.paragraph()).substring(end.character());
         String lineAfterDelete = beforeDeletedContent + afterDeletedContent;

@@ -119,7 +119,7 @@ public class ListFileBuffer implements FileBuffer {
 
     /**
      * finds a position in the buffer that is as close as possible to the given end. If the paragraph does not exist,
-     * the last position in the buffer is used. if the paragraph is valid but the column is not, the last character in that paragraph is used
+     * the end position in the buffer is used. if the paragraph is valid but the column is not, the end character in that paragraph is used
      * @param end the possibly invalid end to correct
      * @return the corrected end
      */
@@ -145,7 +145,7 @@ public class ListFileBuffer implements FileBuffer {
     public List<String> readRange(TextPosition start, TextPosition end) throws InvalidPosition {
         checkPosition(start);
         if (!end.isAfter(start)) {
-            throw new InvalidPosition("start is after end");
+            throw new InvalidPosition("start (" + start + ") is after end (" + end + ")");
         }
 
         List<String> result = new ArrayList<>();

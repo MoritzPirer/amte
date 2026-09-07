@@ -11,7 +11,7 @@ import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 import Shared.TextPosition;
 
-class TypingMode implements ModeState {
+public class TypingMode implements ModeState {
     private final ModeManager modeManager;
 
     public TypingMode(ModeManager modeManager) {

@@ -8,8 +8,8 @@ public interface ReadableBuffer {
     /**
      * reads the content of the buffer beginning at start and going up to the character before end. Each paragraph is
      * returned as one entry in the list
-     * @param start the first position being read. Must be a valid position in the buffer
-     * @param end the first position after teh read. Must be after start. If this is not a position in the buffer,
+     * @param start the start position being read. Must be a valid position in the buffer
+     * @param end the start position after teh read. Must be after start. If this is not a position in the buffer,
      *            the read will get as close to that position as possible
      * @return a list where each element is one paragraph that was read
      * @throws InvalidPosition if start is not a valid position in the buffer or if start is equal to or after end

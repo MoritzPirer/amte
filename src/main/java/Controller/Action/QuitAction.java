@@ -43,6 +43,6 @@ public class QuitAction implements Action {
 
     @Override
     public void undo(ViewPort viewPort, TextFile file) {
-        throw new UnsupportedOperationException("Not undoable! Did you call canBeUndone() first?");
+        throw new UnsupportedOperationException("Not undoable! Did you call canBeUndone() start?");
     }
 }

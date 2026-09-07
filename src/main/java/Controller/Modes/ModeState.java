@@ -5,7 +5,7 @@ import Controller.Input;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 
-interface ModeState {
+public interface ModeState {
     /**
      * converts the given input into an Action. If the input is unknown or if the input is part of
      * an unfinished multi-input command, a NullAction can be returned.

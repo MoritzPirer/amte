@@ -1,20 +1,33 @@
 package Controller.Action;
 
+import Controller.Action.Ranges.Range;
+import Controller.Action.Ranges.RangeResolver;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 
 public class JumpAction implements Action {
 
-    private final TextPosition position;
+    private final RangeResolver resolver;
+    private final boolean jumpToStart;
 
-    public JumpAction(TextPosition position) {
-        this.position = position;
+    public JumpAction(RangeResolver resolver, boolean jumpToStart) {
+        this.resolver = resolver;
+        this.jumpToStart = jumpToStart;
+    }
+    public JumpAction(RangeResolver resolver) {
+        this(resolver, false);
     }
 
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
-        viewPort.moveCursorTo(position);
+        Range range = resolver.resolve(viewPort, file);
+        if (jumpToStart) {
+            viewPort.moveCursorTo(range.start());
+        }
+        else {
+            viewPort.moveCursorTo(file.previousPosition(range.end())); //end is exclusive -> prevent out of bounds
+        }
     }
 
     @Override

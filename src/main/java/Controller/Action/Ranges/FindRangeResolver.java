@@ -17,6 +17,15 @@ public class FindRangeResolver implements RangeResolver {
 
     @Override
     public Range resolve(ViewPort viewPort, TextFile file) {
+        if (reversed) {
+            return walkBackward(viewPort, file);
+        }
+        else {
+            return walkForward(viewPort, file);
+        }
+    }
+
+    private Range walkBackward(ViewPort viewPort, TextFile file) {
         TextPosition cursor = viewPort.getLogicalCursorPosition();
         TextPosition current = cursor;
         while (true) {
@@ -26,7 +35,7 @@ public class FindRangeResolver implements RangeResolver {
                 return toRange(cursor, previous);
             }
 
-            char currentChar = file.readRange(current, current).charAt(0);
+            char currentChar = file.readRange(current, current.offset(0, 1)).charAt(0);
             if (currentChar == target) {
                 if (includeTarget) {
                     return toRange(cursor, current);
@@ -35,6 +44,29 @@ public class FindRangeResolver implements RangeResolver {
                     return toRange(cursor, previous);
                 }
             }
+        }
+    }
+
+    private Range walkForward(ViewPort viewPort, TextFile file) {
+        TextPosition cursor = viewPort.getLogicalCursorPosition();
+        TextPosition current = cursor;
+        while (true) {
+            TextPosition next = step(current, file);
+            if (next == null) {
+                return toRange(cursor, current);
+            }
+            current = next;
+
+            char currentChar = file.readRange(current, current.offset(0, 1)).charAt(0);
+            if (currentChar == target) {
+                if (includeTarget) {
+                    return toRange(cursor, current.offset(0, 1));
+                }
+                else {
+                    return toRange(cursor, current);
+                }
+            }
+
         }
     }
 

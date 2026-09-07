@@ -4,6 +4,14 @@ public class Input {
     private final Character character;
     private final SpecialInput specialInput;
 
+    @Override
+    public String toString() {
+        if (specialInput != null) {
+            return specialInput.toString();
+        }
+        assert character != null;
+        return character.toString();
+    }
     public Input(char character) {
         this.character = character;
         this.specialInput = null;
