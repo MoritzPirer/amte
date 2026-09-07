@@ -13,7 +13,7 @@ class ExpectFindTargetState implements ChordParserState {
     private final boolean includeTarget;
     private final boolean changeToTypingMode;
 
-    public ExpectFindTargetState(ChordParser chordParser, ActionType actionType, boolean isReversed, boolean includeTarget, boolean changeToTypingMode) {
+    private ExpectFindTargetState(ChordParser chordParser, ActionType actionType, boolean isReversed, boolean includeTarget, boolean changeToTypingMode) {
         this.chordParser = chordParser;
         this.actionType = actionType;
         this.isReversed = isReversed;
@@ -31,26 +31,30 @@ class ExpectFindTargetState implements ChordParserState {
         Builder(ChordParser chordParser) {
             this.chordParser = chordParser;
         }
+
         public Builder actionType(ActionType actionType) {
             this.actionType = actionType;
             return this;
         }
+
         public Builder isReversed(boolean isReversed) {
             this.isReversed = isReversed;
             return this;
         }
+
         public Builder includeTarget(boolean includeTarget) {
             this.includeTarget = includeTarget;
             return this;
         }
+
         public Builder changeToTypingMode(boolean changeToTypingMode) {
             this.changeToTypingMode = changeToTypingMode;
             return this;
         }
+
         public ExpectFindTargetState build() {
             return new ExpectFindTargetState(chordParser, actionType, isReversed, includeTarget, changeToTypingMode);
         }
-
     }
 
     @Override

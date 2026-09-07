@@ -26,6 +26,24 @@ class ExpectOperatorState implements ChordParserState {
                     new MoveAction(Direction.RIGHT)
                 );
             }
+            case 'c' -> {
+                chordParser.changeState(new ExpectChordState.Builder(chordParser)
+                    .actionType(ActionType.DELETE)
+                    .changeToTypingMode(true)
+                    .build()
+                );
+
+                return ParseSnapshot.makeUnfinished(buffer.get());
+            }
+            case 'd' -> {
+                chordParser.changeState(new ExpectChordState.Builder(chordParser)
+                        .actionType(ActionType.DELETE)
+                        .changeToTypingMode(false)
+                        .build()
+                );
+
+                return ParseSnapshot.makeUnfinished(buffer.get());
+            }
             case 'f' -> {
                 chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
                     .actionType(ActionType.MOVE)
