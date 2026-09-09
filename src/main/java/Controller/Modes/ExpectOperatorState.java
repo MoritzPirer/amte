@@ -1,8 +1,13 @@
 package Controller.Modes;
 
 import Controller.Action.DeleteAction;
+import Controller.Action.JumpAction;
 import Controller.Action.MoveAction;
 import Controller.Action.NotifyAction;
+import Controller.Action.Ranges.DelimiterRangeResolver;
+import Controller.Action.Ranges.ExpressionDelimiterChecker;
+import Controller.Action.Ranges.RestOfParagraphRangeResolver;
+import Controller.Action.Ranges.WordDelimiterChecker;
 import Shared.Direction;
 import Shared.TextPosition;
 
@@ -26,6 +31,19 @@ class ExpectOperatorState implements ChordParserState {
                     new MoveAction(Direction.RIGHT)
                 );
             }
+            case 'b' -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(
+                    DelimiterRangeResolver.makeBackward(new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE),
+                    true
+                ));
+            }
+            case 'B' -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(
+                    DelimiterRangeResolver.makeBackward(new ExpressionDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE),
+                    true
+                ));
+            }
+
             case 'c' -> {
                 chordParser.changeState(new ExpectChordState.Builder(chordParser)
                     .actionType(ActionType.DELETE)
@@ -35,14 +53,31 @@ class ExpectOperatorState implements ChordParserState {
 
                 return ParseSnapshot.makeUnfinished(buffer.get());
             }
+            case 'C' -> {
+                context.modeManager().setMode(new TypingMode(context.modeManager()));
+                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(new RestOfParagraphRangeResolver()));
+            }
             case 'd' -> {
                 chordParser.changeState(new ExpectChordState.Builder(chordParser)
-                        .actionType(ActionType.DELETE)
-                        .changeToTypingMode(false)
-                        .build()
+                    .actionType(ActionType.DELETE)
+                    .changeToTypingMode(false)
+                    .build()
                 );
 
                 return ParseSnapshot.makeUnfinished(buffer.get());
+            }
+            case 'D' -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(new RestOfParagraphRangeResolver()));
+            }
+            case 'e' -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
+                    new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE
+                )));
+            }
+            case 'E' -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
+                    new ExpressionDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE
+                )));
             }
             case 'f' -> {
                 chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
@@ -114,6 +149,16 @@ class ExpectOperatorState implements ChordParserState {
                 );
 
                 return ParseSnapshot.makeUnfinished(buffer.get());
+            }
+            case 'w' -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
+                    new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.AFTER
+                )));
+            }
+            case 'W' -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
+                    new ExpressionDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.AFTER
+                )));
             }
             case 'x' -> {
                 if (context.textFile().getBuffer().isEmpty()) {

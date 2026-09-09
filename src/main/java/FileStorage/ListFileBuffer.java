@@ -171,6 +171,9 @@ public class ListFileBuffer implements FileBuffer {
     @Override
     public String readParagraph(int paragraphIndex) throws InvalidPosition {
         if (paragraphIndex < 0 || paragraphIndex >= paragraphs.size()) {
+            for (String line : paragraphs) {
+                System.out.println(line.replace("\n", "<\\n>"));
+            }
             throw new InvalidPosition("paragraph " + paragraphIndex + " is out of range");
         }
         

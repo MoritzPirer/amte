@@ -12,6 +12,11 @@ public class DeleteAction implements Action {
     private String content = null;
     private final RangeResolver resolver;
 
+    /**
+     * Deletes the content within the resolved range, including start but not including end
+     * (i.e. Range.end() is the first character after the deleted section)
+     * @param resolver
+     */
     public DeleteAction(RangeResolver resolver) {
         this.resolver = resolver;
     }
@@ -21,7 +26,16 @@ public class DeleteAction implements Action {
 
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
+        if (file.isEmpty()) {
+            return;
+        }
+
         Range range = resolver.resolve(viewPort, file);
+        if (range.start().equals(range.end())) {
+            return;
+        }
+        System.out.println("Deleting " + range.start() + " -> " + range.end());
+
         content = file.readRange(range.start(), range.end());
         file.deleteRange(range.start(), range.end());
 

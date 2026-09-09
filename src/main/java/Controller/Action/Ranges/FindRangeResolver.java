@@ -32,16 +32,16 @@ public class FindRangeResolver implements RangeResolver {
             TextPosition previous = current;
             current = step(current, file);
             if (current == null) {
-                return toRange(cursor, previous);
+                return Range.ordered(cursor, previous);
             }
 
             char currentChar = file.readRange(current, current.offset(0, 1)).charAt(0);
             if (currentChar == target) {
                 if (includeTarget) {
-                    return toRange(cursor, current);
+                    return Range.ordered(cursor, current);
                 }
                 else {
-                    return toRange(cursor, previous);
+                    return Range.ordered(cursor, previous);
                 }
             }
         }
@@ -53,17 +53,17 @@ public class FindRangeResolver implements RangeResolver {
         while (true) {
             TextPosition next = step(current, file);
             if (next == null) {
-                return toRange(cursor, current);
+                return Range.ordered(cursor, current);
             }
             current = next;
 
             char currentChar = file.readRange(current, current.offset(0, 1)).charAt(0);
             if (currentChar == target) {
                 if (includeTarget) {
-                    return toRange(cursor, current.offset(0, 1));
+                    return Range.ordered(cursor, current);
                 }
                 else {
-                    return toRange(cursor, current);
+                    return Range.ordered(cursor, file.previousPosition(current));
                 }
             }
 
@@ -81,13 +81,5 @@ public class FindRangeResolver implements RangeResolver {
         }
 
         return null;
-    }
-
-    private Range toRange(TextPosition cursor, TextPosition current) {
-        if (cursor.isBefore(current)) {
-            return new Range(cursor, current);
-        }
-
-        return new Range(current, cursor);
     }
 }

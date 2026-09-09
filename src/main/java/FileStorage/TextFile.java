@@ -151,4 +151,8 @@ public class TextFile {
 
         return true;
     }
+
+    public boolean isEmpty() {
+        return buffer.isEmpty();
+    }
 }

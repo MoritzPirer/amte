@@ -192,7 +192,7 @@ public class ViewPort {
     }
 
     public TextPosition getVisualCursorPosition(Size size) {
-        if (file.length() == 0) {
+        if (file.isEmpty()) {
             return new TextPosition(0, 0);
         }
         int visualLine = 0;
