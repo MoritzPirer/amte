@@ -195,6 +195,7 @@ public class ViewPort {
         if (file.isEmpty()) {
             return new TextPosition(0, 0);
         }
+
         int visualLine = 0;
         boolean isFirstParagraph = true;
         for (int index = top.paragraph(); index < cursor.getPosition().paragraph(); index++) {
@@ -212,7 +213,11 @@ public class ViewPort {
                 tabAwareColumn(cursor.getPosition().paragraph(),cursor.getPosition().character()),
                 size.width()
         );
-        if (cursor.getPosition().character() % size.width() != 0 || cursor.getPosition().character() == 0) {
+        
+        if (cursor.getPosition().character() % size.width() != 0) {
+            lineOfCursorInParagraph--;
+        }
+        if (cursor.getPosition().character() == 0) {
             lineOfCursorInParagraph--;
         }
         visualLine += lineOfCursorInParagraph;
@@ -222,24 +227,29 @@ public class ViewPort {
 
     private int tabAwareColumn(int paragraphIndex, int logicalColumn) {
         int tabWidth = SettingsMaster.instance().getInt("tabWidth");
+
         Line paragraph = file.readParagraph(paragraphIndex);
-        int column = 0;
+
+        int visualColumn = 0;
+        int logicalColumnsConsumed = 0;
+
         for (TextSpan span : paragraph.textSpans()) {
             for (char current : span.text().toCharArray()) {
                 if (current == '\t') {
-                    column += NumberUtility.nextMultipleOf(column, tabWidth);
+                    visualColumn += NumberUtility.nextMultipleOf(visualColumn, tabWidth);
                 }
                 else {
-                    column++;
+                    visualColumn++;
                 }
 
-                if (--logicalColumn == 0) {
-                    return column;
+                logicalColumnsConsumed++;
+                if (logicalColumnsConsumed >= logicalColumn) {
+                    return visualColumn;
                 }
             }
         }
 
-        return column;
+        return visualColumn;
     }
 
     public void addTemporaryMessage(String message) {

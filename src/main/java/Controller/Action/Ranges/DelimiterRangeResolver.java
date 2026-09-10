@@ -15,26 +15,33 @@ public class DelimiterRangeResolver implements RangeResolver {
     private final EdgeBehaviour behaviour;
     private final boolean startIsCursor;
     private final boolean endIsCursor;
+    private final boolean accountForExclusiveEnd;
 
-    private DelimiterRangeResolver(DelimiterChecker checker, EdgeBehaviour behaviour, boolean startIsCursor, boolean endIsCursor) {
+    private DelimiterRangeResolver(
+        DelimiterChecker checker,
+        EdgeBehaviour behaviour,
+        boolean startIsCursor,
+        boolean endIsCursor,
+        boolean accountForExclusiveEnd
+    ) {
         this.checker = checker;
         this.behaviour = behaviour;
         this.startIsCursor = startIsCursor;
         this.endIsCursor = endIsCursor;
+        this.accountForExclusiveEnd = accountForExclusiveEnd;
     }
 
     public static DelimiterRangeResolver makeForward(DelimiterChecker checker, EdgeBehaviour behaviour) {
-        return new DelimiterRangeResolver(checker, behaviour, true, false);
+        return new DelimiterRangeResolver(checker, behaviour, true, false, false);
     }
 
     public static DelimiterRangeResolver makeBackward(DelimiterChecker checker, EdgeBehaviour behaviour) {
-        return new DelimiterRangeResolver(checker, behaviour, false, true);
+        return new DelimiterRangeResolver(checker, behaviour, false, true, false);
     }
 
     public static DelimiterRangeResolver makeBidirectional(DelimiterChecker checker, EdgeBehaviour behaviour) {
-        return new DelimiterRangeResolver(checker, behaviour, false, false);
+        return new DelimiterRangeResolver(checker, behaviour, false, false,  true);
     }
-
 
     @Override
     public Range resolve(ViewPort viewPort, TextFile file) {
@@ -90,7 +97,6 @@ public class DelimiterRangeResolver implements RangeResolver {
         TextPosition current = viewPort.getLogicalCursorPosition();
 
         while (true) {
-            System.out.println(behaviour);
             TextPosition next = stepForward(current, file);
             if (next == null) {
                 return current;
@@ -104,10 +110,16 @@ public class DelimiterRangeResolver implements RangeResolver {
                 switch (behaviour) {
                     case BEFORE -> {
                         if (hasMoved && hasSeenNonDelimiter) {
+                            if (accountForExclusiveEnd) {
+                                return current;
+                            }
                             return file.previousPosition(current);
                         }
                     }
                     case ON -> {
+                        if (accountForExclusiveEnd) {
+                            return file.nextPosition(current);
+                        }
                         return current;
                     }
                     case AFTER -> { }

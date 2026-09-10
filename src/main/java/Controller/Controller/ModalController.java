@@ -183,12 +183,14 @@ public class ModalController implements Controller{
 
             textSpans.add(new TextSpan(Style.getMetadataStyle(), characterCountText));
         }
+
         if (SettingsMaster.instance().getBoolean("showWordCount")) {
             String wordCountText = provider.get("wordCountIndicator")
                 + NumberUtility.formatNumber(file.getWordCount(), separator);
 
             textSpans.add(new TextSpan(Style.getMetadataStyle(), wordCountText));
         }
+
         if (SettingsMaster.instance().getBoolean("showParagraphCount")) {
             String paragraphCountText = provider.get("paragraphCountIndicator")
                 + NumberUtility.formatNumber(file.getParagraphCount(), separator);

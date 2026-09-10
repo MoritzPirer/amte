@@ -34,7 +34,6 @@ public class DeleteAction implements Action {
         if (range.start().equals(range.end())) {
             return;
         }
-        System.out.println("Deleting " + range.start() + " -> " + range.end());
 
         content = file.readRange(range.start(), range.end());
         file.deleteRange(range.start(), range.end());

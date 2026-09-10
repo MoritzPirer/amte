@@ -2,7 +2,6 @@ package Controller.Modes;
 
 import Controller.Action.Action;
 import Controller.Action.DeleteAction;
-import Controller.Action.JumpAction;
 import Controller.Action.Ranges.*;
 
 class ExpectChordState implements ChordParserState {
@@ -50,6 +49,15 @@ class ExpectChordState implements ChordParserState {
         }
 
         switch (buffer.get().charAt(1)) {
+            case 'a' -> {
+                chordParser.changeState(new ExpectDelimiterState.Builder(chordParser)
+                    .actionType(actionType)
+                    .changeToTypingMode(changeToTypingMode)
+                    .includeTarget(true)
+                    .build()
+                );
+                return ParseSnapshot.makeUnfinished(buffer.get());
+            }
             case 'b' -> {
                 chordParser.changeState(new ExpectOperatorState(chordParser));
                 return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(
@@ -74,7 +82,6 @@ class ExpectChordState implements ChordParserState {
                         DelimiterRangeResolver.makeForward(new ExpressionDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE)
                 ));
             }
-            case 'i', 'a' -> throw new UnsupportedOperationException("TODO");
             case 'f' -> {
                 chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
                     .actionType(actionType)
@@ -95,6 +102,15 @@ class ExpectChordState implements ChordParserState {
                         .build()
                 );
 
+                return ParseSnapshot.makeUnfinished(buffer.get());
+            }
+            case 'i' -> {
+                chordParser.changeState(new ExpectDelimiterState.Builder(chordParser)
+                        .actionType(actionType)
+                        .changeToTypingMode(changeToTypingMode)
+                        .includeTarget(false)
+                        .build()
+                );
                 return ParseSnapshot.makeUnfinished(buffer.get());
             }
             case 't' -> {
@@ -151,9 +167,8 @@ class ExpectChordState implements ChordParserState {
                 action = new DeleteAction(resolver);
             }
             //TODO COPY
-            default -> {
-                throw new IllegalStateException("actionType MOVE not allowed here");
-            }
+            case COPY -> throw new UnsupportedOperationException("TODO");
+            default -> throw new IllegalStateException("actionType MOVE not allowed here");
         }
 
         chordParser.changeState(new ExpectOperatorState(chordParser));
