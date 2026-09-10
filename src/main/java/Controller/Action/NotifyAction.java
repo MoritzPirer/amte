@@ -1,6 +1,7 @@
 package Controller.Action;
 
 import Controller.ViewPort;
+import Debugging.DebugLogger;
 import FileStorage.TextFile;
 
 public class NotifyAction implements Action {
@@ -12,6 +13,7 @@ public class NotifyAction implements Action {
 
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
+        DebugLogger.info("ACTIONS", "adding temporary message with content " + message);
         viewPort.addTemporaryMessage(message);
     }
 

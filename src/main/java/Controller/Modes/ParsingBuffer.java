@@ -26,4 +26,9 @@ class ParsingBuffer {
     public int length() {
         return builder.length();
     }
+
+    @Override
+    public String toString() {
+        return builder.toString();
+    }
 }

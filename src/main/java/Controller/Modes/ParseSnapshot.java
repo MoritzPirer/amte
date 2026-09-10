@@ -3,9 +3,11 @@ package Controller.Modes;
 import Controller.Action.Action;
 import Controller.Action.NotifyAction;
 import Controller.Action.NullAction;
+import Debugging.DebugLogger;
 
 record ParseSnapshot(ParseStatus status, Action action) {
     public static ParseSnapshot makeUnfinished(String progress) {
+        DebugLogger.info("PARSING", "Chord unfinished, currently: " + progress);
         return new ParseSnapshot(ParseStatus.UNFINISHED, new NotifyAction(progress + "_"));
     }
 

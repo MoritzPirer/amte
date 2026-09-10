@@ -22,7 +22,7 @@ class ToolMode implements ModeState, ChordParser {
     @Override
     public Action parseInput(Input input, ViewPort viewPort, TextFile file) {
         ParsingContext context = new ParsingContext(viewPort, file, modeManager);
-        
+
         if (input.isSpecialInput()) {
             if (buffer.length() > 0) {
                 buffer.clear();

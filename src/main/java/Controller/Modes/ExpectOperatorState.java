@@ -8,6 +8,7 @@ import Controller.Action.Ranges.DelimiterRangeResolver;
 import Controller.Action.Ranges.ExpressionDelimiterChecker;
 import Controller.Action.Ranges.RestOfParagraphRangeResolver;
 import Controller.Action.Ranges.WordDelimiterChecker;
+import Debugging.DebugLogger;
 import Shared.Direction;
 import Shared.TextPosition;
 
@@ -21,6 +22,8 @@ class ExpectOperatorState implements ChordParserState {
 
     @Override
     public ParseSnapshot parse(ParsingBuffer buffer, ParsingContext context) {
+        DebugLogger.info("PARSING", "parsing buffer " + buffer.toString() + " in ExpectOperatorState");
+
         assert buffer.length() == 1;
 
         switch (buffer.get().charAt(0)) {

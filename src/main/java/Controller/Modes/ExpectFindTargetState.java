@@ -5,6 +5,7 @@ import Controller.Action.DeleteAction;
 import Controller.Action.JumpAction;
 import Controller.Action.NullAction;
 import Controller.Action.Ranges.FindRangeResolver;
+import Debugging.DebugLogger;
 
 class ExpectFindTargetState implements ChordParserState {
     private final ChordParser chordParser;
@@ -59,6 +60,8 @@ class ExpectFindTargetState implements ChordParserState {
 
     @Override
     public ParseSnapshot parse(ParsingBuffer buffer, ParsingContext context) {
+        DebugLogger.info("PARSING", "parsing buffer " + buffer.toString() + " in ExpectFindTargetState");
+
         assert buffer.length() != 0;
 
         char last = buffer.get().charAt(buffer.length() - 1);

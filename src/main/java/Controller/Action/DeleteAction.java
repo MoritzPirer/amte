@@ -5,6 +5,7 @@ import Controller.Action.Ranges.FixedRangeResolver;
 import Controller.Action.Ranges.Range;
 import Controller.Action.Ranges.RangeResolver;
 import Controller.ViewPort;
+import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 
@@ -26,12 +27,17 @@ public class DeleteAction implements Action {
 
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
+        DebugLogger.info("ACTIONS", "applying DeleteAction");
         if (file.isEmpty()) {
+            DebugLogger.info("ACTIONS", "Delete canceled because file is empty");
             return;
         }
 
         Range range = resolver.resolve(viewPort, file);
+        DebugLogger.info("ACTIONS", "Delete Range evaluates to " + range);
+
         if (range.start().equals(range.end())) {
+            DebugLogger.info("ACTIONS", "Delete canceled because range is empty delete");
             return;
         }
 

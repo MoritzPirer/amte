@@ -1,6 +1,7 @@
 package Controller.Action;
 
 import Controller.ViewPort;
+import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import Shared.Direction;
 
@@ -14,6 +15,7 @@ public class MoveAction implements Action {
 
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
+        DebugLogger.info("ACTIONS", "Moving cursor in direction " + direction);
         viewPort.moveCursor(direction);
     }
 

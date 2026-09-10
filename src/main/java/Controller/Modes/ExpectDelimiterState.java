@@ -3,6 +3,7 @@ package Controller.Modes;
 import Controller.Action.Action;
 import Controller.Action.DeleteAction;
 import Controller.Action.Ranges.*;
+import Debugging.DebugLogger;
 
 class ExpectDelimiterState implements ChordParserState {
     private final ChordParser chordParser;
@@ -49,6 +50,7 @@ class ExpectDelimiterState implements ChordParserState {
 
     @Override
     public ParseSnapshot parse(ParsingBuffer buffer, ParsingContext context) {
+        DebugLogger.info("PARSING", "parsing buffer " + buffer.toString() + " in ExpectDelimiterState");
         char last = adjustAliases(buffer);
         RangeResolver resolver;
 

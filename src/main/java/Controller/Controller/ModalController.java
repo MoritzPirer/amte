@@ -80,7 +80,6 @@ public class ModalController implements Controller{
         ViewComponent temporaryMessagePanel = viewPort.getTemporaryMessages();
         TextPosition cursorPositionInText = viewPort.getVisualCursorPosition(sizeConfiguration.textAreaSize());
 
-
         return new View(textArea, uiPanel, numberPanel, temporaryMessagePanel, cursorPositionInText);
     }
 

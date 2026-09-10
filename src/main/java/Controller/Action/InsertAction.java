@@ -1,6 +1,7 @@
 package Controller.Action;
 
 import Controller.ViewPort;
+import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
@@ -16,7 +17,9 @@ public class InsertAction implements Action {
 
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
-        file.insert(content, viewPort.getLogicalCursorPosition());
+        DebugLogger.info("ACTIONS", "inserting content '" + content + "' at position " + position );
+
+        file.insert(content, position);
         TextPosition firstAfterInsert = findPositionAfterInsert();
         viewPort.moveCursorTo(firstAfterInsert);
     }

@@ -3,6 +3,7 @@ package Controller.Modes;
 import Controller.Action.Action;
 import Controller.Action.DeleteAction;
 import Controller.Action.Ranges.*;
+import Debugging.DebugLogger;
 
 class ExpectChordState implements ChordParserState {
     private final ChordParser chordParser;
@@ -41,6 +42,7 @@ class ExpectChordState implements ChordParserState {
 
     @Override
     public ParseSnapshot parse(ParsingBuffer buffer, ParsingContext context) {
+        DebugLogger.info("PARSING", "parsing buffer " + buffer.toString() + " in ExpectChordState");
         assert buffer.length() == 2;
 
         if (buffer.get().charAt(0) == buffer.get().charAt(1)) {

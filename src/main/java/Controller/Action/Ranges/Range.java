@@ -22,4 +22,9 @@ public record Range(TextPosition start, TextPosition end) {
 
         return new Range(b, a);
     }
+
+    @Override
+    public String toString() {
+        return start.toString() + " -> " + end.toString();
+    }
 }
