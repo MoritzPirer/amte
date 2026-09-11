@@ -1,5 +1,7 @@
 package Controller.View;
 
+import Settings.SettingsMaster;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -102,5 +104,40 @@ public record Line(TextSpan[] textSpans) {
         }
 
         return sum;
+    }
+
+    public Line replaceTabs() {
+        final int tabWidth = SettingsMaster.instance().getInt("tabWidth");
+        int offset = 0;
+
+        List<TextSpan> result = new ArrayList<>();
+        StringBuilder builder = new StringBuilder();
+
+        for (TextSpan span : textSpans) {
+            if (!span.text().contains("\t")) {
+                result.add(span);
+                offset += span.text().length();
+                continue;
+            }
+
+            for (int i = 0; i < span.text().length(); i++) {
+                char current = span.text().charAt(i);
+                if (current == '\t') {
+                     offset %= tabWidth;
+                     int requiredSpaces = tabWidth - offset;
+                     builder.append(" ".repeat(requiredSpaces));
+                     offset = 0;
+                }
+                else {
+                    builder.append(current);
+                    offset++;
+                }
+            }
+
+            result.add(new TextSpan(span.style(), builder.toString()));
+            builder.delete(0, builder.length());
+        }
+
+        return new Line(result.toArray(new TextSpan[0]));
     }
 }

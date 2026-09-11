@@ -10,6 +10,7 @@ import Controller.View.*;
 import Settings.SettingsMaster;
 import Shared.Size;
 import Shared.TextPosition;
+import Shared.Utility.NumberUtility;
 import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextCharacter;
@@ -18,6 +19,7 @@ import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.screen.TabBehaviour;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration;
 
@@ -58,6 +60,7 @@ public class LanternaDisplay extends Display {
         this.screen.startScreen();
         this.screen.setCursorPosition(null);
         this.graphics = screen.newTextGraphics()
+            .setTabBehaviour(TabBehaviour.CONVERT_TO_FOUR_SPACES)
             .setBackgroundColor(new TextColor.RGB(0, 0, 0))
             .setForegroundColor(new TextColor.RGB(255, 255, 255))
             .fill(' ');
@@ -108,9 +111,9 @@ public class LanternaDisplay extends Display {
         );
 
         ScreenElement numberPanel;
+        int numberPanelHeight = screenSize.height() - uiPanel.paddedSize().height();
         if (SettingsMaster.instance().getBoolean("showNumbers")) {
             int numberPanelWidth = Math.max(recommendedNumberWidth + 2 * NUMBER_PANEL_PADDING, NUMBER_PANEL_WIDTH);
-            int numberPanelHeight = screenSize.height() - uiPanel.paddedSize().height();
             numberPanel = new ScreenElement(
                 new Size(numberPanelHeight, numberPanelWidth - 2 * NUMBER_PANEL_PADDING),
                 new Size(numberPanelHeight, numberPanelWidth),
@@ -120,8 +123,8 @@ public class LanternaDisplay extends Display {
         }
         else {
             numberPanel = new ScreenElement(
-                new Size(0, 0),
-                new Size(0, 0),
+                new Size(numberPanelHeight, 0),
+                new Size(numberPanelHeight, 0),
                 new TextPosition(0, 0),
                 new TextPosition(0, 0)
             );

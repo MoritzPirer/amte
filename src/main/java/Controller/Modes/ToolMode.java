@@ -1,13 +1,16 @@
 package Controller.Modes;
 
 import Controller.Action.*;
+import Controller.Action.Ranges.FixedRangeResolver;
 import Controller.Input;
 import Controller.SpecialInput;
+import Controller.View.Line;
 import Controller.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 import Shared.Direction;
+import Shared.TextPosition;
 
 class ToolMode implements ModeState, ChordParser {
     private final ModeManager modeManager;
@@ -30,7 +33,7 @@ class ToolMode implements ModeState, ChordParser {
                 return new NullAction();
             }
             else {
-                return parseSpecialInput(input.getSpecialInput(), context.viewPort());
+                return parseSpecialInput(input.getSpecialInput(), context.viewPort(), context.textFile());
             }
         }
 
@@ -38,7 +41,7 @@ class ToolMode implements ModeState, ChordParser {
         ParseSnapshot result = state.parse(buffer, context);
         DebugLogger.info("PARSING", "input chord is " + result.status()
             + ", evaluated to " + result.action().getClass().getSimpleName());
-        
+
         if (result.status() != ParseStatus.UNFINISHED) {
             buffer.clear();
         }
@@ -57,7 +60,7 @@ class ToolMode implements ModeState, ChordParser {
         this.state = state;
     }
 
-    private Action parseSpecialInput(SpecialInput input, ViewPort viewPort) {
+    private Action parseSpecialInput(SpecialInput input, ViewPort viewPort, TextFile file) {
         switch (input) {
             case ARROW_LEFT -> {
                 return new MoveAction(Direction.LEFT);
@@ -71,6 +74,29 @@ class ToolMode implements ModeState, ChordParser {
             case ARROW_RIGHT -> {
                 return new MoveAction(Direction.RIGHT);
             }
+            case TAB -> {
+                TextPosition position = new TextPosition(
+                        viewPort.getLogicalCursorPosition().paragraph(),
+                        0
+                );
+                return new CompoundAction(
+                        new InsertAction("\t", position),
+                        new JumpAction(new FixedRangeResolver(null, viewPort.getLogicalCursorPosition().offset(0, 1)))
+                );
+            }
+            case SHIFT_TAB -> {
+                int paragraph = viewPort.getLogicalCursorPosition().paragraph();
+                Line line = file.readParagraph(paragraph);
+                if (line.textSpans().length == 0 || !line.textSpans()[0].text().startsWith("\t")) {
+                    return new NullAction();
+                }
+
+                return new DeleteAction(new FixedRangeResolver(
+                        new TextPosition(paragraph, 0),
+                        new TextPosition(paragraph, 1))
+                );
+            }
+
             default -> {
                 return new NullAction();
             }

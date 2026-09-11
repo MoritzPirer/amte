@@ -109,6 +109,8 @@ public class ViewPort {
                 isFirstParagraph = false;
             }
 
+            currentParagraph = currentParagraph.replaceTabs();
+
             Line[] visualLines = currentParagraph.splitIntoChunks(size.width());
             int remainingVisualLines = size.height() - visualLinesUsed;
             if (Math.min(visualLines.length, remainingVisualLines) >= 0)
@@ -209,11 +211,12 @@ public class ViewPort {
             visualLine += visualLinesOfParagraph;
         }
 
+        int tabAwareColumn = tabAwareColumn(cursor.getPosition().paragraph(),cursor.getPosition().character());
         int lineOfCursorInParagraph = visualLinesNeeded(
-                tabAwareColumn(cursor.getPosition().paragraph(),cursor.getPosition().character()),
-                size.width()
+            tabAwareColumn,
+            size.width()
         );
-        
+
         if (cursor.getPosition().character() % size.width() != 0) {
             lineOfCursorInParagraph--;
         }
@@ -222,7 +225,7 @@ public class ViewPort {
         }
         visualLine += lineOfCursorInParagraph;
 
-        return new TextPosition(visualLine, cursor.getPosition().character() % size.width());
+        return new TextPosition(visualLine, tabAwareColumn % size.width());
     }
 
     private int tabAwareColumn(int paragraphIndex, int logicalColumn) {
@@ -235,17 +238,18 @@ public class ViewPort {
 
         for (TextSpan span : paragraph.textSpans()) {
             for (char current : span.text().toCharArray()) {
+                if (logicalColumnsConsumed >= logicalColumn) {
+                    return visualColumn;
+                }
+
                 if (current == '\t') {
-                    visualColumn += NumberUtility.nextMultipleOf(visualColumn, tabWidth);
+                    visualColumn = NumberUtility.nextMultipleOf(visualColumn, tabWidth);
                 }
                 else {
                     visualColumn++;
                 }
 
                 logicalColumnsConsumed++;
-                if (logicalColumnsConsumed >= logicalColumn) {
-                    return visualColumn;
-                }
             }
         }
 

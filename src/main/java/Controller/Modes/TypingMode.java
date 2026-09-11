@@ -1,11 +1,10 @@
 package Controller.Modes;
 
-import Controller.Action.Action;
-import Controller.Action.DeleteAction;
-import Controller.Action.InsertAction;
-import Controller.Action.NullAction;
+import Controller.Action.*;
+import Controller.Action.Ranges.FixedRangeResolver;
 import Controller.Input;
 import Controller.SpecialInput;
+import Controller.View.Line;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
@@ -38,6 +37,28 @@ public class TypingMode implements ModeState {
             }
             case ENTER -> {
                 return new InsertAction("\n",  viewPort.getLogicalCursorPosition());
+            }
+            case TAB -> {
+                TextPosition position = new TextPosition(
+                    viewPort.getLogicalCursorPosition().paragraph(),
+                    0
+                );
+                return new CompoundAction(
+                    new InsertAction("\t", position),
+                    new JumpAction(new FixedRangeResolver(null, viewPort.getLogicalCursorPosition().offset(0, 1)))
+                );
+            }
+            case SHIFT_TAB -> {
+                int paragraph = viewPort.getLogicalCursorPosition().paragraph();
+                Line line = file.readParagraph(paragraph);
+                if (line.textSpans().length == 0 || !line.textSpans()[0].text().startsWith("\t")) {
+                    return new NullAction();
+                }
+
+                return new DeleteAction(new FixedRangeResolver(
+                    new TextPosition(paragraph, 0),
+                    new TextPosition(paragraph, 1))
+                );
             }
             default -> {
                 return new NullAction();

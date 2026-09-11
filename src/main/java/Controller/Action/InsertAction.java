@@ -20,7 +20,9 @@ public class InsertAction implements Action {
         DebugLogger.info("ACTIONS", "inserting content '" + content + "' at position " + position );
 
         file.insert(content, position);
+        DebugLogger.info("ACTIONS",  "paragraph is now '" + file.readParagraph(position.paragraph()));
         TextPosition firstAfterInsert = findPositionAfterInsert();
+        DebugLogger.info("DEBUG", "moving to " + firstAfterInsert);
         viewPort.moveCursorTo(firstAfterInsert);
     }
 
@@ -32,7 +34,7 @@ public class InsertAction implements Action {
         int paragraphsAdded = StringUtility.countOccurrences(content, '\n');
 
         if (paragraphsAdded == 0) {
-            return new TextPosition(position.paragraph(), position.character() + content.length());
+            return position.offset(0, content.length());
         }
 
         String lastLine = content.substring(content.lastIndexOf('\n') + 1);
