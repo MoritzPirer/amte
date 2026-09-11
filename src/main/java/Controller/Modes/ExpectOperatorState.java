@@ -1,13 +1,7 @@
 package Controller.Modes;
 
-import Controller.Action.DeleteAction;
-import Controller.Action.JumpAction;
-import Controller.Action.MoveAction;
-import Controller.Action.NotifyAction;
-import Controller.Action.Ranges.DelimiterRangeResolver;
-import Controller.Action.Ranges.ExpressionDelimiterChecker;
-import Controller.Action.Ranges.RestOfParagraphRangeResolver;
-import Controller.Action.Ranges.WordDelimiterChecker;
+import Controller.Action.*;
+import Controller.Action.Ranges.*;
 import Debugging.DebugLogger;
 import Shared.Direction;
 import Shared.TextPosition;
@@ -32,6 +26,17 @@ class ExpectOperatorState implements ChordParserState {
                 return new ParseSnapshot(
                     ParseStatus.FINISHED,
                     new MoveAction(Direction.RIGHT)
+                );
+            }
+            case 'A' -> {
+                context.modeManager().setMode(new TypingMode(context.modeManager()));
+                int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
+                int character = context.textFile().lengthOfParagraph(paragraph) - 1;
+                return new ParseSnapshot(ParseStatus.FINISHED,
+                    new JumpAction(
+                        new FixedRangeResolver( null, new TextPosition(paragraph, character)),
+                        false
+                    )
                 );
             }
             case 'b' -> {
@@ -107,18 +112,53 @@ class ExpectOperatorState implements ChordParserState {
             case 'h' -> {
                 return new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.LEFT));
             }
-            case 'i' ->{
+            case 'i' -> {
                 context.modeManager().setMode(new TypingMode(context.modeManager()));
                 return ParseSnapshot.FINISHED_NO_OP;
             }
+            case 'I' -> {
+                context.modeManager().setMode(new TypingMode(context.modeManager()));
+                return new ParseSnapshot(ParseStatus.FINISHED,
+                    new JumpAction(
+                        new FixedRangeResolver(
+                            new TextPosition(context.viewPort().getLogicalCursorPosition().paragraph(), 0),
+                            null
+                        ),
+                        true
+                    )
+                );
+            }
             case 'j' -> {
                 return new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.DOWN));
+            }
+            case 'J' -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new ParagraphJoiningAction(
+                    context.viewPort().getLogicalCursorPosition().paragraph()
+                ));
             }
             case 'k' -> {
                 return new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.UP));
             }
             case 'l' -> {
                 return new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.RIGHT));
+            }
+            case 'o' -> {
+                context.modeManager().setMode(new TypingMode(context.modeManager()));
+
+                int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
+                int character = context.textFile().lengthOfParagraph(paragraph) - 1;
+                return new ParseSnapshot(ParseStatus.FINISHED,
+                    new InsertAction("\n", new TextPosition(paragraph, character))
+                );
+            }
+            case 'O' -> {
+                context.modeManager().setMode(new TypingMode(context.modeManager()));
+
+                int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
+                return new ParseSnapshot(ParseStatus.FINISHED, new CompoundAction(
+                    new InsertAction("\n", new TextPosition(paragraph, 0)),
+                    new MoveAction(Direction.UP)
+                ));
             }
             case 's' -> {
                 context.modeManager().setMode(new TypingMode(context.modeManager()));

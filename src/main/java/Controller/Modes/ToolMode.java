@@ -4,6 +4,7 @@ import Controller.Action.*;
 import Controller.Input;
 import Controller.SpecialInput;
 import Controller.ViewPort;
+import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 import Shared.Direction;
@@ -35,7 +36,9 @@ class ToolMode implements ModeState, ChordParser {
 
         buffer.add(input.getCharacter());
         ParseSnapshot result = state.parse(buffer, context);
-
+        DebugLogger.info("PARSING", "input chord is " + result.status()
+            + ", evaluated to " + result.action().getClass().getSimpleName());
+        
         if (result.status() != ParseStatus.UNFINISHED) {
             buffer.clear();
         }

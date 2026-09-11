@@ -178,4 +178,29 @@ public class StringUtility {
 
         return lines;
     }
+
+    public static int countLeadingWhiteSpace(String text) {
+        int count = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (Character.isWhitespace(text.charAt(i))) {
+                count++;
+            }
+            else { break; }
+        }
+
+        return count;
+    }
+
+    public static int countTrailingWhiteSpace(String text) {
+        int count = 0;
+        for (int i = text.length() - 1; i >= 0; i--) {
+            if (Character.isWhitespace(text.charAt(i))) {
+                count++;
+            }
+            else { break; }
+        }
+
+        return count;
+    }
+
 }

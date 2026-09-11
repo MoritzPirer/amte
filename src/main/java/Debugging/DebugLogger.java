@@ -1,5 +1,6 @@
 package Debugging;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -58,17 +59,12 @@ public class DebugLogger {
         }
     }
 
-    public static void error(String category, Throwable throwable, String message) throws Throwable {
-        error(category, message);
-        throw throwable;
+    public static void error(String category, RuntimeException exception) throws RuntimeException {
+        error(category, exception.getMessage());
+        throw exception;
     }
 
     public static void error(String category, String message, Object... arguments) {
         error(category, String.format(message, arguments));
-    }
-
-    public static void error(String category, Throwable throwable, String message, Object... arguments) throws Throwable {
-        error(category, message, arguments);
-        throw throwable;
     }
 }

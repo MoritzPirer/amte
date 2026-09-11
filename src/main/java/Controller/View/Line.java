@@ -7,12 +7,13 @@ import java.util.List;
 public record Line(TextSpan[] textSpans) {
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         for (TextSpan span : textSpans) {
-            sb.append(span.toString());
+            builder.append(span.toString());
         }
-        return sb.toString();
+        return builder.toString();
     }
+
     /**
      * returns a Line that is has the same contents as this, except that the start n characters are removed.
      * @param n the number of characters to remove. May not be negative. If there are <= n characters, the returned object will be empty

@@ -1,5 +1,7 @@
 package Controller;
 
+import Debugging.DebugLogger;
+
 public class Input {
     private final Character character;
     private final SpecialInput specialInput;
@@ -27,10 +29,11 @@ public class Input {
     }
 
     public char getCharacter() {
-        if (character == null) {
-            throw new RuntimeException("tried to access character when special input was given");
+        if (character != null) {
+            return character;
         }
-        return character;
+
+        throw new RuntimeException("tried to access character when special input was given");
     }
 
     public boolean isSpecialInput() {
@@ -39,7 +42,8 @@ public class Input {
 
     public SpecialInput getSpecialInput() {
         if (specialInput == null) {
-            throw new RuntimeException("tried to access special input when character input was given");
+
+            throw new RuntimeException("tried to access character when special input was given");
         }
 
         return specialInput;
