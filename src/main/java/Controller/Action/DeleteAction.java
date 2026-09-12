@@ -9,7 +9,7 @@ import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 
-public class DeleteAction implements Action {
+public class DeleteAction extends Action {
     private String content = null;
     private final RangeResolver resolver;
 
@@ -56,5 +56,15 @@ public class DeleteAction implements Action {
     public void undo(ViewPort viewPort, TextFile file) {
         assert content != null;
         //TODO WHEN [adding undo and redo functionality] DO [implement this function]
+    }
+
+    @Override
+    public boolean canAbsorb(Action action) {
+        return false; //change to true when absorbing is implemented
+    }
+
+    @Override
+    public void absorb(Action action) {
+        throw new UnsupportedOperationException("TODO");
     }
 }

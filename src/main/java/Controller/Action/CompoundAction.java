@@ -6,7 +6,7 @@ import FileStorage.TextFile;
 import java.util.Arrays;
 import java.util.List;
 
-public class CompoundAction implements Action {
+public class CompoundAction extends Action {
     private final List<Action> actions;
 
     public CompoundAction(Action... actions) {

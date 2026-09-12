@@ -4,7 +4,7 @@ import Controller.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 
-public class NotifyAction implements Action {
+public class NotifyAction extends Action {
     private final String message;
 
     public NotifyAction(String message) {
@@ -15,15 +15,5 @@ public class NotifyAction implements Action {
     public void apply(ViewPort viewPort, TextFile file) {
         DebugLogger.info("ACTIONS", "adding temporary message with content " + message);
         viewPort.addTemporaryMessage(message);
-    }
-
-    @Override
-    public boolean canBeUndone() {
-        return false;
-    }
-
-    @Override
-    public void undo(ViewPort viewPort, TextFile file) {
-        throw new UnsupportedOperationException("Not undoable!");
     }
 }

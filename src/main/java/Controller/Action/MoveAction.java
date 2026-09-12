@@ -5,7 +5,7 @@ import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import Shared.Direction;
 
-public class MoveAction implements Action {
+public class MoveAction extends Action {
 
     private final Direction direction;
 
@@ -17,15 +17,5 @@ public class MoveAction implements Action {
     public void apply(ViewPort viewPort, TextFile file) {
         DebugLogger.info("ACTIONS", "Moving cursor in direction " + direction);
         viewPort.moveCursor(direction);
-    }
-
-    @Override
-    public boolean canBeUndone() {
-        return false;
-    }
-
-    @Override
-    public void undo(ViewPort viewPort, TextFile file) {
-        throw new UnsupportedOperationException("Not undoable! Did you call canBeUndone()?");
     }
 }

@@ -4,7 +4,7 @@ import Controller.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 
-public class RenameAction implements Action {
+public class RenameAction extends Action {
     private String previousName;
     private String newName;
 

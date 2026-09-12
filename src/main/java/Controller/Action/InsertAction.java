@@ -6,7 +6,7 @@ import FileStorage.TextFile;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
-public class InsertAction implements Action {
+public class InsertAction extends Action {
     private final String content;
     private final TextPosition position;
 
@@ -51,4 +51,13 @@ public class InsertAction implements Action {
         //TODO WHEN [adding undo and redo functionality] DO [implement this function]
     }
 
+    @Override
+    public boolean canAbsorb(Action action) {
+        return false;
+    }
+
+    @Override
+    public void absorb(Action action) {
+        throw new UnsupportedOperationException("TODO");
+    }
 }

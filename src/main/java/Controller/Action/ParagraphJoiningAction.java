@@ -6,7 +6,7 @@ import FileStorage.TextFile;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
-public class ParagraphJoiningAction implements Action {
+public class ParagraphJoiningAction extends Action {
     private final int upperParagraph;
 
     public ParagraphJoiningAction(int upperParagraph) {

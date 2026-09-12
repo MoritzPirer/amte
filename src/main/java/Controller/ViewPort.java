@@ -1,5 +1,8 @@
 package Controller;
 
+import Controller.Action.Action;
+import Controller.History.History;
+import Controller.History.StackHistory;
 import Controller.View.Line;
 import Controller.View.Style;
 import Controller.View.TextSpan;
@@ -24,6 +27,7 @@ public class ViewPort {
     private Size textAreaSize;
     private final List<String> temporaryMessages = new ArrayList<>();
 
+    private final History history = new StackHistory();
     private boolean isRunning = true;
 
     public ViewPort(TextFile file) {
@@ -272,5 +276,9 @@ public class ViewPort {
             .toArray(Line[]::new);
 
         return new ViewComponent(size, lines);
+    }
+
+    public History getHistory() {
+        return history;
     }
 }

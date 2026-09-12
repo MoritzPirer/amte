@@ -7,7 +7,7 @@ import FileStorage.FileIO.FileLoader;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 
-public class SaveAction implements Action {
+public class SaveAction extends Action {
 
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
@@ -22,15 +22,5 @@ public class SaveAction implements Action {
             DebugLogger.warn("ACTIONS", "saving file failed");
             viewPort.addTemporaryMessage(provider.get("saveFail"));
         }
-    }
-
-    @Override
-    public boolean canBeUndone() {
-        return false;
-    }
-
-    @Override
-    public void undo(ViewPort viewPort, TextFile file) {
-        throw new UnsupportedOperationException("Not undoable! Did you call canBeUndone()?");
     }
 }

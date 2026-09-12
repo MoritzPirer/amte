@@ -5,7 +5,7 @@ import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 
-public class QuitAction implements Action {
+public class QuitAction extends Action {
     private final boolean abortOnUnsavedChanges;
 
     private QuitAction(boolean abortOnUnsavedChanges) {
@@ -38,15 +38,5 @@ public class QuitAction implements Action {
             DebugLogger.info("ACTIONS", "force quitting");
             viewPort.stop();
         }
-    }
-
-    @Override
-    public boolean canBeUndone() {
-        return false;
-    }
-
-    @Override
-    public void undo(ViewPort viewPort, TextFile file) {
-        throw new UnsupportedOperationException("Not undoable! Did you call canBeUndone() start?");
     }
 }

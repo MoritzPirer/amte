@@ -193,6 +193,12 @@ class ExpectOperatorState implements ChordParserState {
 
                 return ParseSnapshot.makeUnfinished(buffer.get());
             }
+            case 'u' -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new UndoAction());
+            }
+            case 'U' -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new RedoAction());
+            }
             case 'w' -> {
                 return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
                     new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.AFTER

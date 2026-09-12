@@ -7,7 +7,7 @@ import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 
-public class JumpAction implements Action {
+public class JumpAction extends Action {
 
     private final RangeResolver resolver;
     private final boolean jumpToStart;
@@ -37,15 +37,5 @@ public class JumpAction implements Action {
             DebugLogger.info("ACTIONS", "jumping cursor to " + range.end());
             viewPort.moveCursorTo(range.end());
         }
-    }
-
-    @Override
-    public boolean canBeUndone() {
-        return false;
-    }
-
-    @Override
-    public void undo(ViewPort viewPort, TextFile file) {
-        throw new UnsupportedOperationException("Not undoable! Did you call canBeUndone()?");
     }
 }

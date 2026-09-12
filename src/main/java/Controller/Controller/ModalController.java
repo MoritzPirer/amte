@@ -69,7 +69,9 @@ public class ModalController implements Controller{
         if (!(action instanceof NullAction)) {
             viewPort.clearTemporaryMessages();
         }
+
         action.apply(viewPort, file);
+        viewPort.getHistory().add(action);
     }
 
     @Override
