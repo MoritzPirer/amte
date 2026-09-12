@@ -26,8 +26,8 @@ public class CompoundAction extends Action {
     @Override
     public boolean canBeUndone() {
         for (Action action : actions) {
-            if (!action.canBeUndone()) {
-                return false;
+            if (action.canBeUndone()) {
+                return true;
             }
         }
 
@@ -37,7 +37,9 @@ public class CompoundAction extends Action {
     @Override
     public void undo(ViewPort viewPort, TextFile file) {
         for (Action action : actions) {
-            action.undo(viewPort, file);
+            if (action.canBeUndone()) {
+                action.undo(viewPort, file);
+            }
         }
     }
 }

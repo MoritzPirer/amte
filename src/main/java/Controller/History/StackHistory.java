@@ -2,11 +2,15 @@ package Controller.History;
 
 import Controller.Action.Action;
 import Controller.ViewPort;
+import Debugging.DebugLogger;
 import FileStorage.TextFile;
+import LanguageSupport.LanguageProvider;
 
 import java.util.Stack;
 
 public class StackHistory implements History {
+    private static final LanguageProvider provider = new LanguageProvider();
+
     private final Stack<Action> undoableActions = new Stack<>();
     private final Stack<Action> redoableActions = new Stack<>();
     private boolean isMergePossible = false;
@@ -14,14 +18,18 @@ public class StackHistory implements History {
     @Override
     public void add(Action action) {
         if (!action.canBeUndone()) {
+            DebugLogger.warn("HISTORY", action.getClass().getSimpleName());
+            DebugLogger.info("HISTORY", "action not added to history because it is not undoable");
             isMergePossible = false;
             return;
         }
 
         if (shouldMerge(action)) {
+            DebugLogger.info("HISTORY", "action absorbed by previous action");
             undoableActions.peek().absorb(action);
         }
         else {
+            DebugLogger.info("HISTORY", "action added to history");
             isMergePossible = true;
             undoableActions.push(action);
             redoableActions.clear();
@@ -35,8 +43,7 @@ public class StackHistory implements History {
     @Override
     public void undo(ViewPort viewPort, TextFile textFile) {
         if (undoableActions.isEmpty()) {
-            //TODO Language file
-            viewPort.addTemporaryMessage("Nothing to undo.");
+            viewPort.addTemporaryMessage(provider.get("nothingToRedo"));
             return;
         }
 
@@ -49,8 +56,7 @@ public class StackHistory implements History {
     @Override
     public void redo(ViewPort viewPort, TextFile textFile) {
         if (redoableActions.isEmpty()) {
-            //TODO Language file
-            viewPort.addTemporaryMessage("Nothing to redo.");
+            viewPort.addTemporaryMessage(provider.get("nothingToUndo"));
             return;
         }
 

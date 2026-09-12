@@ -9,6 +9,10 @@ import Shared.Utility.StringUtility;
 public class ParagraphJoiningAction extends Action {
     private final int upperParagraph;
 
+    private String removedFromFirst;
+    private String removedFromSecond;
+    private int joinIndex;
+
     public ParagraphJoiningAction(int upperParagraph) {
         this.upperParagraph = upperParagraph;
     }
@@ -26,11 +30,14 @@ public class ParagraphJoiningAction extends Action {
         int firstTrailingWhiteSpace = StringUtility.countTrailingWhiteSpace(first);
         int secondLeadingWhiteSpace = StringUtility.countLeadingWhiteSpace(second);
 
-        //TODO WHEN [undo is being implemented] do [store what whitespace was removed to restore it]
+        removedFromFirst = first.substring(first.length() - firstTrailingWhiteSpace);
         first = first.substring(0, first.length() - firstTrailingWhiteSpace);
+
+        removedFromSecond = second.substring(0, secondLeadingWhiteSpace);
         second = second.substring(secondLeadingWhiteSpace);
 
         String combined = first + " " + second;
+        joinIndex = first.length();
 
         TextPosition start = new TextPosition(upperParagraph, 0);
         file.deleteRange(start, new TextPosition(upperParagraph + 2, 0));
@@ -44,6 +51,12 @@ public class ParagraphJoiningAction extends Action {
 
     @Override
     public void undo(ViewPort viewPort, TextFile file) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String joined = file.readParagraph(upperParagraph).toString();
+        String first = joined.substring(0, joinIndex) + removedFromFirst;
+        String second = removedFromSecond + joined.substring(joinIndex + 1);
+
+        TextPosition start = new TextPosition(upperParagraph, 0);
+        file.deleteRange(start, new TextPosition(upperParagraph + 1, 0));
+        file.insert(first + second, start);
     }
 }

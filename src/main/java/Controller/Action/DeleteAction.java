@@ -13,10 +13,13 @@ public class DeleteAction extends Action {
     private String content = null;
     private final RangeResolver resolver;
 
+    private TextPosition deletionStart = null;
+    private TextPosition restoreCursorTo = null;
+
     /**
      * Deletes the content within the resolved range, including start but not including end
      * (i.e. Range.end() is the first character after the deleted section)
-     * @param resolver
+     * @param resolver a RangeResolver that can evaluate to the appropriate start and end of the range
      */
     public DeleteAction(RangeResolver resolver) {
         this.resolver = resolver;
@@ -41,6 +44,8 @@ public class DeleteAction extends Action {
             return;
         }
 
+        deletionStart = range.start();
+        restoreCursorTo = viewPort.getLogicalCursorPosition();
         content = file.readRange(range.start(), range.end());
         file.deleteRange(range.start(), range.end());
 
@@ -54,8 +59,12 @@ public class DeleteAction extends Action {
 
     @Override
     public void undo(ViewPort viewPort, TextFile file) {
-        assert content != null;
-        //TODO WHEN [adding undo and redo functionality] DO [implement this function]
+        if (content == null) {
+            return; // valid state if apply() ended early (e.g. empty file)
+        }
+
+        file.insert(content, deletionStart);
+        viewPort.moveCursorTo(restoreCursorTo);
     }
 
     @Override
