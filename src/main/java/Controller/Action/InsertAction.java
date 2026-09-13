@@ -7,8 +7,8 @@ import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
 public class InsertAction extends Action {
-    private final String content;
-    private final TextPosition position;
+    private String content;
+    private TextPosition position;
     private TextPosition firstAfterInsert = null;
 
     public InsertAction(String content, TextPosition position) {
@@ -47,18 +47,71 @@ public class InsertAction extends Action {
 
     @Override
     public void undo(ViewPort viewPort, TextFile file) {
-        //TODO WHEN [adding undo and redo functionality] DO [implement this function]
         file.deleteRange(position, firstAfterInsert);
         viewPort.moveCursorTo(position);
     }
 
     @Override
     public boolean canAbsorb(Action action) {
-        return false;
+        if (!(action instanceof InsertAction insertAction)) {
+            DebugLogger.info("HISTORY", "not merging because new action is not InsertAction");
+            return false;
+        }
+
+        if (content.isEmpty() || insertAction.content.isEmpty()) {
+            DebugLogger.info("HISTORY", "not merging because one or both actions do not have content");
+            return false;
+        }
+
+        //THIS CHECK IS WRONG. SHOULD check if a.position is directly after b. firstafterinsert
+        if (!this.position.equals(insertAction.firstAfterInsert) && !insertAction.position.equals(this.firstAfterInsert)) {
+            DebugLogger.info("HISTORY", "not merging because inserts are not adjacent");
+            DebugLogger.warn("HISTORY", "this.position" + this.position + " this.firstAfterInsert" + this.firstAfterInsert);
+            DebugLogger.warn("HISTORY", "other.position" + insertAction.position + " other.firstAfterInsert" + insertAction.firstAfterInsert);
+            return false;
+        }
+
+        char endOfFirst;
+        char startOfSecond;
+
+        if (this.position.isBefore(insertAction.position)) {
+            endOfFirst = this.content.charAt(this.content.length() - 1);
+            startOfSecond = insertAction.content.charAt(0);
+        }
+        else {
+            endOfFirst = insertAction.content.charAt(insertAction.content.length() - 1);
+            startOfSecond = this.content.charAt(0);
+        }
+
+        if (!StringUtility.isAlphanumeric(endOfFirst) || !StringUtility.isAlphanumeric(startOfSecond)) {
+            DebugLogger.info("HISTORY", "not merging because the merging point is the end of a word");
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public void absorb(Action action) {
-        throw new UnsupportedOperationException("TODO");
+        assert action instanceof InsertAction;
+
+        InsertAction insertAction = (InsertAction) action;
+
+        if (insertAction.position.isBefore(this.position)) {
+            absorbBefore(insertAction);
+        }
+        else {
+            absorbAfter(insertAction);
+        }
+    }
+
+    private void absorbBefore(InsertAction insertAction) {
+        this.position = insertAction.position;
+        this.content = insertAction.content + this.content;
+    }
+
+    private void absorbAfter(InsertAction insertAction) {
+        this.content += insertAction.content;
+        this.firstAfterInsert = insertAction.firstAfterInsert;
     }
 }

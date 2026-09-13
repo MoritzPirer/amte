@@ -27,6 +27,14 @@ public record TextPosition(int paragraph, int character) {
         return character > position.character();
     }
 
+    public boolean isDirectlyBefore(TextPosition other) {
+        if (this.paragraph != other.paragraph()) {
+            return false;
+        }
+
+        return this.character + 1 == other.character;
+    }
+
     public boolean equals(TextPosition position) {
         return paragraph == position.paragraph() && character == position.character();
     }

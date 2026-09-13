@@ -23,8 +23,23 @@ public record Range(TextPosition start, TextPosition end) {
         return new Range(b, a);
     }
 
+    /**
+     * checks if the range is before another range. If the first one ends at the same position where the other starts,
+     * it is considered being before
+     * @param range the second range
+     * @return true if this range is fully before the given range, false if this range comes after or if there is any overlap
+     */
+    public boolean isBefore(Range range) {
+        return this.end.isBefore(range.start) || this.end.equals(range.start);
+    }
+
+    public boolean isEmpty() {
+        return start.equals(end);
+    }
+
     @Override
     public String toString() {
         return start.toString() + " -> " + end.toString();
     }
+
 }
