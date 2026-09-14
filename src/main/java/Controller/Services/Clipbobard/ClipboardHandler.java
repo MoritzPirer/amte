@@ -1,10 +1,7 @@
 package Controller.Services.Clipbobard;
 
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.datatransfer.*;
 import java.io.IOException;
 
 public class ClipboardHandler {
@@ -17,6 +14,7 @@ public class ClipboardHandler {
         this.type = type;
         this.content = content;
     }
+
 
     public CopyType getType() {
         return type;
@@ -50,5 +48,16 @@ public class ClipboardHandler {
         catch (UnsupportedFlavorException | IOException e) {
             return null;
         }
+    }
+
+    /**
+     * copies the given content into the system clipboard
+     * @param content the content to copy
+     * @see <a href="https://www.baeldung.com/java-clipboard-copy-paste-text#2-retrieving-from-clipboard">...</a>
+     */
+    public static void putSystemClipboardContent(String content) {
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        StringSelection selection = new StringSelection(content);
+        clipboard.setContents(selection, null);
     }
 }

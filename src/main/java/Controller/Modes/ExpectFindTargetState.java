@@ -76,7 +76,7 @@ class ExpectFindTargetState implements ChordParserState {
 
     private Action createActionByType(char last) {
         return switch (actionType) {
-            case DELETE -> new DeleteAction(new FindRangeResolver(last, includeTarget, isReversed));
+            case DELETE -> new DeleteAction(new FindRangeResolver(last, includeTarget, isReversed), CopyType.INLINE);
             case MOVE -> new JumpAction(new FindRangeResolver(last, includeTarget, isReversed), isReversed);
             case COPY -> new CopyAction(new FindRangeResolver(last, includeTarget, isReversed), CopyType.INLINE);
         };

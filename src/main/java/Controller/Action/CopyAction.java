@@ -2,9 +2,11 @@ package Controller.Action;
 
 import Controller.Action.Ranges.Range;
 import Controller.Action.Ranges.RangeResolver;
+import Controller.Services.Clipbobard.ClipboardHandler;
 import Controller.Services.Clipbobard.CopyType;
 import Controller.ViewPort;
 import FileStorage.TextFile;
+import Settings.SettingsMaster;
 
 public class CopyAction extends Action {
     private final RangeResolver resolver;
@@ -21,5 +23,9 @@ public class CopyAction extends Action {
         String content = file.readRange(range.start(), range.end());
 
         viewPort.copy(type, content);
+
+        if (SettingsMaster.instance().getBoolean("yankToSystemClipboard")) {
+            ClipboardHandler.putSystemClipboardContent(content);
+        }
     }
 }

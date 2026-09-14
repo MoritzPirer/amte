@@ -24,6 +24,8 @@ class DefaultSettings implements SettingStorage {
         booleanSettings.put("showCharacterCount", true);
         booleanSettings.put("showWordCount", true);
         booleanSettings.put("showParagraphCount", true);
+        booleanSettings.put("copyOnDelete", true);
+        booleanSettings.put("yankToSystemClipboard", true);
 
         restrictedIntSettings = new HashMap<>();
         restrictedIntSettings.put("tabWidth", new RestrictedValue<>(4, new Integer[]{2, 4}));

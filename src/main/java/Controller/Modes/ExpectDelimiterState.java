@@ -1,6 +1,5 @@
 package Controller.Modes;
 
-import Controller.Action.Action;
 import Controller.Action.CopyAction;
 import Controller.Action.DeleteAction;
 import Controller.Action.Ranges.*;
@@ -61,7 +60,6 @@ class ExpectDelimiterState implements ChordParserState {
                 DelimiterRangeResolver.EdgeBehaviour behaviour = includeTarget? DelimiterRangeResolver.EdgeBehaviour.ON :
                     DelimiterRangeResolver.EdgeBehaviour.BEFORE;
 
-
                 resolver = DelimiterRangeResolver.makeBidirectional(
                     SpecificDelimiterChecker.matching(String.valueOf(last)),
                     behaviour
@@ -93,7 +91,7 @@ class ExpectDelimiterState implements ChordParserState {
         chordParser.changeState(new ExpectOperatorState(chordParser));
 
         return switch (actionType) {
-            case DELETE -> new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(resolver));
+            case DELETE -> new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(resolver, CopyType.INLINE));
             case COPY -> new ParseSnapshot(ParseStatus.FINISHED, new CopyAction(resolver, CopyType.INLINE));
             default -> throw new IllegalStateException();
         };
@@ -109,5 +107,4 @@ class ExpectDelimiterState implements ChordParserState {
             default -> last;
         };
     }
-
 }

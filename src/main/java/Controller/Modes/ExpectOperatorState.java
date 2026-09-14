@@ -20,269 +20,246 @@ class ExpectOperatorState implements ChordParserState {
 
         assert buffer.length() == 1;
 
-        switch (buffer.get().charAt(0)) {
-            case 'a' -> {
-                context.modeManager().setMode(new TypingMode(context.modeManager()));
-                return new ParseSnapshot(
-                    ParseStatus.FINISHED,
-                    new MoveAction(Direction.RIGHT)
-                );
-            }
-            case 'A' -> {
-                context.modeManager().setMode(new TypingMode(context.modeManager()));
-                int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
-                int character = context.textFile().lengthOfParagraph(paragraph) - 1;
-                return new ParseSnapshot(ParseStatus.FINISHED,
-                    new JumpAction(
-                        new FixedRangeResolver( null, new TextPosition(paragraph, character)),
-                        false
-                    )
-                );
-            }
-            case 'b' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(
-                    DelimiterRangeResolver.makeBackward(new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE),
-                    true
-                ));
-            }
-            case 'B' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(
-                    DelimiterRangeResolver.makeBackward(new ExpressionDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE),
-                    true
-                ));
-            }
+        return switch (buffer.get().charAt(0)) {
+            case 'a' -> parseTypingModeAfterCursor(context);
+            case 'A' -> parseTypingModeAfterParagraph(context);
+            case 'b' -> parseStartOfWordMove(context, new WordDelimiterChecker());
+            case 'B' -> parseStartOfWordMove(context, new ExpressionDelimiterChecker());
+            case 'c' -> parseBeginningOfDeleteChord(buffer, true);
+            case 'C' -> parseRestOfParagraphDelete(context, true);
+            case 'd' -> parseBeginningOfDeleteChord(buffer, false);
+            case 'D' -> parseRestOfParagraphDelete(context, false);
+            case 'e' -> parseEndOfWordMove(context, new WordDelimiterChecker());
+            case 'E' -> parseEndOfWordMove(context, new ExpressionDelimiterChecker());
+            case 'f' -> parseFindOperator(buffer, Direction.RIGHT);
+            case 'F' -> parseFindOperator(buffer, Direction.LEFT);
+            case 'h' -> new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.LEFT));
+            case 'i' -> parseTypingModeBeforeCursor(context);
+            case 'I' -> parseTypingModeBeforeParagraph(context);
+            case 'j' -> new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.DOWN));
+            case 'J' -> joinParagraphs(context);
+            case 'k' -> new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.UP));
+            case 'l' -> new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.RIGHT));
+            case 'o' -> parseCreateParagraphBelow(context);
+            case 'O' -> parseCreateParagraphAbove(context);
+            case 'p' -> parsePasteBelow(context);
+            case 'P' -> parsePasteAbove(context);
+            case 's' -> parseCutUnderCursor(context, true);
+            case 't' -> parseExclusiveFindOperator(buffer, Direction.RIGHT);
+            case 'T' -> parseExclusiveFindOperator(buffer, Direction.LEFT);
+            case 'u' -> new ParseSnapshot(ParseStatus.FINISHED, new UndoAction());
+            case 'U' -> new ParseSnapshot(ParseStatus.FINISHED, new RedoAction());
+            case 'w' -> parseNextWordMove(context, new WordDelimiterChecker());
+            case 'W' -> parseNextWordMove(context, new ExpressionDelimiterChecker());
+            case 'x' -> parseCutUnderCursor(context, false);
+            case 'X' -> parseCutBeforeCursor(context);
+            case 'y' -> parseBeginningOfCopyChord(buffer);
+            case ':' -> enterCommandMode(context);
+            default -> ParseSnapshot.INVALID;
+        };
+    }
 
-            case 'c' -> {
-                chordParser.changeState(new ExpectChordState.Builder(chordParser)
-                    .actionType(ActionType.DELETE)
-                    .changeToTypingMode(true)
-                    .build()
-                );
+    private ParseSnapshot parseTypingModeAfterCursor(ParsingContext context) {
+        context.modeManager().setMode(new TypingMode(context.modeManager()));
+        return new ParseSnapshot(
+            ParseStatus.FINISHED,
+            new MoveAction(Direction.RIGHT)
+        );
+    }
 
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'C' -> {
-                context.modeManager().setMode(new TypingMode(context.modeManager()));
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(new RestOfParagraphRangeResolver()));
-            }
-            case 'd' -> {
-                chordParser.changeState(new ExpectChordState.Builder(chordParser)
-                    .actionType(ActionType.DELETE)
-                    .changeToTypingMode(false)
-                    .build()
-                );
+    private ParseSnapshot parseTypingModeBeforeCursor(ParsingContext context) {
+        context.modeManager().setMode(new TypingMode(context.modeManager()));
+        return ParseSnapshot.FINISHED_NO_OP;
+    }
 
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'D' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(new RestOfParagraphRangeResolver()));
-            }
-            case 'e' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
-                    new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE
-                )));
-            }
-            case 'E' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
-                    new ExpressionDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE
-                )));
-            }
-            case 'f' -> {
-                chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
-                    .actionType(ActionType.MOVE)
-                    .isReversed(false)
-                    .includeTarget(true)
-                    .changeToTypingMode(false)
-                    .build()
-                );
+    private ParseSnapshot parseTypingModeAfterParagraph(ParsingContext context) {
+        context.modeManager().setMode(new TypingMode(context.modeManager()));
+        int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
+        int character = context.textFile().lengthOfParagraph(paragraph) - 1;
 
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'F' -> {
-                chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
-                    .actionType(ActionType.MOVE)
-                    .isReversed(true)
-                    .includeTarget(true)
-                    .changeToTypingMode(false)
-                    .build()
-                );
+        return new ParseSnapshot(ParseStatus.FINISHED,
+            new JumpAction(
+                new FixedRangeResolver( null, new TextPosition(paragraph, character)),
+                false
+            )
+        );
+    }
 
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'h' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.LEFT));
-            }
-            case 'i' -> {
-                context.modeManager().setMode(new TypingMode(context.modeManager()));
-                return ParseSnapshot.FINISHED_NO_OP;
-            }
-            case 'I' -> {
-                context.modeManager().setMode(new TypingMode(context.modeManager()));
-                return new ParseSnapshot(ParseStatus.FINISHED,
-                    new JumpAction(
-                        new FixedRangeResolver(
-                            new TextPosition(context.viewPort().getLogicalCursorPosition().paragraph(), 0),
-                            null
-                        ),
-                        true
-                    )
-                );
-            }
-            case 'j' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.DOWN));
-            }
-            case 'J' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new ParagraphJoiningAction(
-                    context.viewPort().getLogicalCursorPosition().paragraph()
-                ));
-            }
-            case 'k' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.UP));
-            }
-            case 'l' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.RIGHT));
-            }
-            case 'o' -> {
-                context.modeManager().setMode(new TypingMode(context.modeManager()));
+    private ParseSnapshot parseTypingModeBeforeParagraph(ParsingContext context) {
+        context.modeManager().setMode(new TypingMode(context.modeManager()));
+        return new ParseSnapshot(ParseStatus.FINISHED,
+            new JumpAction(
+                new FixedRangeResolver(
+                    new TextPosition(context.viewPort().getLogicalCursorPosition().paragraph(), 0),
+                    null
+                ),
+                true
+            )
+        );
+    }
 
-                int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
-                int character = context.textFile().lengthOfParagraph(paragraph) - 1;
-                return new ParseSnapshot(ParseStatus.FINISHED,
-                    new InsertAction("\n", new TextPosition(paragraph, character))
-                );
-            }
-            case 'O' -> {
-                context.modeManager().setMode(new TypingMode(context.modeManager()));
+    private ParseSnapshot parseStartOfWordMove(ParsingContext context, DelimiterChecker checker) {
+        return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(
+            DelimiterRangeResolver.makeBackward(checker, DelimiterRangeResolver.EdgeBehaviour.BEFORE),
+            true
+        ));
+    }
 
-                int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
-                return new ParseSnapshot(ParseStatus.FINISHED, new CompoundAction(
-                    new InsertAction("\n", new TextPosition(paragraph, 0)),
-                    new MoveAction(Direction.UP)
-                ));
-            }
-            case 'p' -> {
-                String content = context.viewPort().getInternalClipboard();
+    private ParseSnapshot parseEndOfWordMove(ParsingContext context, DelimiterChecker checker) {
+        return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
+                checker, DelimiterRangeResolver.EdgeBehaviour.BEFORE
+        )));
+    }
 
-                switch (context.viewPort().getInternalClipboardType()) {
-                    case BLOCK -> {
-                        int paragraph = context.viewPort().getLogicalCursorPosition().paragraph() + 1;
-                        return new ParseSnapshot(ParseStatus.FINISHED,
-                                new InsertAction(content, new TextPosition(paragraph, 0))
-                        );
-                    }
-                    case INLINE -> {
-                        return new ParseSnapshot(ParseStatus.FINISHED, new CompoundAction(
-                            new MoveAction(Direction.RIGHT),
-                            new InsertAction(content, context.viewPort().getLogicalCursorPosition())
-                        ));
-                    }
-                    case null -> { return ParseSnapshot.FINISHED_NO_OP; }
-                }
-            }
-            case 'P' -> {
-                String content = context.viewPort().getInternalClipboard();
+    private ParseSnapshot parseNextWordMove(ParsingContext context, DelimiterChecker checker) {
+        return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
+                checker, DelimiterRangeResolver.EdgeBehaviour.AFTER
+        )));
+    }
 
-                switch (context.viewPort().getInternalClipboardType()) {
-                    case BLOCK -> {
+    private ParseSnapshot parseBeginningOfDeleteChord(ParsingBuffer buffer, boolean changeToTypingMode) {
+        chordParser.changeState(new ExpectChordState.Builder(chordParser)
+                .actionType(ActionType.DELETE)
+                .changeToTypingMode(changeToTypingMode)
+                .build()
+        );
 
-                        int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
-                        return new ParseSnapshot(ParseStatus.FINISHED,
-                                new InsertAction(content, new TextPosition(paragraph, 0))
-                        );
-                    }
-                    case INLINE -> {
-                        return new ParseSnapshot(ParseStatus.FINISHED,
-                            new InsertAction(content, context.viewPort().getLogicalCursorPosition())
-                        );
-                    }
-                    case null -> { return ParseSnapshot.FINISHED_NO_OP; }
-                }
-            }
-            case 's' -> {
-                context.modeManager().setMode(new TypingMode(context.modeManager()));
-                if (context.textFile().getBuffer().isEmpty()) {
-                    return ParseSnapshot.FINISHED_NO_OP;
-                }
+        return ParseSnapshot.makeUnfinished(buffer.get());
+    }
 
-                TextPosition cursor = context.viewPort().getLogicalCursorPosition();
-                TextPosition next = context.textFile().nextPosition(cursor);
+    private ParseSnapshot parseBeginningOfCopyChord(ParsingBuffer buffer) {
+        chordParser.changeState(new ExpectChordState.Builder(chordParser)
+                .actionType(ActionType.COPY)
+                .changeToTypingMode(false)
+                .build()
+        );
 
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(cursor, next));
-            }
-            case 't' -> {
-                chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
-                    .actionType(ActionType.MOVE)
-                    .isReversed(false)
-                    .includeTarget(false)
-                    .changeToTypingMode(false)
-                    .build()
-                );
+        return ParseSnapshot.makeUnfinished(buffer.get());
+    }
 
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'T' -> {
-                chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
-                    .actionType(ActionType.MOVE)
-                    .isReversed(true)
-                    .includeTarget(false)
-                    .changeToTypingMode(false)
-                    .build()
-                );
-
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'u' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new UndoAction());
-            }
-            case 'U' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new RedoAction());
-            }
-            case 'w' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
-                    new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.AFTER
-                )));
-            }
-            case 'W' -> {
-                return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
-                    new ExpressionDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.AFTER
-                )));
-            }
-            case 'x' -> {
-                if (context.textFile().getBuffer().isEmpty()) {
-                    return ParseSnapshot.FINISHED_NO_OP;
-                }
-
-                TextPosition cursor = context.viewPort().getLogicalCursorPosition();
-                TextPosition next = context.textFile().nextPosition(cursor);
-
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(cursor, next));
-            }
-            case 'X' -> {
-                TextPosition cursor = context.viewPort().getLogicalCursorPosition();
-                TextPosition previous = context.textFile().previousPosition(cursor);
-                if (previous == null) {
-                    return ParseSnapshot.FINISHED_NO_OP;
-                }
-
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(previous, cursor));
-            }
-            case 'y' -> {
-                chordParser.changeState(new ExpectChordState.Builder(chordParser)
-                        .actionType(ActionType.COPY)
-                        .changeToTypingMode(false)
-                        .build()
-                );
-
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-
-            case ':' -> {
-                context.modeManager().setMode(new CommandMode(context.modeManager()));
-                return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(":"));
-            }
-            default -> {
-                return ParseSnapshot.INVALID;
-            }
+    private ParseSnapshot parseRestOfParagraphDelete(ParsingContext context, boolean changeToTypingMode) {
+        if (changeToTypingMode) {
+            context.modeManager().setMode(new TypingMode(context.modeManager()));
         }
+        return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(new RestOfParagraphRangeResolver()));
+    }
+
+    private ParseSnapshot parseFindOperator(ParsingBuffer buffer, Direction direction) {
+        chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
+                .actionType(ActionType.MOVE)
+                .isReversed(direction == Direction.LEFT)
+                .includeTarget(true)
+                .changeToTypingMode(false)
+                .build()
+        );
+
+        return ParseSnapshot.makeUnfinished(buffer.get());
+    }
+
+    private ParseSnapshot parseExclusiveFindOperator(ParsingBuffer buffer, Direction direction) {
+        chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
+                .actionType(ActionType.MOVE)
+                .isReversed(direction == Direction.LEFT)
+                .includeTarget(false)
+                .changeToTypingMode(false)
+                .build()
+        );
+
+        return ParseSnapshot.makeUnfinished(buffer.get());
+    }
+
+    private ParseSnapshot parseCreateParagraphBelow(ParsingContext context) {
+        context.modeManager().setMode(new TypingMode(context.modeManager()));
+
+        int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
+        int character = context.textFile().lengthOfParagraph(paragraph) - 1;
+        return new ParseSnapshot(ParseStatus.FINISHED,
+                new InsertAction("\n", new TextPosition(paragraph, character))
+        );
+    }
+
+    private ParseSnapshot parseCreateParagraphAbove(ParsingContext context) {
+        context.modeManager().setMode(new TypingMode(context.modeManager()));
+
+        int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
+        int character = context.textFile().lengthOfParagraph(paragraph) - 1;
+        return new ParseSnapshot(ParseStatus.FINISHED,
+                new InsertAction("\n", new TextPosition(paragraph, character))
+        );
+    }
+
+    private ParseSnapshot parsePasteBelow(ParsingContext context) {
+        String content = context.viewPort().getInternalClipboard();
+
+        switch (context.viewPort().getInternalClipboardType()) {
+            case BLOCK -> {
+                int paragraph = context.viewPort().getLogicalCursorPosition().paragraph() + 1;
+                return new ParseSnapshot(ParseStatus.FINISHED,
+                        new InsertAction(content, new TextPosition(paragraph, 0))
+                );
+            }
+            case INLINE -> {
+                return new ParseSnapshot(ParseStatus.FINISHED, new CompoundAction(
+                        new MoveAction(Direction.RIGHT),
+                        new InsertAction(content, context.viewPort().getLogicalCursorPosition())
+                ));
+            }
+            case null -> { return ParseSnapshot.FINISHED_NO_OP; }
+        }
+    }
+
+    private ParseSnapshot parsePasteAbove(ParsingContext context) {
+        String content = context.viewPort().getInternalClipboard();
+
+        switch (context.viewPort().getInternalClipboardType()) {
+            case BLOCK -> {
+
+                int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
+                return new ParseSnapshot(ParseStatus.FINISHED,
+                        new InsertAction(content, new TextPosition(paragraph, 0))
+                );
+            }
+            case INLINE -> {
+                return new ParseSnapshot(ParseStatus.FINISHED,
+                        new InsertAction(content, context.viewPort().getLogicalCursorPosition())
+                );
+            }
+            case null -> { return ParseSnapshot.FINISHED_NO_OP; }
+        }
+    }
+
+    private ParseSnapshot parseCutUnderCursor(ParsingContext context, boolean changeToTypingMode) {
+        if (changeToTypingMode) {
+            context.modeManager().setMode(new TypingMode(context.modeManager()));
+        }
+        if (context.textFile().getBuffer().isEmpty()) {
+            return ParseSnapshot.FINISHED_NO_OP;
+        }
+
+        TextPosition cursor = context.viewPort().getLogicalCursorPosition();
+        TextPosition next = context.textFile().nextPosition(cursor);
+
+        return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(cursor, next));
+    }
+
+    private ParseSnapshot parseCutBeforeCursor(ParsingContext context) {
+        TextPosition cursor = context.viewPort().getLogicalCursorPosition();
+        TextPosition previous = context.textFile().previousPosition(cursor);
+        if (previous == null) {
+            return ParseSnapshot.FINISHED_NO_OP;
+        }
+
+        return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(previous, cursor));
+    }
+
+    private ParseSnapshot enterCommandMode(ParsingContext context) {
+        context.modeManager().setMode(new CommandMode(context.modeManager()));
+        return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(":"));
+    }
+
+    private ParseSnapshot joinParagraphs(ParsingContext context) {
+        return new ParseSnapshot(ParseStatus.FINISHED, new ParagraphJoiningAction(
+                context.viewPort().getLogicalCursorPosition().paragraph()
+        ));
     }
 }

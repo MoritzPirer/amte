@@ -4,16 +4,33 @@ package Controller.Action;
 import Controller.Action.Ranges.FixedRangeResolver;
 import Controller.Action.Ranges.Range;
 import Controller.Action.Ranges.RangeResolver;
+import Controller.Services.Clipbobard.CopyType;
 import Controller.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
+import Settings.SettingsMaster;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
 public class DeleteAction extends Action {
-    private String content = null;
     private final RangeResolver resolver;
 
+    enum CopyPreference {
+        DO_NOT_COPY,
+        BLOCK_COPY,
+        INLINE_COPY;
+
+        static CopyPreference of(CopyType type) {
+            return switch (type) {
+                case CopyType.INLINE-> INLINE_COPY;
+                case BLOCK -> BLOCK_COPY;
+            };
+        }
+    }
+
+    private final CopyPreference copyPreference;
+
+    private String content = null;
     private Range range;
     private TextPosition restoreCursorTo = null;
 
@@ -22,11 +39,24 @@ public class DeleteAction extends Action {
      * (i.e. Range.end() is the first character after the deleted section)
      * @param resolver a RangeResolver that can evaluate to the appropriate start and end of the range
      */
+    public DeleteAction(RangeResolver resolver, CopyType type) {
+        this.resolver = resolver;
+        if (SettingsMaster.instance().getBoolean("copyOnDelete")) {
+            this.copyPreference = CopyPreference.of(type);
+        }
+        else {
+            this.copyPreference = CopyPreference.DO_NOT_COPY;
+        }
+    }
+
     public DeleteAction(RangeResolver resolver) {
         this.resolver = resolver;
+        this.copyPreference = CopyPreference.DO_NOT_COPY;
     }
+
     public DeleteAction(TextPosition start, TextPosition end) {
         this.resolver = new FixedRangeResolver(start, end);
+        this.copyPreference = CopyPreference.DO_NOT_COPY;
     }
 
     @Override
@@ -50,6 +80,16 @@ public class DeleteAction extends Action {
         file.deleteRange(range.start(), range.end());
 
         viewPort.moveCursorTo(range.start());
+
+        handleCopy(viewPort);
+    }
+
+    private void handleCopy(ViewPort viewPort) {
+        switch (copyPreference) {
+            case DO_NOT_COPY -> { }
+            case BLOCK_COPY -> viewPort.copy(CopyType.BLOCK, content);
+            case INLINE_COPY -> viewPort.copy(CopyType.INLINE, content);
+        }
     }
 
     @Override

@@ -6,6 +6,7 @@ import Controller.Action.DeleteAction;
 import Controller.Action.Ranges.*;
 import Controller.Services.Clipbobard.CopyType;
 import Debugging.DebugLogger;
+import Shared.Direction;
 
 class ExpectChordState implements ChordParserState {
     private final ChordParser chordParser;
@@ -52,111 +53,21 @@ class ExpectChordState implements ChordParserState {
             return fullParagraphAffectingAction(context);
         }
 
-        switch (buffer.get().charAt(1)) {
-            case 'a' -> {
-                chordParser.changeState(new ExpectDelimiterState.Builder(chordParser)
-                    .actionType(actionType)
-                    .changeToTypingMode(changeToTypingMode)
-                    .includeTarget(true)
-                    .build()
-                );
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'b' -> {
-                chordParser.changeState(new ExpectOperatorState(chordParser));
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(
-                    DelimiterRangeResolver.makeBackward(new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE)
-                ));
-            }
-            case 'B' -> {
-                chordParser.changeState(new ExpectOperatorState(chordParser));
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(
-                    DelimiterRangeResolver.makeBackward(new ExpressionDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE)
-                ));
-            }
-            case 'e' -> {
-                chordParser.changeState(new ExpectOperatorState(chordParser));
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(
-                        DelimiterRangeResolver.makeForward(new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE)
-                ));
-            }
-            case 'E' -> {
-                chordParser.changeState(new ExpectOperatorState(chordParser));
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(
-                        DelimiterRangeResolver.makeForward(new ExpressionDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.BEFORE)
-                ));
-            }
-            case 'f' -> {
-                chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
-                    .actionType(actionType)
-                    .isReversed(false)
-                    .includeTarget(true)
-                    .changeToTypingMode(changeToTypingMode)
-                    .build()
-                );
-
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'F' -> {
-                chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
-                        .actionType(actionType)
-                        .isReversed(true)
-                        .includeTarget(true)
-                        .changeToTypingMode(changeToTypingMode)
-                        .build()
-                );
-
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'i' -> {
-                chordParser.changeState(new ExpectDelimiterState.Builder(chordParser)
-                        .actionType(actionType)
-                        .changeToTypingMode(changeToTypingMode)
-                        .includeTarget(false)
-                        .build()
-                );
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 't' -> {
-                chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
-                    .actionType(actionType)
-                    .isReversed(false)
-                    .includeTarget(false)
-                    .changeToTypingMode(changeToTypingMode)
-                    .build()
-                );
-
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'T' -> {
-                chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
-                        .actionType(actionType)
-                        .isReversed(true)
-                        .includeTarget(false)
-                        .changeToTypingMode(changeToTypingMode)
-                        .build()
-                );
-
-                return ParseSnapshot.makeUnfinished(buffer.get());
-            }
-            case 'w' -> {
-                chordParser.changeState(new ExpectOperatorState(chordParser));
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(
-                        DelimiterRangeResolver.makeForward(new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.AFTER)
-                ));
-            }
-            case 'W' -> {
-                chordParser.changeState(new ExpectOperatorState(chordParser));
-                return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(
-                        DelimiterRangeResolver.makeForward(new ExpressionDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.AFTER)
-                ));
-            }
-
-            default -> {
-                chordParser.changeState(new ExpectOperatorState(chordParser));
-                return ParseSnapshot.INVALID;
-            }
-        }
+        return switch (buffer.get().charAt(1)) {
+            case 'a' ->  parseAroundModifier(buffer);
+            case 'b' ->  parseStartOfWordModifier(new WordDelimiterChecker());
+            case 'B' ->  parseStartOfWordModifier(new ExpressionDelimiterChecker());
+            case 'e' ->  parseEndOfWordModifier(new WordDelimiterChecker());
+            case 'E' ->  parseEndOfWordModifier(new ExpressionDelimiterChecker());
+            case 'f' ->  parseFindModifier(buffer, Direction.RIGHT);
+            case 'F' ->  parseFindModifier(buffer, Direction.LEFT);
+            case 'i' ->  parseInnerModifier(buffer);
+            case 't' ->  parseExclusiveFindModifier(buffer, Direction.RIGHT);
+            case 'T' ->  parseExclusiveFindModifier(buffer, Direction.LEFT);
+            case 'w' ->  parseNextWordModifier(new WordDelimiterChecker());
+            case 'W' ->  parseNextWordModifier(new ExpressionDelimiterChecker());
+            default -> parseReset();
+        };
     }
 
     private ParseSnapshot fullParagraphAffectingAction(ParsingContext context) {
@@ -168,15 +79,89 @@ class ExpectChordState implements ChordParserState {
                     context.modeManager().setMode(new TypingMode(context.modeManager()));
                 }
 
-                action = new DeleteAction(resolver);
+                action = new DeleteAction(resolver, CopyType.BLOCK);
             }
-            case COPY -> {
-                action = new CopyAction(resolver, CopyType.BLOCK);
-            }
+            case COPY -> action = new CopyAction(resolver, CopyType.BLOCK);
             default -> throw new IllegalStateException("actionType MOVE not allowed here");
         }
 
         chordParser.changeState(new ExpectOperatorState(chordParser));
         return new ParseSnapshot(ParseStatus.FINISHED, action);
     }
+
+    private ParseSnapshot parseAroundModifier(ParsingBuffer buffer) {
+        chordParser.changeState(new ExpectDelimiterState.Builder(chordParser)
+                .actionType(actionType)
+                .changeToTypingMode(changeToTypingMode)
+                .includeTarget(true)
+                .build()
+        );
+        return ParseSnapshot.makeUnfinished(buffer.get());
+    }
+
+    private ParseSnapshot parseInnerModifier(ParsingBuffer buffer) {
+        chordParser.changeState(new ExpectDelimiterState.Builder(chordParser)
+                .actionType(actionType)
+                .changeToTypingMode(changeToTypingMode)
+                .includeTarget(false)
+                .build()
+        );
+        return ParseSnapshot.makeUnfinished(buffer.get());
+    }
+
+    ///
+
+    private ParseSnapshot parseStartOfWordModifier(DelimiterChecker checker) {
+        chordParser.changeState(new ExpectOperatorState(chordParser));
+        return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(
+            DelimiterRangeResolver.makeBackward(checker, DelimiterRangeResolver.EdgeBehaviour.BEFORE),
+            CopyType.INLINE
+        ));
+    }
+
+    private ParseSnapshot parseEndOfWordModifier(DelimiterChecker checker) {
+        chordParser.changeState(new ExpectOperatorState(chordParser));
+        return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(
+                DelimiterRangeResolver.makeForward(checker, DelimiterRangeResolver.EdgeBehaviour.BEFORE),
+                CopyType.INLINE
+        ));
+    }
+
+    private ParseSnapshot parseNextWordModifier(DelimiterChecker checker) {
+        chordParser.changeState(new ExpectOperatorState(chordParser));
+        return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(
+                DelimiterRangeResolver.makeForward(checker, DelimiterRangeResolver.EdgeBehaviour.AFTER),
+                CopyType.INLINE
+        ));
+    }
+
+    private ParseSnapshot parseFindModifier(ParsingBuffer buffer, Direction direction) {
+        chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
+                .actionType(actionType)
+                .isReversed(direction == Direction.LEFT)
+                .includeTarget(true)
+                .changeToTypingMode(changeToTypingMode)
+                .build()
+        );
+
+        return ParseSnapshot.makeUnfinished(buffer.get());
+    }
+
+    private ParseSnapshot parseExclusiveFindModifier(ParsingBuffer buffer, Direction direction) {
+        chordParser.changeState(new ExpectFindTargetState.Builder(chordParser)
+                .actionType(actionType)
+                .isReversed(direction == Direction.LEFT)
+                .includeTarget(false)
+                .changeToTypingMode(changeToTypingMode)
+                .build()
+        );
+
+        return ParseSnapshot.makeUnfinished(buffer.get());
+    }
+
+    private ParseSnapshot parseReset() {
+        chordParser.changeState(new ExpectOperatorState(chordParser));
+        return ParseSnapshot.INVALID;
+    }
+
 }
