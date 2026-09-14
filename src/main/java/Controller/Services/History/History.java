@@ -1,4 +1,4 @@
-package Controller.History;
+package Controller.Services.History;
 
 import Controller.Action.Action;
 import Controller.ViewPort;

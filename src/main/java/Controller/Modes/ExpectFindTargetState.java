@@ -1,10 +1,8 @@
 package Controller.Modes;
 
-import Controller.Action.Action;
-import Controller.Action.DeleteAction;
-import Controller.Action.JumpAction;
-import Controller.Action.NullAction;
+import Controller.Action.*;
 import Controller.Action.Ranges.FindRangeResolver;
+import Controller.Services.Clipbobard.CopyType;
 import Debugging.DebugLogger;
 
 class ExpectFindTargetState implements ChordParserState {
@@ -66,27 +64,21 @@ class ExpectFindTargetState implements ChordParserState {
 
         char last = buffer.get().charAt(buffer.length() - 1);
 
-        Action action;
-        switch (actionType) {
-            case DELETE -> {
-                action = new DeleteAction(new FindRangeResolver(last, includeTarget, isReversed));
-            }
-            case MOVE -> {
-                action = new JumpAction(new FindRangeResolver(last, includeTarget, isReversed), isReversed);
-            }
-            default -> {
-                action = new NullAction();
-            }
-        }
+        Action action = createActionByType(last);
 
         chordParser.changeState(new ExpectOperatorState(chordParser));
         if (changeToTypingMode) {
             context.modeManager().setMode(new TypingMode(context.modeManager()));
         }
 
-        return new ParseSnapshot(
-            ParseStatus.FINISHED,
-            action
-        );
+        return new ParseSnapshot(ParseStatus.FINISHED, action);
+    }
+
+    private Action createActionByType(char last) {
+        return switch (actionType) {
+            case DELETE -> new DeleteAction(new FindRangeResolver(last, includeTarget, isReversed));
+            case MOVE -> new JumpAction(new FindRangeResolver(last, includeTarget, isReversed), isReversed);
+            case COPY -> new CopyAction(new FindRangeResolver(last, includeTarget, isReversed), CopyType.INLINE);
+        };
     }
 }

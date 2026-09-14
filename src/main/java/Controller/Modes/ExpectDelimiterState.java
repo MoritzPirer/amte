@@ -1,8 +1,10 @@
 package Controller.Modes;
 
 import Controller.Action.Action;
+import Controller.Action.CopyAction;
 import Controller.Action.DeleteAction;
 import Controller.Action.Ranges.*;
+import Controller.Services.Clipbobard.CopyType;
 import Debugging.DebugLogger;
 
 class ExpectDelimiterState implements ChordParserState {
@@ -65,9 +67,15 @@ class ExpectDelimiterState implements ChordParserState {
                     behaviour
                 );
             }
-            case 'w' -> resolver = DelimiterRangeResolver.makeBidirectional(
-                new WordDelimiterChecker(), DelimiterRangeResolver.EdgeBehaviour.ON
-            );
+            case 'w' -> {
+                DelimiterRangeResolver.EdgeBehaviour behaviour = actionType == ActionType.COPY?
+                    DelimiterRangeResolver.EdgeBehaviour.BEFORE :
+                    DelimiterRangeResolver.EdgeBehaviour.ON;
+
+                resolver = DelimiterRangeResolver.makeBidirectional(
+                    new WordDelimiterChecker(), behaviour
+                );
+            }
             case 'W' -> resolver = DelimiterRangeResolver.makeBidirectional(
                 new ExpressionDelimiterChecker(),
                 DelimiterRangeResolver.EdgeBehaviour.ON
@@ -86,7 +94,7 @@ class ExpectDelimiterState implements ChordParserState {
 
         return switch (actionType) {
             case DELETE -> new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(resolver));
-            case COPY -> throw new UnsupportedOperationException("TODO");
+            case COPY -> new ParseSnapshot(ParseStatus.FINISHED, new CopyAction(resolver, CopyType.INLINE));
             default -> throw new IllegalStateException();
         };
     }

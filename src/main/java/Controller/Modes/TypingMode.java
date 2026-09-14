@@ -3,6 +3,7 @@ package Controller.Modes;
 import Controller.Action.*;
 import Controller.Action.Ranges.FixedRangeResolver;
 import Controller.Input;
+import Controller.Services.Clipbobard.ClipboardHandler;
 import Controller.SpecialInput;
 import Controller.View.Line;
 import Controller.ViewPort;
@@ -59,6 +60,14 @@ public class TypingMode implements ModeState {
                     new TextPosition(paragraph, 0),
                     new TextPosition(paragraph, 1))
                 );
+            }
+            case PASTE -> {
+                String content = ClipboardHandler.getSystemClipboardContent();
+                if (content == null) {
+                    return new NullAction();
+                }
+
+                return new InsertAction(content, viewPort.getLogicalCursorPosition());
             }
             default -> {
                 return new NullAction();

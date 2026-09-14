@@ -10,7 +10,6 @@ import Controller.View.*;
 import Settings.SettingsMaster;
 import Shared.Size;
 import Shared.TextPosition;
-import Shared.Utility.NumberUtility;
 import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextCharacter;
@@ -151,6 +150,9 @@ public class LanternaDisplay extends Display {
         }
 
         if (keyStroke.getKeyType() == KeyType.Character) {
+            if (keyStroke.isCtrlDown() && keyStroke.getCharacter() == 'v') {
+                return new Input(SpecialInput.PASTE);
+            }
             return new Input(keyStroke.getCharacter());
         }
 

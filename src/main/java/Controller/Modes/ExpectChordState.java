@@ -1,8 +1,10 @@
 package Controller.Modes;
 
 import Controller.Action.Action;
+import Controller.Action.CopyAction;
 import Controller.Action.DeleteAction;
 import Controller.Action.Ranges.*;
+import Controller.Services.Clipbobard.CopyType;
 import Debugging.DebugLogger;
 
 class ExpectChordState implements ChordParserState {
@@ -168,8 +170,9 @@ class ExpectChordState implements ChordParserState {
 
                 action = new DeleteAction(resolver);
             }
-            //TODO COPY
-            case COPY -> throw new UnsupportedOperationException("TODO");
+            case COPY -> {
+                action = new CopyAction(resolver, CopyType.BLOCK);
+            }
             default -> throw new IllegalStateException("actionType MOVE not allowed here");
         }
 

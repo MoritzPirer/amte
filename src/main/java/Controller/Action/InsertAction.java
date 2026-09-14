@@ -36,6 +36,11 @@ public class InsertAction extends Action {
             return position.offset(0, content.length());
         }
 
+        if (content.endsWith("\n")) {
+            String[] lines = content.split("\n");
+            return new TextPosition(position.paragraph() + paragraphsAdded - 1, lines[lines.length - 1].length());
+        }
+
         String lastLine = content.substring(content.lastIndexOf('\n') + 1);
         return new TextPosition(position.paragraph() + paragraphsAdded, lastLine.length());
     }

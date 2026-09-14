@@ -160,6 +160,44 @@ class ExpectOperatorState implements ChordParserState {
                     new MoveAction(Direction.UP)
                 ));
             }
+            case 'p' -> {
+                String content = context.viewPort().getInternalClipboard();
+
+                switch (context.viewPort().getInternalClipboardType()) {
+                    case BLOCK -> {
+                        int paragraph = context.viewPort().getLogicalCursorPosition().paragraph() + 1;
+                        return new ParseSnapshot(ParseStatus.FINISHED,
+                                new InsertAction(content, new TextPosition(paragraph, 0))
+                        );
+                    }
+                    case INLINE -> {
+                        return new ParseSnapshot(ParseStatus.FINISHED, new CompoundAction(
+                            new MoveAction(Direction.RIGHT),
+                            new InsertAction(content, context.viewPort().getLogicalCursorPosition())
+                        ));
+                    }
+                    case null -> { return ParseSnapshot.FINISHED_NO_OP; }
+                }
+            }
+            case 'P' -> {
+                String content = context.viewPort().getInternalClipboard();
+
+                switch (context.viewPort().getInternalClipboardType()) {
+                    case BLOCK -> {
+
+                        int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
+                        return new ParseSnapshot(ParseStatus.FINISHED,
+                                new InsertAction(content, new TextPosition(paragraph, 0))
+                        );
+                    }
+                    case INLINE -> {
+                        return new ParseSnapshot(ParseStatus.FINISHED,
+                            new InsertAction(content, context.viewPort().getLogicalCursorPosition())
+                        );
+                    }
+                    case null -> { return ParseSnapshot.FINISHED_NO_OP; }
+                }
+            }
             case 's' -> {
                 context.modeManager().setMode(new TypingMode(context.modeManager()));
                 if (context.textFile().getBuffer().isEmpty()) {
@@ -227,6 +265,15 @@ class ExpectOperatorState implements ChordParserState {
                 }
 
                 return new ParseSnapshot(ParseStatus.FINISHED, new DeleteAction(previous, cursor));
+            }
+            case 'y' -> {
+                chordParser.changeState(new ExpectChordState.Builder(chordParser)
+                        .actionType(ActionType.COPY)
+                        .changeToTypingMode(false)
+                        .build()
+                );
+
+                return ParseSnapshot.makeUnfinished(buffer.get());
             }
 
             case ':' -> {

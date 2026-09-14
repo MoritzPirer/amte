@@ -1,8 +1,9 @@
 package Controller;
 
-import Controller.Action.Action;
-import Controller.History.History;
-import Controller.History.StackHistory;
+import Controller.Services.Clipbobard.ClipboardHandler;
+import Controller.Services.Clipbobard.CopyType;
+import Controller.Services.History.History;
+import Controller.Services.History.StackHistory;
 import Controller.View.Line;
 import Controller.View.Style;
 import Controller.View.TextSpan;
@@ -28,6 +29,8 @@ public class ViewPort {
     private final List<String> temporaryMessages = new ArrayList<>();
 
     private final History history = new StackHistory();
+    private final ClipboardHandler clipboardHandler = new ClipboardHandler();
+
     private boolean isRunning = true;
 
     public ViewPort(TextFile file) {
@@ -280,5 +283,21 @@ public class ViewPort {
 
     public History getHistory() {
         return history;
+    }
+
+    public String getInternalClipboard() {
+        return clipboardHandler.getContent();
+    }
+
+    public CopyType getInternalClipboardType() {
+        return clipboardHandler.getType();
+    }
+
+    public void copy(CopyType type, String content) {
+        clipboardHandler.copy(type, content);
+    }
+
+    public String getExternalClipboard() {
+        return ClipboardHandler.getSystemClipboardContent();
     }
 }
