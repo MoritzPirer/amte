@@ -6,6 +6,8 @@ import Controller.View.Style;
 import Controller.View.TextSpan;
 import FileStorage.FileIO.DiskFileLoader;
 import FileStorage.FileIO.FileLoader;
+import Rendering.DoubleBufferRenderer;
+import Rendering.Renderer;
 import Shared.TextPosition;
 
 import java.io.File;
@@ -22,12 +24,17 @@ public class TextFile {
 
     private SaveState saveState;
 
+    private final Renderer renderer;
+
     public TextFile(Path filePath, String fileName, FileBuffer buffer, FileMetadataTracker tracker, SaveState saveState) {
         this.filePath = filePath;
         this.fileName = fileName;
         this.buffer = buffer;
         this.tracker = tracker;
         this.saveState = saveState;
+
+        renderer = new DoubleBufferRenderer(buffer);
+        renderer.start();
     }
 
     public void setFileName(String fileName) {
@@ -35,6 +42,7 @@ public class TextFile {
             this.fileName = fileName;
         }
     }
+
     public String getFileName() {
         return fileName;
     }
@@ -75,10 +83,7 @@ public class TextFile {
     }
 
     public Line readParagraph(int paragraphIndex) {
-        //TODO WHEN [Rendering Component is being implemented] DO [rewrite this function to retrieve Style from Rendering Component]
-        Style style = new Style(false, false, RenderStyle.TEXT);
-        TextSpan span = new TextSpan(style, buffer.readParagraph(paragraphIndex));
-        return new Line(new TextSpan[]{span});
+        return Line.of(buffer.readParagraph(paragraphIndex), renderer.getStyle(paragraphIndex));
     }
 
     public String readRange(TextPosition start, TextPosition end) {

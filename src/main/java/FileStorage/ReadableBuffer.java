@@ -41,4 +41,10 @@ public interface ReadableBuffer {
      * @return true if the buffer is empty, false otherwise
      */
     boolean isEmpty();
+
+    /**
+     * creates a new ReadableBuffer that is a deep copy of the current state in a thread-safe way
+     * @return the current state of the buffer
+     */
+    ReadableBuffer snapshot();
 }

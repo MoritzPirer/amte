@@ -1,5 +1,6 @@
 package Controller.View;
 
+import Rendering.StyleData;
 import Settings.SettingsMaster;
 
 import java.util.ArrayList;
@@ -7,6 +8,30 @@ import java.util.Arrays;
 import java.util.List;
 
 public record Line(TextSpan[] textSpans) {
+
+    public static Line of(String text, StyleData[] styles) {
+        List<TextSpan> textSpans = new ArrayList<>();
+        int consumed = 0;
+        for (StyleData style : styles) {
+            if (consumed + style.length() <= text.length()) {
+                textSpans.add(new TextSpan(style.style(), text.substring(consumed, consumed + style.length())));
+            }
+            else if (consumed <= text.length()) {
+                textSpans.add(new TextSpan(style.style(), text.substring(consumed)));
+            }
+            else {
+                break;
+            }
+            consumed += style.length();
+        }
+
+        if (consumed < text.length()) {
+            textSpans.add(new TextSpan(Style.getTextStyle(), text.substring(consumed)));
+        }
+
+        return new Line(textSpans.toArray(new TextSpan[0]));
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

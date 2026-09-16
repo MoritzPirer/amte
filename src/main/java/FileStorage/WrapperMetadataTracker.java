@@ -217,4 +217,9 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
     public FileBuffer getTrackedFileBuffer() {
         return this;
     }
+
+    @Override
+    public ReadableBuffer snapshot() {
+        return buffer.snapshot();
+    }
 }

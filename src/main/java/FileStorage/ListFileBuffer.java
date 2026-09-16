@@ -5,6 +5,7 @@ import Shared.Utility.StringUtility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Implements the FileBuffer interface as a List of Strings, with each list element being one paragraph / paragraph of content
@@ -12,8 +13,19 @@ import java.util.List;
 public class ListFileBuffer implements FileBuffer {
     private final List<String> paragraphs;
 
+    /**
+     * NOTE: on shared objects, the main thread reads and writes, the render thread only makes a copy
+     * the main thread can never read while the object is being written, and the render thread reads from a copy it owns
+     * alone, therefore read operations do not need to be locked
+     */
+    private final ReentrantLock lock = new ReentrantLock();
+
     public ListFileBuffer() {
         paragraphs = new ArrayList<>();
+    }
+
+    private ListFileBuffer(List<String> paragraphs) {
+        this.paragraphs = paragraphs;
     }
 
     private void checkPosition(TextPosition position) throws InvalidPosition {
@@ -35,86 +47,109 @@ public class ListFileBuffer implements FileBuffer {
 
     @Override
     public void insert(String content, TextPosition position) throws InvalidPosition {
-        checkPosition(position);
+        try {
+            lock.lock();
+            checkPosition(position);
 
-        if (content == null || content.isEmpty()) {
-            return;
+            if (content == null || content.isEmpty()) {
+                return;
+            }
+
+            if (position.paragraph() == paragraphs.size()) {
+                append(content);
+                return;
+            }
+
+            String currentLine = paragraphs.get(position.paragraph());
+            String beforeInsert = currentLine.substring(0, position.character());
+            String afterInsert = currentLine.substring(position.character());
+
+            if (content.equals("\n")) {
+                paragraphs.set(position.paragraph(), beforeInsert + "\n");
+                paragraphs.add(position.paragraph() + 1, afterInsert);
+                return;
+            }
+            else if (!content.contains("\n")) {
+                // inline insert
+                String result = beforeInsert + content + afterInsert;
+                paragraphs.set(position.paragraph(), result);
+                return;
+            }
+
+            List<String> lines = StringUtility.splitAfterDelimiter(content, '\n');
+            assert !lines.isEmpty();
+            lines.set(0, beforeInsert + lines.getFirst());
+            if (lines.getLast().endsWith("\n")) {
+                lines.add(afterInsert);
+            }
+            else {
+                lines.set(lines.size() - 1, lines.getLast() + afterInsert);
+            }
+
+            paragraphs.remove(position.paragraph());
+            paragraphs.addAll(position.paragraph(), lines);
         }
-
-        if (position.paragraph() == paragraphs.size()) {
-            append(content);
-            return;
+        finally {
+            lock.unlock();
         }
-
-        String currentLine = paragraphs.get(position.paragraph());
-        String beforeInsert = currentLine.substring(0, position.character());
-        String afterInsert = currentLine.substring(position.character());
-
-        if (content.equals("\n")) {
-            paragraphs.set(position.paragraph(), beforeInsert + "\n");
-            paragraphs.add(position.paragraph() + 1, afterInsert);
-            return;
-        }
-        else if (!content.contains("\n")) {
-            // inline insert
-            String result = beforeInsert + content + afterInsert;
-            paragraphs.set(position.paragraph(), result);
-            return;
-        }
-
-        List<String> lines = StringUtility.splitAfterDelimiter(content, '\n');
-        assert !lines.isEmpty();
-        lines.set(0, beforeInsert + lines.getFirst());
-        if (lines.getLast().endsWith("\n")) {
-            lines.add(afterInsert);
-        }
-        else {
-            lines.set(lines.size() - 1, lines.getLast() + afterInsert);
-        }
-
-        paragraphs.remove(position.paragraph());
-        paragraphs.addAll(position.paragraph(), lines);
-
     }
 
     @Override
     public void append(String content) {
-        List<String> lines = StringUtility.splitAfterDelimiter(content, '\n');
-        assert !lines.isEmpty();
+        try {
+            lock.lock();
+            List<String> lines = StringUtility.splitAfterDelimiter(content, '\n');
+            assert !lines.isEmpty();
 
-        if (!lines.getLast().endsWith("\n")) {
-            lines.set(lines.size() - 1, lines.getLast().concat("\n"));
+            if (!lines.getLast().endsWith("\n")) {
+                lines.set(lines.size() - 1, lines.getLast().concat("\n"));
+            }
+
+            paragraphs.addAll(lines);
         }
-
-        paragraphs.addAll(lines);
+        finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public void delete(TextPosition start, TextPosition end) throws InvalidPosition {
-        checkPosition(start);
-        if (!end.isAfter(start)) {
-            throw new InvalidPosition("start is after end");
+        try {
+            lock.lock();
+            checkPosition(start);
+            if (!end.isAfter(start)) {
+                throw new InvalidPosition("start is after end");
+            }
+
+            String beforeDelete = paragraphs.get(start.paragraph()).substring(0, start.character());
+
+            TextPosition deletionEnd = getDeletionEnd(end);
+
+            int rowsToDelete = deletionEnd.paragraph() - start.paragraph() + 1;
+            String afterDelete = paragraphs.get(deletionEnd.paragraph()).substring(deletionEnd.character());
+
+            for (int i = 0; i < rowsToDelete; i++) {
+                paragraphs.remove(start.paragraph());
+            }
+
+            if (!beforeDelete.isEmpty() || !afterDelete.isEmpty()) {
+                paragraphs.add(start.paragraph(), beforeDelete + afterDelete);
+            }
         }
-        
-        String beforeDelete = paragraphs.get(start.paragraph()).substring(0, start.character());
-
-        TextPosition deletionEnd = getDeletionEnd(end);
-
-        int rowsToDelete = deletionEnd.paragraph() - start.paragraph() + 1;
-        String afterDelete = paragraphs.get(deletionEnd.paragraph()).substring(deletionEnd.character());
-
-        for (int i = 0; i < rowsToDelete; i++) {
-            paragraphs.remove(start.paragraph());
-        }
-
-        if (!beforeDelete.isEmpty() || !afterDelete.isEmpty()) {
-            paragraphs.add(start.paragraph(), beforeDelete + afterDelete);
+        finally {
+            lock.unlock();
         }
     }
 
     @Override
     public void clear() {
-        paragraphs.clear();
+        try {
+            lock.lock();
+            paragraphs.clear();
+        }
+        finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -197,5 +232,18 @@ public class ListFileBuffer implements FileBuffer {
     @Override
     public boolean isEmpty() {
         return paragraphs.isEmpty();
+    }
+
+    @Override
+    public ReadableBuffer snapshot() {
+        try {
+            lock.lock();
+            List<String> lines = new ArrayList<>(paragraphs.size());
+            lines.addAll(paragraphs);
+            return new ListFileBuffer(lines);
+        }
+        finally {
+            lock.unlock();
+        }
     }
 }

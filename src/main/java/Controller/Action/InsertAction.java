@@ -6,6 +6,8 @@ import FileStorage.TextFile;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
+import java.util.Arrays;
+
 public class InsertAction extends Action {
     private String content;
     private TextPosition position;
@@ -38,6 +40,10 @@ public class InsertAction extends Action {
 
         if (content.endsWith("\n")) {
             String[] lines = content.split("\n");
+
+            if (lines.length == 0) {
+                return new TextPosition(position.paragraph() + paragraphsAdded, 0);
+            }
             return new TextPosition(position.paragraph() + paragraphsAdded - 1, lines[lines.length - 1].length());
         }
 

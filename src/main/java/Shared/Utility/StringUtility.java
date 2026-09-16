@@ -2,6 +2,8 @@ package Shared.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class StringUtility {
 
@@ -205,5 +207,64 @@ public class StringUtility {
 
     public static boolean isAlphanumeric(char c) {
         return Character.isAlphabetic(c) || Character.isDigit(c);
+    }
+
+    /**
+     * Split the given text into a list such that:
+     *      a) joining the list together recovers the original text (i.e. text is split without adding or removing characters
+     *          and each character is in exactly one element of the resulting list
+     *      b) each element of the result is either one of the delimiters or does not contain any delimiter as a substring
+     * @param text the text to split
+     * @param delimiters the substrings that designate the end of a token, and that are themselves tokens
+     * @param escapeChars a String of characters, where each character indicated that the next character is not part of a delimiter
+     * @return the tokenized list
+     */
+    public static List<String> tokenize(String text, Set<String> delimiters, String escapeChars) {
+        List<String> tokens = new ArrayList<>();
+        StringBuilder currentToken = new StringBuilder();
+
+        for (int i = 0; i < text.length(); i++) {
+            char currentChar = text.charAt(i);
+            if (escapeChars.contains(String.valueOf(currentChar))) {
+                i++;
+                continue;
+            }
+
+            if (delimiterStartsAtIndex(text, delimiters, i)) {
+                tokens.add(currentToken.toString());
+                currentToken.delete(0, currentToken.length());
+
+                String matchingDelimiter = getDelimiterStartingAtIndex(text, delimiters, i);
+                tokens.add(matchingDelimiter);
+                i += matchingDelimiter.length() - 1;
+            }
+            else {
+                currentToken.append(currentChar);
+            }
+        }
+
+        if (!currentToken.isEmpty()) {
+            tokens.add(currentToken.toString());
+        }
+
+        return tokens;
+    }
+
+    private static boolean delimiterStartsAtIndex(String text, Set<String> delimiters, int index) {
+        String rest = text.substring(index);
+        return delimiters.stream().anyMatch(rest::startsWith);
+    }
+
+    private static String getDelimiterStartingAtIndex(String text, Set<String> delimiters, int index) {
+        String rest = text.substring(index);
+        String best = "";
+
+        for (String delimiter : delimiters) {
+            if (rest.startsWith(delimiter) && delimiter.length() > best.length()) {
+                best = delimiter;
+            }
+        }
+
+        return best;
     }
 }
