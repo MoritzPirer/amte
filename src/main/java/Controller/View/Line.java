@@ -26,7 +26,7 @@ public record Line(TextSpan[] textSpans) {
         }
 
         if (consumed < text.length()) {
-            textSpans.add(new TextSpan(Style.getTextStyle(), text.substring(consumed)));
+            textSpans.add(new TextSpan(Style.TEXT_STYLE, text.substring(consumed)));
         }
 
         return new Line(textSpans.toArray(new TextSpan[0]));

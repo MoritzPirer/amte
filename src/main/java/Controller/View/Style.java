@@ -3,17 +3,12 @@ package Controller.View;
 import FileStorage.SaveState;
 
 public record Style(boolean isItalic, boolean isBold, RenderStyle renderStyle) {
-    public static Style getNumberingStyle() {
-        return new Style(false, false, RenderStyle.TEXT);
-    }
-    public static Style getFileNameStyle() {
-        return new Style(false, false, RenderStyle.WEAK_HIGHLIGHT);
-    }
+    public static final Style NUMBERING_STYLE = new Style(false, false, RenderStyle.TEXT);
+    public static final Style FILE_NAME_STYLE = new Style(false, false, RenderStyle.WEAK_HIGHLIGHT);
+    public static final Style CURSOR_POSITION_STYLE = new Style(true, false, RenderStyle.TEXT);
 
     public static Style getSaveStateStyle(SaveState saveState) {
-        return new Style(
-            false,
-            false,
+        return new Style(false, false,
             switch (saveState) {
                 case SAVED -> RenderStyle.FILE_SAVED;
                 case MODIFIED -> RenderStyle.FILE_MODIFIED;
@@ -22,19 +17,9 @@ public record Style(boolean isItalic, boolean isBold, RenderStyle renderStyle) {
         );
     }
 
-    public static Style getCursorPositionStyle() {
-        return new Style(true, false, RenderStyle.TEXT);
-    }
-
-    public static Style getModeIndicatorStyle() {
-        return new Style(true, false, RenderStyle.STRONG_HIGHLIGHT);
-    }
-
-    public static Style getMetadataStyle() {
-        return new Style(false, false, RenderStyle.TEXT);
-    }
-
-    public static Style getTextStyle() {
-        return new Style(false, false, RenderStyle.TEXT);
-    }
+    public static final Style MODE_INDICATOR_STYLE = new Style(true, false, RenderStyle.STRONG_HIGHLIGHT);
+    public static final Style METADATA_STYLE = new Style(false, false, RenderStyle.TEXT);
+    public static final Style TEXT_STYLE = new Style(false, false, RenderStyle.TEXT);
+    public static final Style HEADING_STYLE = new Style(false, false, RenderStyle.MEDIUM_HIGHLIGHT);
+    public static final Style QUOTE_STYLE = new Style(false, false, RenderStyle.STRONG_HIGHLIGHT);
 }

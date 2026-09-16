@@ -6,7 +6,7 @@ class NullRendererState implements RendererState {
 
     @Override
     public StyleData[] parse(String paragraph) {
-        return new StyleData[]{new StyleData(Style.getTextStyle(), paragraph.length())};
+        return new StyleData[]{new StyleData(Style.TEXT_STYLE, paragraph.length())};
     }
 
     @Override

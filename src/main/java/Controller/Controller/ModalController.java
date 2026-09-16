@@ -124,7 +124,7 @@ public class ModalController implements Controller{
     }
 
     private TextSpan getModeIndicator() {
-        return new TextSpan(Style.getModeIndicatorStyle(), modeManager.getName());
+        return new TextSpan(Style.MODE_INDICATOR_STYLE, modeManager.getName());
     }
 
     private TextSpan getFileName() {
@@ -134,9 +134,9 @@ public class ModalController implements Controller{
                 fileName = provider.get("untitledFile");
             }
             String text = provider.get("nowEditing") + fileName;
-            return new TextSpan(Style.getFileNameStyle(), text);
+            return new TextSpan(Style.FILE_NAME_STYLE, text);
         }
-        return new TextSpan(Style.getFileNameStyle(), "");
+        return new TextSpan(Style.FILE_NAME_STYLE, "");
     }
 
     private TextSpan getSaveStateIndicator() {
@@ -167,10 +167,10 @@ public class ModalController implements Controller{
             TextPosition position = viewPort.getLogicalCursorPosition()
                 .offset(1, 1); // convert from 0-indexed to 1-indexed
 
-            return new TextSpan(Style.getCursorPositionStyle(), position.toString());
+            return new TextSpan(Style.CURSOR_POSITION_STYLE, position.toString());
         }
 
-        return new TextSpan(Style.getCursorPositionStyle(), "");
+        return new TextSpan(Style.CURSOR_POSITION_STYLE, "");
     }
 
 
@@ -182,21 +182,21 @@ public class ModalController implements Controller{
             String characterCountText = provider.get("characterCountIndicator")
                 + NumberUtility.formatNumber(file.getCharacterCount(), separator);
 
-            textSpans.add(new TextSpan(Style.getMetadataStyle(), characterCountText));
+            textSpans.add(new TextSpan(Style.METADATA_STYLE, characterCountText));
         }
 
         if (SettingsMaster.instance().getBoolean("showWordCount")) {
             String wordCountText = provider.get("wordCountIndicator")
                 + NumberUtility.formatNumber(file.getWordCount(), separator);
 
-            textSpans.add(new TextSpan(Style.getMetadataStyle(), wordCountText));
+            textSpans.add(new TextSpan(Style.METADATA_STYLE, wordCountText));
         }
 
         if (SettingsMaster.instance().getBoolean("showParagraphCount")) {
             String paragraphCountText = provider.get("paragraphCountIndicator")
                 + NumberUtility.formatNumber(file.getParagraphCount(), separator);
 
-            textSpans.add(new TextSpan(Style.getMetadataStyle(), paragraphCountText));
+            textSpans.add(new TextSpan(Style.METADATA_STYLE, paragraphCountText));
         }
 
         if (textSpans.isEmpty()) {

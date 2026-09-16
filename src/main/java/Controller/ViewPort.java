@@ -151,7 +151,7 @@ public class ViewPort {
 
             int visualLines = visualLinesNeeded(currentParagraph.length(), textAreaSize.width());
             String content = generateLineNumber(currentIndex, size.width());
-            lines[visualLinesUsed] = new Line(new TextSpan[]{new TextSpan(Style.getNumberingStyle(), content)});
+            lines[visualLinesUsed] = new Line(new TextSpan[]{new TextSpan(Style.NUMBERING_STYLE, content)});
 
             int remainingVisualLines = size.height() - visualLinesUsed;
             for (int i = 1; i < Math.min(visualLines, remainingVisualLines); i++) {
@@ -274,7 +274,7 @@ public class ViewPort {
     public ViewComponent getTemporaryMessages() {
         Size size = new Size(temporaryMessages.size(), textAreaSize.width());
         Line[] lines = temporaryMessages.stream()
-            .map(message -> new TextSpan(Style.getTextStyle(), message))
+            .map(message -> new TextSpan(Style.TEXT_STYLE, message))
             .map(span -> new Line(new TextSpan[]{span}))
             .toArray(Line[]::new);
 

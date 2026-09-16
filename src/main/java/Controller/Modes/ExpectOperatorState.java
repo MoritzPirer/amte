@@ -23,14 +23,14 @@ class ExpectOperatorState implements ChordParserState {
         return switch (buffer.get().charAt(0)) {
             case 'a' -> parseTypingModeAfterCursor(context);
             case 'A' -> parseTypingModeAfterParagraph(context);
-            case 'b' -> parseStartOfWordMove(context, new WordDelimiterChecker());
-            case 'B' -> parseStartOfWordMove(context, new ExpressionDelimiterChecker());
+            case 'b' -> parseStartOfWordMove(new WordDelimiterChecker());
+            case 'B' -> parseStartOfWordMove(new ExpressionDelimiterChecker());
             case 'c' -> parseBeginningOfDeleteChord(buffer, true);
             case 'C' -> parseRestOfParagraphDelete(context, true);
             case 'd' -> parseBeginningOfDeleteChord(buffer, false);
             case 'D' -> parseRestOfParagraphDelete(context, false);
-            case 'e' -> parseEndOfWordMove(context, new WordDelimiterChecker());
-            case 'E' -> parseEndOfWordMove(context, new ExpressionDelimiterChecker());
+            case 'e' -> parseEndOfWordMove(new WordDelimiterChecker());
+            case 'E' -> parseEndOfWordMove(new ExpressionDelimiterChecker());
             case 'f' -> parseFindOperator(buffer, Direction.RIGHT);
             case 'F' -> parseFindOperator(buffer, Direction.LEFT);
             case 'h' -> new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.LEFT));
@@ -49,8 +49,8 @@ class ExpectOperatorState implements ChordParserState {
             case 'T' -> parseExclusiveFindOperator(buffer, Direction.LEFT);
             case 'u' -> new ParseSnapshot(ParseStatus.FINISHED, new UndoAction());
             case 'U' -> new ParseSnapshot(ParseStatus.FINISHED, new RedoAction());
-            case 'w' -> parseNextWordMove(context, new WordDelimiterChecker());
-            case 'W' -> parseNextWordMove(context, new ExpressionDelimiterChecker());
+            case 'w' -> parseNextWordMove(new WordDelimiterChecker());
+            case 'W' -> parseNextWordMove(new ExpressionDelimiterChecker());
             case 'x' -> parseCutUnderCursor(context, false);
             case 'X' -> parseCutBeforeCursor(context);
             case 'y' -> parseBeginningOfCopyChord(buffer);
@@ -98,20 +98,20 @@ class ExpectOperatorState implements ChordParserState {
         );
     }
 
-    private ParseSnapshot parseStartOfWordMove(ParsingContext context, DelimiterChecker checker) {
+    private ParseSnapshot parseStartOfWordMove(DelimiterChecker checker) {
         return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(
             DelimiterRangeResolver.makeBackward(checker, DelimiterRangeResolver.EdgeBehaviour.BEFORE),
             true
         ));
     }
 
-    private ParseSnapshot parseEndOfWordMove(ParsingContext context, DelimiterChecker checker) {
+    private ParseSnapshot parseEndOfWordMove(DelimiterChecker checker) {
         return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
                 checker, DelimiterRangeResolver.EdgeBehaviour.BEFORE
         )));
     }
 
-    private ParseSnapshot parseNextWordMove(ParsingContext context, DelimiterChecker checker) {
+    private ParseSnapshot parseNextWordMove(DelimiterChecker checker) {
         return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(DelimiterRangeResolver.makeForward(
                 checker, DelimiterRangeResolver.EdgeBehaviour.AFTER
         )));

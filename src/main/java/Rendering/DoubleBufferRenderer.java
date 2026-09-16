@@ -74,7 +74,7 @@ public class DoubleBufferRenderer implements Renderer {
 
             swapBuffers();
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1000); //TEMP -> replace with a better mechanic to limit re-runs on short files
             }
             catch (InterruptedException ignored) { }
         }
