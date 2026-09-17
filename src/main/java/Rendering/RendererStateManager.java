@@ -12,7 +12,7 @@ class RendererStateManager {
     }
 
     void reset() {
-        currentState.reset();
+        currentState = new MarkdownRendererState(this);
     }
 
     void changeState(RendererState newState) {

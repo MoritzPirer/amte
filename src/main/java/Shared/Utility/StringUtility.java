@@ -225,14 +225,16 @@ public class StringUtility {
 
         for (int i = 0; i < text.length(); i++) {
             char currentChar = text.charAt(i);
-            if (escapeChars.contains(String.valueOf(currentChar))) {
+            if (escapeChars != null && escapeChars.contains(String.valueOf(currentChar))) {
                 i++;
                 continue;
             }
 
             if (delimiterStartsAtIndex(text, delimiters, i)) {
-                tokens.add(currentToken.toString());
-                currentToken.delete(0, currentToken.length());
+                if (!currentToken.isEmpty()) {
+                    tokens.add(currentToken.toString());
+                    currentToken.delete(0, currentToken.length());
+                }
 
                 String matchingDelimiter = getDelimiterStartingAtIndex(text, delimiters, i);
                 tokens.add(matchingDelimiter);
@@ -266,5 +268,16 @@ public class StringUtility {
         }
 
         return best;
+    }
+
+    public static String removeWhiteSpace(String s) {
+        StringBuilder builder = new StringBuilder();
+        for (char c : s.toCharArray()) {
+            if (!Character.isWhitespace(c)) {
+                builder.append(c);
+            }
+        }
+
+        return builder.toString();
     }
 }

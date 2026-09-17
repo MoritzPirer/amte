@@ -2,6 +2,7 @@ package Rendering;
 
 import Controller.View.RenderStyle;
 import Controller.View.Style;
+import Debugging.DebugLogger;
 import Shared.Utility.StringUtility;
 
 import java.util.List;
@@ -14,8 +15,14 @@ class MarkdownRendererState implements RendererState {
     private static final String BOLD_INDICATOR = "**";
     private static final String VERBATIM_INDICATOR = "`";
     private static final String ESCAPE_INDICATOR = "\\";
+    private static final String CODE_BLOCK_INDICATOR = "```";
 
-    private static final Set<String> delimiters = Set.of(ITALIC_INDICATOR, BOLD_INDICATOR, VERBATIM_INDICATOR);
+    private static final Set<String> delimiters = Set.of(
+        ITALIC_INDICATOR,
+        BOLD_INDICATOR,
+        VERBATIM_INDICATOR,
+        CODE_BLOCK_INDICATOR
+    );
 
     private static final String HEADING_INDICATOR = "#";
     private static final String QUOTE_INDICATOR = ">";
@@ -49,6 +56,11 @@ class MarkdownRendererState implements RendererState {
             return Style.QUOTE_STYLE;
         }
 
+        if (isCodeBlockStart(tokens)) {
+            String requestedLanguage = getCodeBlockLanguage(tokens);
+            manager.changeState(new CodeBlockRendererState(requestedLanguage, manager));
+        }
+
         return Style.TEXT_STYLE;
     }
 
@@ -68,6 +80,17 @@ class MarkdownRendererState implements RendererState {
             && tokens.getFirst().startsWith(QUOTE_INDICATOR);
     }
 
+    private boolean isCodeBlockStart(List<String> tokens) {
+        return !tokens.isEmpty() && tokens.getFirst().equals(CODE_BLOCK_INDICATOR);
+    }
+
+    private String getCodeBlockLanguage(List<String> tokens) {
+        if (tokens.size() < 2) {
+            return "";
+        }
+
+        return StringUtility.removeWhiteSpace(tokens.get(1));
+    }
     private StyleData parseToken(String token, Style baseStyle) {
         Style currentStyle = getCurrentStyle(baseStyle);
 

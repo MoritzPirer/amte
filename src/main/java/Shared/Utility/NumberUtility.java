@@ -75,4 +75,56 @@ public class NumberUtility {
     public static String formatNumber(int number, String separator) {
         return formatNumber(number, separator, 3);
     }
+
+    public static boolean isNumber(String text) {
+        return isNumber(text, "");
+    }
+
+    public static boolean isNumber(String text, String separators) {
+        return isDecimalNumber(text, separators)
+            || isHexNumber(text, separators)
+            || isOctalNumber(text, separators)
+            || isBinaryNumber(text, separators);
+    }
+
+    /**
+     * checks if the given string is a decimal number, containing only an optional leading plus or minus,
+     * the digits 0-9 and any of the defined separators.
+     * back-to-back separators as well as leading or trailing separators are not allowed. Leading zeros are allowed.
+     * @param text the string to check
+     * @param separators a string containing characters that can separate chunks of numbers, e.g. "." in "1.000.000"
+     * @return true if the text contains a decimal number
+     */
+    public static boolean isDecimalNumber(String text, String separators) {
+        return hasNumberFormat(text, separators, "0-9", "");
+    }
+
+    public static boolean isHexNumber(String text, String separators) {
+        return hasNumberFormat(text, separators, "0-9a-fA-F", "0x");
+    }
+
+    public static boolean isOctalNumber(String text, String separators) {
+        return hasNumberFormat(text, separators, "0-7", "0o");
+    }
+
+    private static boolean isBinaryNumber(String text, String separators) {
+        return hasNumberFormat(text, separators, "01", "0b");
+    }
+
+    private static boolean hasNumberFormat(String text, String separators, String digitRegex, String prefix) {
+        StringBuilder builder = new StringBuilder("^[+-]?");
+        if (prefix != null && !prefix.isEmpty()) {
+            builder.append(prefix).append("?");
+        }
+
+        builder.append("[").append(digitRegex).append("]+");
+
+        if (separators != null && !separators.isEmpty()) {
+            builder.append("([").append(separators).append("][").append(digitRegex).append("]+)*");
+        }
+
+        builder.append("$");
+
+        return text.matches(builder.toString());
+    }
 }
