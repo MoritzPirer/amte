@@ -1,7 +1,8 @@
 package Rendering;
 
-interface CodeBlockInfoLoader {
-    boolean knowsLanguage(String language);
+import java.util.Map;
 
-    CodeBlockInfo load(String language);
+interface CodeBlockInfoLoader {
+
+    Map<String, CodeBlockInfo> loadAll();
 }

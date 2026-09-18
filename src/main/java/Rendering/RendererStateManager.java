@@ -11,8 +11,24 @@ class RendererStateManager {
         return currentState.parse(text);
     }
 
-    void reset() {
-        currentState = new MarkdownRendererState(this);
+    void reset(String fileExtension) {
+        if (fileExtension.startsWith(".")) {
+            fileExtension = fileExtension.substring(1);
+        }
+
+        switch (fileExtension) {
+            case "md" -> currentState = new MarkdownRendererState(this);
+            case "txt" -> currentState = new NullRendererState();
+            default -> {
+               CodeBlockInfo info = CodeBlockInfoMaster.instance().getByExtension(fileExtension);
+               if (info == null) {
+                   currentState = new NullRendererState();
+               }
+               else {
+                   currentState = new CodeBlockRendererState(info, this);
+               }
+            }
+        }
     }
 
     void changeState(RendererState newState) {

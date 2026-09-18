@@ -1,7 +1,6 @@
 package Rendering;
 
 import Controller.View.Style;
-import Debugging.DebugLogger;
 import Shared.Utility.NumberUtility;
 import Shared.Utility.StringUtility;
 
@@ -23,17 +22,21 @@ class CodeBlockRendererState implements RendererState{
 
     public CodeBlockRendererState(String language, RendererStateManager manager) {
         CodeBlockInfo info = CodeBlockInfoMaster.instance().getCodeBlockInfo(language);
-        if (info == null) {
-            DebugLogger.warn("RENDERING", "using dummy codeBlockInfo");
-        }
         this.info = Objects.requireNonNullElse(info, CodeBlockInfo.DUMMY);
+        this.manager = manager;
+    }
 
-
+    public CodeBlockRendererState(CodeBlockInfo info, RendererStateManager manager) {
+        this.info = info;
         this.manager = manager;
     }
 
     @Override
     public StyleData[] parse(String paragraph) {
+        if (paragraph.endsWith("\n")) {
+            paragraph = paragraph.substring(0, paragraph.length() - 1);
+        }
+
         isWithinEndOfParagraphComment = false;
 
         if (isEndOfCodeBlock(paragraph)) {

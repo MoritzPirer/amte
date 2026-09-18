@@ -1,36 +1,55 @@
 package Rendering;
 
-import java.util.HashSet;
-import java.util.Set;
+import Debugging.DebugLogger;
+import Shared.Utility.FileParsingUtility;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 class JsonCodeBlockInfoLoader implements CodeBlockInfoLoader {
 
     @Override
-    public boolean knowsLanguage(String language) {
-        System.out.println("knowsLanguage: _" + language + "_");
+    public Map<String, CodeBlockInfo> loadAll() {
+        Map<String, CodeBlockInfo> codeBlockInfoMap = new HashMap<>();
+        String folderPath = FileParsingUtility.getCodeBlockInfoFolder();
+        Path[] files = FileParsingUtility.filesInFolder(Path.of(folderPath));
 
-        if (language.equals("java")) {
-            System.out.println("yuh huh");
-            return true;
+        DebugLogger.info("RENDERING/LOADING", "Loading " + files.length + " files from " + folderPath);
+        for (Path path : files) {
+            CodeBlockInfo info = load(path);
+            if (info != null) {
+                addAllNames(codeBlockInfoMap, info);
+            }
+            else {
+                DebugLogger.warn("RENDERING/LOADING", "ignoring unparsable file: " + path);
+            }
         }
 
-        System.out.println("Nuh uh");
-        return false;
+        return codeBlockInfoMap;
     }
 
-    @Override
-    public CodeBlockInfo load(String language) {
-        if (!language.equals("java")) {
+    private CodeBlockInfo load(Path path) {
+        try {
+            String content = FileParsingUtility.readFile(path);
+
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(content, CodeBlockInfo.class);
+        }
+        catch (IOException e) {
+            DebugLogger.warn("RENDERING/LOADING", "ignoring unparsable file: " + path
+                + "(" + e.getMessage() + ")");
             return null;
         }
-
-        return new CodeBlockInfo(
-            Set.of("private", "static", "final", "int", "void"),
-            Set.of("stream", "get", "put", "size", "isEmpty"),
-            Set.of("//"),
-            Set.of(new StringPair("/*", "*/")),
-            Set.of(new StringPair("\"", "\""), new StringPair("'", "'")),
-            Set.of(" ", ".", ",", "-", "+", "/", "*", "=", ">", "<", "?", "/*", "*/", "//", "\n")
-        );
     }
+
+    private void addAllNames(Map<String, CodeBlockInfo> codeBlockInfoMap, CodeBlockInfo codeBlockInfo) {
+        for (String name : codeBlockInfo.names()) {
+            DebugLogger.info("RENDERING/LOADING", "adding language alias: " + name);
+            codeBlockInfoMap.put(name, codeBlockInfo);
+        }
+    }
+
 }

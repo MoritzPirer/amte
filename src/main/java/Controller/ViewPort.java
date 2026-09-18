@@ -94,6 +94,7 @@ public class ViewPort {
 
     public void stop() {
         isRunning = false;
+        file.stop();
     }
 
     public ViewComponent getTextArea(Size size) {

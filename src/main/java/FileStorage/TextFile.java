@@ -1,9 +1,6 @@
 package FileStorage;
 
 import Controller.View.Line;
-import Controller.View.RenderStyle;
-import Controller.View.Style;
-import Controller.View.TextSpan;
 import FileStorage.FileIO.DiskFileLoader;
 import FileStorage.FileIO.FileLoader;
 import Rendering.DoubleBufferRenderer;
@@ -33,13 +30,19 @@ public class TextFile {
         this.tracker = tracker;
         this.saveState = saveState;
 
-        renderer = new DoubleBufferRenderer(buffer);
+        renderer = new DoubleBufferRenderer(buffer, fileName.substring(fileName.lastIndexOf('.') + 1));
         renderer.start();
+    }
+
+    public void stop() {
+        renderer.stop();
     }
 
     public void setFileName(String fileName) {
         if (fileName != null && !fileName.isEmpty()) {
             this.fileName = fileName;
+            String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+            renderer.registerFileTypeChange(extension);
         }
     }
 
@@ -80,6 +83,7 @@ public class TextFile {
         if (saveState != SaveState.CREATED) {
             saveState = SaveState.MODIFIED;
         }
+        renderer.requestRefresh();
     }
 
     public Line readParagraph(int paragraphIndex) {
@@ -150,14 +154,11 @@ public class TextFile {
             return false;
         }
 
-        if (position.character() < 0 || position.character() >= buffer.lengthOfParagraph(position.paragraph())) {
-            return false;
-        }
-
-        return true;
+        return position.character() >= 0 && position.character() < buffer.lengthOfParagraph(position.paragraph());
     }
 
     public boolean isEmpty() {
         return buffer.isEmpty();
     }
+
 }

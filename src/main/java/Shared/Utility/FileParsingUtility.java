@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
 
 public class FileParsingUtility {
 
@@ -61,7 +59,7 @@ public class FileParsingUtility {
      * @return a string containing a filepath to the data folder
      */
     public static String getBaseFolder() {
-        String baseFolder = System.getProperty("user.home") + File.separator + ".strato/";
+        String baseFolder = System.getProperty("user.home") + File.separator + ".strato" + File.separator;
         ensureDirectoryExists(baseFolder);
 
         return baseFolder;
@@ -71,7 +69,7 @@ public class FileParsingUtility {
      * @return a string containing a filepath to the folder containing the color themes (a subfolder of the data folder)
      */
     public static String getColorThemesFolder() {
-        String colorThemesFolder = getBaseFolder() + "themes/";
+        String colorThemesFolder = getBaseFolder() + "themes" + File.separator;
         ensureDirectoryExists(colorThemesFolder);
 
         return colorThemesFolder;
@@ -81,23 +79,17 @@ public class FileParsingUtility {
      * @return a string containing a filepath to the folder containing the language files (a subfolder of the data folder)
      */
     public static String getLanguageFolder() {
-        String languageFolder = getBaseFolder() + "languages/";
+        String languageFolder = getBaseFolder() + "languages" + File.separator;
         ensureDirectoryExists(languageFolder);
 
         return languageFolder;
     }
 
-    /**
-     * check if a given path exists and points to a folder
-     * @param path the path to check
-     * @return false if the path doesn't exist or if it points to something other than a folder, true otherwise
-     */
-    public static boolean isFolder(Path path) {
-        if (!Files.exists(path)) {
-            return false;
-        }
+    public static String getCodeBlockInfoFolder() {
+        String codeBlockInfoFolder = getBaseFolder() + "rendering" + File.separator;
+        ensureDirectoryExists(codeBlockInfoFolder);
 
-        return Files.isDirectory(path);
+        return codeBlockInfoFolder;
     }
 
     /**
@@ -123,4 +115,5 @@ public class FileParsingUtility {
             .map(File::toPath)
             .toArray(Path[]::new);
     }
+
 }
