@@ -11,6 +11,10 @@ class RendererStateManager {
         return currentState.parse(text);
     }
 
+    /**
+     * prepare the manager for a new rendering pass
+     * @param fileExtension the file extension of the file, such that the appropriate rendering state can be set
+     */
     void reset(String fileExtension) {
         if (fileExtension.startsWith(".")) {
             fileExtension = fileExtension.substring(1);

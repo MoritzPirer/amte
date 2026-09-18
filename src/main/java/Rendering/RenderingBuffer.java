@@ -4,26 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 class RenderingBuffer {
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        int i = 0;
-        for (StyleData[] line : buffer) {
-            builder.append(i);
-            builder.append(": ");
-            for (StyleData style : line) {
-                builder.append(style);
-            }
-        }
-
-        return builder.toString();
-    }
     private final List<StyleData[]> buffer = new ArrayList<>();
 
+    /**
+     * append a paragraph to the end of the buffer
+     * @param style the paragraph's style
+     */
     public void addParagraph(StyleData[] style) {
         buffer.add(style);
     }
 
+    /**
+     * read a paragraph from the buffer
+     * @param paragraph the paragraph to read. non-existing paragraphs must be handled externally
+     * @return the Styling of the specified paragraph
+     */
     public StyleData[] getParagraph(int paragraph) {
         return buffer.get(paragraph);
     }

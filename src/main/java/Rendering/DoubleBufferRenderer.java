@@ -20,12 +20,10 @@ public class DoubleBufferRenderer implements Renderer {
 
     private boolean refreshRequested = true;
     private final Condition needsRefresh = lock.newCondition();
+    private String fileExtension;
 
     private final ReadableBuffer reference;
-
     private final RendererStateManager stateManager = new RendererStateManager();
-
-    private String fileExtension;
 
     public DoubleBufferRenderer(ReadableBuffer reference, String fileExtension) {
         front = new RenderingBuffer();
@@ -49,6 +47,10 @@ public class DoubleBufferRenderer implements Renderer {
         lock.unlock();
     }
 
+    /**
+     * atomically swaps the buffers, then waits until a new rendering pass is requested
+     * @throws InterruptedException if the render thread is interrupted while waiting for a new request
+     */
     private void swapBuffers() throws InterruptedException {
         lock.lock();
 
@@ -91,6 +93,9 @@ public class DoubleBufferRenderer implements Renderer {
         }
     }
 
+    /**
+     * perform one rendering pass for the entire file
+     */
     private void render() {
         while (isRunning) {
             ReadableBuffer snapshot = reference.snapshot();

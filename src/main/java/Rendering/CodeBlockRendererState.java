@@ -59,42 +59,55 @@ class CodeBlockRendererState implements RendererState{
             return parseWithinSpecialSection(token);
         }
 
+        // start of a string
         if (containsAsFirst(info.stringLiterals(), token)) {
             isWithinStringLiteral = true;
             requiredClosingToken = getClosing(info.stringLiterals(), token);
             return new StyleData(Style.CODE_STRING_LITERAL, token.length());
         }
 
+        // start of a ranged comment
         if (containsAsFirst(info.rangedComments(), token)) {
             isWithinRangedComment = true;
             requiredClosingToken = getClosing(info.rangedComments(), token);
             return new StyleData(Style.CODE_COMMENT, token.length());
         }
 
+        // start of an end-of-paragraph comment
         if (info.endOfParagraphComments().contains(token)) {
             isWithinEndOfParagraphComment = true;
             return new StyleData(Style.CODE_COMMENT, token.length());
         }
 
+        // number literal
         if (NumberUtility.isNumber(token)) {
             return new StyleData(Style.CODE_NUMBER_LITERAL, token.length());
-        }
-
-        if (info.builtins().contains(token)) {
-            return new StyleData(Style.CODE_BUILTIN, token.length());
         }
 
         if (info.keywords().contains(token)) {
             return new StyleData(Style.CODE_KEYWORD, token.length());
         }
 
+        if (info.builtins().contains(token)) {
+            return new StyleData(Style.CODE_BUILTIN, token.length());
+        }
+
         return new StyleData(Style.TEXT_STYLE, token.length());
     }
 
+    /**
+     * @return true if the token is part of a ranged styling section that can only be terminated by end of line or
+     *         a closing token
+     */
     private boolean isWithinSpecialSection() {
         return isWithinEndOfParagraphComment || isWithinStringLiteral || isWithinRangedComment;
     }
 
+    /**
+     * If currently in a ranged styling section, check if the token ends that section style it as part of that section
+     * @param token the token to parse
+     * @return the style of that token
+     */
     private StyleData parseWithinSpecialSection(String token) {
         if (isWithinEndOfParagraphComment) {
             return new StyleData(Style.CODE_COMMENT, token.length());
@@ -117,6 +130,12 @@ class CodeBlockRendererState implements RendererState{
         return new StyleData(Style.CODE_COMMENT, token.length());
     }
 
+    /**
+     * checks if the given target is the first element of a StringPair in container
+     * @param container the container to look through
+     * @param target the target to look for
+     * @return true if container has target as a first element, false otherwise
+     */
     private boolean containsAsFirst(Set<StringPair> container, String target) {
         for (StringPair pair : container) {
             if (target.equals(pair.first())) {
@@ -127,6 +146,12 @@ class CodeBlockRendererState implements RendererState{
         return false;
     }
 
+    /**
+     * assuming that container has a pair that has opening as its first element, find the matching second element
+     * @param container the container to look through
+     * @param opening the opening token for which the closing counterpart should be found
+     * @return the token that matches opening, or null if no such token exists
+     */
     private String getClosing(Set<StringPair> container, String opening) {
         for (StringPair pair : container) {
             if (opening.equals(pair.first())) {
@@ -135,13 +160,5 @@ class CodeBlockRendererState implements RendererState{
         }
 
         return null;
-    }
-
-    @Override
-    public void reset() {
-        isWithinEndOfParagraphComment = false;
-        isWithinStringLiteral = false;
-        isWithinRangedComment = false;
-        requiredClosingToken = null;
     }
 }

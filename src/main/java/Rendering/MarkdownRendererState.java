@@ -2,7 +2,6 @@ package Rendering;
 
 import Controller.View.RenderStyle;
 import Controller.View.Style;
-import Debugging.DebugLogger;
 import Shared.Utility.StringUtility;
 
 import java.util.List;
@@ -39,6 +38,8 @@ class MarkdownRendererState implements RendererState {
 
     @Override
     public StyleData[] parse(String paragraph) {
+        isVerbatim = false; //verbatim resets with end of paragraph, bold and italic continue
+
         List<String> tokenized = StringUtility.tokenize(paragraph, delimiters, ESCAPE_INDICATOR);
         Style baseStyle = baseStyle(tokenized);
 
@@ -47,6 +48,11 @@ class MarkdownRendererState implements RendererState {
             .toArray(StyleData[]::new);
     }
 
+    /**
+     * checks if the paragraph should have a default style other than the one for regular text
+     * @param tokens the tokenized paragraph
+     * @return what Style should be used if no other is required
+     */
     private Style baseStyle(List<String> tokens) {
         if (isHeading(tokens)) {
             return Style.HEADING_STYLE;
@@ -69,6 +75,9 @@ class MarkdownRendererState implements RendererState {
             return false;
         }
 
+        //TODO
+        // WHEN [anytime]
+        // DO [introduce 6 heading limit]
         Pattern pattern = Pattern.compile("^\\s*" + HEADING_INDICATOR + "+\\s+.*", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(tokens.getFirst());
 
@@ -84,6 +93,12 @@ class MarkdownRendererState implements RendererState {
         return !tokens.isEmpty() && tokens.getFirst().equals(CODE_BLOCK_INDICATOR);
     }
 
+    /**
+     * retrieves the language specified by the start of a code block. Assumes that the paragraph contains a valid start
+     * to a code block as specified by isCodeBlockStart()
+     * @param tokens the paragraph that is the start of a code block.
+     * @return the specified code language, or an empty string if none was specified
+     */
     private String getCodeBlockLanguage(List<String> tokens) {
         if (tokens.size() < 2) {
             return "";
@@ -91,6 +106,7 @@ class MarkdownRendererState implements RendererState {
 
         return StringUtility.removeWhiteSpace(tokens.get(1));
     }
+
     private StyleData parseToken(String token, Style baseStyle) {
         Style currentStyle = getCurrentStyle(baseStyle);
 
@@ -99,6 +115,7 @@ class MarkdownRendererState implements RendererState {
             return new StyleData(currentStyle, token.length());
         }
 
+        // never change bold or italic in a verbatim section
         if (isVerbatim) {
             return new StyleData(currentStyle, token.length());
         }
@@ -117,18 +134,16 @@ class MarkdownRendererState implements RendererState {
         }
     }
 
+    /**
+     * constructs the current style by combining toggleable settings with the base style
+     * @param baseStyle the base style on which italic and bold request are layered
+     * @return the style to use
+     */
     private Style getCurrentStyle(Style baseStyle) {
         return new Style(
             isItalic || baseStyle.isItalic(),
             isBold || baseStyle.isBold(),
             baseStyle.renderStyle()
         );
-    }
-
-    @Override
-    public void reset() {
-        isBold = false;
-        isItalic = false;
-        isVerbatim = false;
     }
 }
