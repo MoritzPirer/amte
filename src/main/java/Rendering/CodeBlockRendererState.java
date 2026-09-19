@@ -21,8 +21,8 @@ class CodeBlockRendererState implements RendererState{
     private String requiredClosingToken;
 
     public CodeBlockRendererState(String language, RendererStateManager manager) {
-        CodeBlockInfo info = CodeBlockInfoMaster.instance().getCodeBlockInfo(language);
-        this.info = Objects.requireNonNullElse(info, CodeBlockInfo.DUMMY);
+
+        this.info = CodeBlockInfoMaster.instance().getByLanguage(language);
         this.manager = manager;
     }
 

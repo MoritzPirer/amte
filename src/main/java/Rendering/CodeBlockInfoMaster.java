@@ -1,14 +1,12 @@
 package Rendering;
 
-import java.util.Map;
-
 class CodeBlockInfoMaster {
     private static CodeBlockInfoMaster instance = null;
 
-    private final Map<String, CodeBlockInfo> loadedCodeBlockInfos;
+    private final CodeBlockInfoLoader loader;
 
     private CodeBlockInfoMaster() {
-        this.loadedCodeBlockInfos = new JsonCodeBlockInfoLoader().loadAll();
+        this.loader = new JsonCodeBlockInfoLoader();
     }
 
     public static CodeBlockInfoMaster instance() {
@@ -25,10 +23,8 @@ class CodeBlockInfoMaster {
      * @return the CodeBlockInfo, or null if no CodeBlockInfo is associated with this extension
      */
     public CodeBlockInfo getByExtension(String fileExtension) {
-        for (CodeBlockInfo info : loadedCodeBlockInfos.values()) {
-            if (info.extensions().contains(fileExtension)) {
-                return info;
-            }
+        if (loader.knowsExtension(fileExtension)) {
+            return loader.loadByExtension(fileExtension);
         }
 
         return null;
@@ -39,9 +35,9 @@ class CodeBlockInfoMaster {
      * @param language the language for which to retrieve the CodeBlockInfo
      * @return the CodeBlockInfo, or null if none is associated with this extension
      */
-    public CodeBlockInfo getCodeBlockInfo(String language) {
-        if (loadedCodeBlockInfos.containsKey(language)) {
-            return loadedCodeBlockInfos.get(language);
+    public CodeBlockInfo getByLanguage (String language) {
+        if (loader.knowsLanguage(language)) {
+            return loader.loadByLanguage(language);
         }
 
         return CodeBlockInfo.DUMMY;

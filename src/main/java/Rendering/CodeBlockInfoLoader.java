@@ -4,6 +4,9 @@ import java.util.Map;
 
 interface CodeBlockInfoLoader {
 
-    //TO BE REWORKED
-    Map<String, CodeBlockInfo> loadAll();
+    boolean knowsLanguage(String language);
+    CodeBlockInfo loadByLanguage(String language);
+
+    boolean knowsExtension(String extension);
+    CodeBlockInfo loadByExtension(String extension);
 }

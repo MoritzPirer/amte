@@ -2,5 +2,4 @@ package Rendering;
 
 import Controller.View.Style;
 
-public record StyleData(Style style, int length) {
-}
+public record StyleData(Style style, int length) { }
