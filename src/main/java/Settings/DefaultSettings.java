@@ -32,6 +32,8 @@ class DefaultSettings implements SettingStorage {
 
         stringSettings = new HashMap<>();
         stringSettings.put("activeColorTheme", "default.json");
+        stringSettings.put("activeLanguage", "english");
+        stringSettings.put("spellCheckLanguage", "english");
 
         restrictedStringSettings = new HashMap<>();
         restrictedStringSettings.put("numberSeparator", new RestrictedValue<>(".", new String[]{" ", ",", "."}));

@@ -28,4 +28,7 @@ public record Style(boolean isItalic, boolean isBold, RenderStyle renderStyle) {
     public static final Style CODE_NUMBER_LITERAL = new Style(false, false, RenderStyle.CODE_NUMBER_LITERAL);
     public static final Style CODE_KEYWORD = new Style(false, false, RenderStyle.CODE_KEYWORD);
     public static final Style CODE_BUILTIN = new Style(false, false, RenderStyle.CODE_BUILTIN);
+
+    public static final Style ERROR = new Style(false, false, RenderStyle.ERROR);
+
 }

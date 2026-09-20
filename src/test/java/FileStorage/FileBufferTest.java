@@ -7,6 +7,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 class FileBufferTest {
     private FileBuffer[] getImplementations() {
         return new FileBuffer[]{

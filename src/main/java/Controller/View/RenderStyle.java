@@ -15,7 +15,7 @@ public enum RenderStyle {
     CODE_KEYWORD,
     CODE_STRING_LITERAL,
     CODE_NUMBER_LITERAL,
-    CODE_COMMENT;
+    CODE_COMMENT, ERROR;
 
     public static String toString(RenderStyle style) {
         return switch (style) {
@@ -31,6 +31,7 @@ public enum RenderStyle {
             case CODE_STRING_LITERAL -> "codeStringLiteral";
             case CODE_NUMBER_LITERAL -> "codeNumberLiteral";
             case CODE_COMMENT -> "codeComment";
+            case ERROR -> "error";
         };
     }
 

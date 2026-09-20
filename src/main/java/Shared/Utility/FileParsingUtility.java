@@ -92,6 +92,20 @@ public class FileParsingUtility {
         return codeBlockInfoFolder;
     }
 
+    public static String getBaseDictionaryFolder() {
+        String codeBlockInfoFolder = getBaseFolder() + "dict" + File.separator + "base" + File.separator;
+        ensureDirectoryExists(codeBlockInfoFolder);
+
+        return codeBlockInfoFolder;
+    }
+
+    public static String getUserDictionaryFolder() {
+        String codeBlockInfoFolder = getBaseFolder() + "dict" + File.separator + "user" + File.separator;
+        ensureDirectoryExists(codeBlockInfoFolder);
+
+        return codeBlockInfoFolder;
+    }
+
     /**
      * given a path pointing to a folder, returns an array of paths to the files in that folder (NOT including files in subfolders)
      * @param path the path to check

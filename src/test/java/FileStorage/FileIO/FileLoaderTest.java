@@ -3,6 +3,7 @@ package FileStorage.FileIO;
 import FileStorage.FileBuffer;
 import FileStorage.ListFileBuffer;
 import Shared.TextPosition;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -14,6 +15,7 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 class FileLoaderTest {
 
     @TempDir

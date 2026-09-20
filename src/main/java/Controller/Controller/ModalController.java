@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ModalController implements Controller{
-    private TextFile file = null; //NOTE: will be used to access metadata like word- and character count
+    private final TextFile file;
     private SizeConfiguration sizeConfiguration = null;
     private final ViewPort viewPort;
     private final ModeManager modeManager = new ModeManager();
