@@ -7,9 +7,10 @@ import Controller.SpecialInput;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
+import Settings.SettingsMaster;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CommandMode implements ModeState {
     private final StringBuilder buffer;
@@ -27,9 +28,10 @@ public class CommandMode implements ModeState {
         Map<String, Action> commands = new HashMap<>();
 
         addWithAliases(commands, new SaveAction(), new String[]{"save", "s", "write", "w"});
-        addWithAliases(commands, QuitAction.makeForceQuit(), new String[]{"exit", "forcequit", "force-quit", "force quit", "e"});
+        addWithAliases(commands, QuitAction.makeForceQuit(), new String[]{"exit", "forcequit", "force-quit", "force quit", "fq", "e"});
         addWithAliases(commands, QuitAction.makeSoftQuit(), new String[]{"quit", "q", "close"});
         addWithAliases(commands, new CompoundAction(new SaveAction(), QuitAction.makeSoftQuit()), new String[]{"save quit", "sq", "save-quit", "wq"});
+        commands.put("list", makeListCommandAction());
 
         return commands;
     }
@@ -38,6 +40,19 @@ public class CommandMode implements ModeState {
         for (String alias : aliases) {
             commands.put(alias, command);
         }
+    }
+
+    private Action makeListCommandAction() {
+        String list = provider.get("command/list");
+        String[] names = list.split("\n");
+        Arrays.sort(names);
+
+        List<Action> actions = new ArrayList<>(names.length);
+        for (String name : names) {
+            actions.add(new NotifyAction(name));
+        }
+
+        return new CompoundAction(actions);
     }
 
     @Override
@@ -94,8 +109,32 @@ public class CommandMode implements ModeState {
 
         return switch (keyword) {
             case "rename", "r" -> new RenameAction(arguments);
+            case "info" -> makeInfoCommand(arguments);
+            case "help" -> makeHelpCommand(arguments);
             default -> new NotifyAction(provider.get("command/unknown"));
         };
+    }
+
+    private Action makeInfoCommand(String argument) {
+        Set<String> validArguments = Set.of(
+            "save", "force-quit", "quit", "save-quit", "rename", "help", "info", "list"
+        );
+
+        if (validArguments.contains(argument)) {
+            return new NotifyAction(provider.get("command/info/" + argument));
+        }
+
+        return new NotifyAction(provider.get("command/unknown"));
+    }
+
+    private Action makeHelpCommand(String argument) {
+        String validTools = "aAbBcCdDeEfFhiIjJkloOpPstTuUwWxXyY:?";
+
+        if (argument.length() == 1 && validTools.contains(argument)) {
+            return new NotifyAction(provider.get("command/help/" + argument));
+        }
+
+        return new NotifyAction(provider.get("command/unknown"));
     }
 
     private Action showUnfinishedCommand() {
@@ -104,6 +143,6 @@ public class CommandMode implements ModeState {
 
     @Override
     public String getName() {
-        return new LanguageProvider().get("ui/mode/command");
+        return provider.get("ui/mode/command");
     }
 }

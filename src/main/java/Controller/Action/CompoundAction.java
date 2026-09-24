@@ -4,6 +4,7 @@ import Controller.ViewPort;
 import FileStorage.TextFile;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class CompoundAction extends Action {
@@ -12,8 +13,8 @@ public class CompoundAction extends Action {
     public CompoundAction(Action... actions) {
         this.actions = Arrays.asList(actions);
     }
-    public CompoundAction(List<Action> actions) {
-        this.actions = actions;
+    public CompoundAction(Collection<Action> actions) {
+        this.actions = actions.stream().toList();
     }
 
     @Override
