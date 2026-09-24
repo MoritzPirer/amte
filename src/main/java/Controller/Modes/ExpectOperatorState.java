@@ -3,11 +3,15 @@ package Controller.Modes;
 import Controller.Action.*;
 import Controller.Action.Ranges.*;
 import Debugging.DebugLogger;
+import LanguageSupport.LanguageProvider;
 import Shared.Direction;
 import Shared.TextPosition;
 
-class ExpectOperatorState implements ChordParserState {
+import java.util.ArrayList;
+import java.util.List;
 
+class ExpectOperatorState implements ChordParserState {
+    private final LanguageProvider provider = new LanguageProvider();
     private final ChordParser chordParser;
 
     public ExpectOperatorState(ChordParser chordParser) {
@@ -55,6 +59,7 @@ class ExpectOperatorState implements ChordParserState {
             case 'X' -> parseCutBeforeCursor(context);
             case 'y' -> parseBeginningOfCopyChord(buffer);
             case ':' -> enterCommandMode(context);
+            case '?' -> parseSpellCheckOperator(context);
             default -> ParseSnapshot.INVALID;
         };
     }
@@ -182,9 +187,8 @@ class ExpectOperatorState implements ChordParserState {
         context.modeManager().setMode(new TypingMode(context.modeManager()));
 
         int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
-        int character = context.textFile().lengthOfParagraph(paragraph) - 1;
         return new ParseSnapshot(ParseStatus.FINISHED,
-                new InsertAction("\n", new TextPosition(paragraph, character))
+                new InsertAction("\n", new TextPosition(paragraph, 0))
         );
     }
 
@@ -261,5 +265,34 @@ class ExpectOperatorState implements ChordParserState {
         return new ParseSnapshot(ParseStatus.FINISHED, new ParagraphJoiningAction(
                 context.viewPort().getLogicalCursorPosition().paragraph()
         ));
+    }
+
+    private ParseSnapshot parseSpellCheckOperator(ParsingContext context) {
+        RangeResolver currentWord = DelimiterRangeResolver.makeWordUnderCursor();
+        Range range = currentWord.resolve(context.viewPort(), context.textFile());
+
+        String word = context.textFile().readRange(range.start(), range.end());
+        String[] corrections = context.textFile().generateCorrections(range);
+
+        if (corrections == null) {
+            return new ParseSnapshot(ParseStatus.FINISHED,
+                new NotifyAction(provider.get("tool/correct/alreadyCorrect")));
+        }
+        if (corrections.length == 0) {
+            return new ParseSnapshot(ParseStatus.FINISHED,
+                new NotifyAction(provider.get("tool/correct/noCorrectionsFound")));
+        }
+
+        List<Action> actions = new ArrayList<>(corrections.length);
+        for (int i = 0; i < corrections.length; i++) {
+            String message = (i + 1) + ": " + corrections[i];
+            actions.add(new NotifyAction(message));
+        }
+        actions.add(new NotifyAction(provider.get("tool/correct/addToDictionaryHint")));
+
+        Action action = new CompoundAction(actions);
+
+        chordParser.changeState(new ExpectSelectionState(chordParser, word, corrections));
+        return new ParseSnapshot(ParseStatus.UNFINISHED, action);
     }
 }

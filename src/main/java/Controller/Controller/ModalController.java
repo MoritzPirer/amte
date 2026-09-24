@@ -13,6 +13,8 @@ import LanguageSupport.LanguageProvider;
 import Settings.SettingsMaster;
 import Shared.TextPosition;
 import Shared.Utility.NumberUtility;
+import SpellChecking.SpellChecker;
+import SpellChecking.SpellCheckerLoader;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -28,13 +30,15 @@ public class ModalController implements Controller{
     private final ModeManager modeManager = new ModeManager();
     private final LanguageProvider provider = new LanguageProvider();
 
+
     public ModalController() {
         FileBuffer buffer = new ListFileBuffer();
         FileMetadataTracker tracker = new WrapperMetadataTracker(buffer);
 
         //TODO WHEN [anytime] DO [pass working directory as filepath s.t. it can be saved OR make FileLoader default to wd if filepath is null]
 
-        TextFile file = new TextFile(null, "", tracker.getTrackedFileBuffer(), tracker, SaveState.CREATED);
+        SpellChecker checker = SpellCheckerLoader.load(SettingsMaster.instance().getString("spellCheckLanguage"));
+        TextFile file = new TextFile(null, "", tracker, SaveState.CREATED, checker);
         this.viewPort = new ViewPort(file);
         this.file = file;
     }
@@ -51,9 +55,12 @@ public class ModalController implements Controller{
         }
         FileMetadataTracker tracker = new WrapperMetadataTracker(buffer);
 
+
+        SpellChecker checker = SpellCheckerLoader.load(SettingsMaster.instance().getString("spellCheckLanguage"));
+
         Path path = Paths.get(filePath);
         String fileName = path.getFileName().toString();
-        TextFile file = new TextFile(path, fileName, tracker.getTrackedFileBuffer(), tracker, SaveState.SAVED);
+        TextFile file = new TextFile(path, fileName, tracker, SaveState.SAVED, checker);
         this.viewPort = new ViewPort(file);
         this.file = file;
     }
@@ -131,9 +138,9 @@ public class ModalController implements Controller{
         if (SettingsMaster.instance().getBoolean("showFileName")) {
             String fileName = file.getFileName();
             if (fileName == null || fileName.isEmpty()) {
-                fileName = provider.get("untitledFile");
+                fileName = provider.get("ui/file/untitled");
             }
-            String text = provider.get("nowEditing") + fileName;
+            String text = provider.get("ui/file/nowEditing") + fileName;
             return new TextSpan(Style.FILE_NAME_STYLE, text);
         }
         return new TextSpan(Style.FILE_NAME_STYLE, "");
@@ -143,9 +150,9 @@ public class ModalController implements Controller{
         String word = "";
         if (SettingsMaster.instance().getBoolean("showSaveStateWord")) {
            word = switch (file.getSaveState()) {
-               case SAVED -> provider.get("saveStateSaved");
-               case MODIFIED -> provider.get("saveStateModified");
-               case CREATED -> provider.get("saveStateCreated");
+               case SAVED -> provider.get("ui/saveState/saved");
+               case MODIFIED -> provider.get("ui/saveState/modified");
+               case CREATED -> provider.get("ui/saveState/created");
            };
         }
 
@@ -179,21 +186,21 @@ public class ModalController implements Controller{
         List<TextSpan> textSpans = new ArrayList<>();
 
         if (SettingsMaster.instance().getBoolean("showCharacterCount")) {
-            String characterCountText = provider.get("characterCountIndicator")
+            String characterCountText = provider.get("ui/counts/character")
                 + NumberUtility.formatNumber(file.getCharacterCount(), separator);
 
             textSpans.add(new TextSpan(Style.METADATA_STYLE, characterCountText));
         }
 
         if (SettingsMaster.instance().getBoolean("showWordCount")) {
-            String wordCountText = provider.get("wordCountIndicator")
+            String wordCountText = provider.get("ui/counts/word")
                 + NumberUtility.formatNumber(file.getWordCount(), separator);
 
             textSpans.add(new TextSpan(Style.METADATA_STYLE, wordCountText));
         }
 
         if (SettingsMaster.instance().getBoolean("showParagraphCount")) {
-            String paragraphCountText = provider.get("paragraphCountIndicator")
+            String paragraphCountText = provider.get("ui/counts/paragraph")
                 + NumberUtility.formatNumber(file.getParagraphCount(), separator);
 
             textSpans.add(new TextSpan(Style.METADATA_STYLE, paragraphCountText));

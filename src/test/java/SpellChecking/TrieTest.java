@@ -1,6 +1,5 @@
 package SpellChecking;
 
-import SpellChecking.Trie.Trie;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

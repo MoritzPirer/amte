@@ -13,14 +13,15 @@ public class SaveAction extends Action {
     public void apply(ViewPort viewPort, TextFile file) {
         DebugLogger.info("ACTIONS", "saving file");
         file.save();
+
         LanguageProvider provider = new LanguageProvider();
         if (file.isSaved()) {
             DebugLogger.info("ACTIONS", "finished saving file");
-            viewPort.addTemporaryMessage(provider.get("saveSuccess"));
+            viewPort.addTemporaryMessage(provider.get("command/save/success"));
         }
         else {
             DebugLogger.warn("ACTIONS", "saving file failed");
-            viewPort.addTemporaryMessage(provider.get("saveFail"));
+            viewPort.addTemporaryMessage(provider.get("command/save/failed"));
         }
     }
 }

@@ -43,7 +43,7 @@ public class StackHistory implements History {
     @Override
     public void undo(ViewPort viewPort, TextFile textFile) {
         if (undoableActions.isEmpty()) {
-            viewPort.addTemporaryMessage(provider.get("nothingToRedo"));
+            viewPort.addTemporaryMessage(provider.get("tool/history/nothingToUndo"));
             return;
         }
 
@@ -56,7 +56,7 @@ public class StackHistory implements History {
     @Override
     public void redo(ViewPort viewPort, TextFile textFile) {
         if (redoableActions.isEmpty()) {
-            viewPort.addTemporaryMessage(provider.get("nothingToUndo"));
+            viewPort.addTemporaryMessage(provider.get("tool/history/nothingToRedo"));
             return;
         }
 

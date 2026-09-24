@@ -16,31 +16,45 @@ public class DelimiterRangeResolver implements RangeResolver {
     private final boolean startIsCursor;
     private final boolean endIsCursor;
     private final boolean accountForExclusiveEnd;
+    private final boolean forceMove;
 
     private DelimiterRangeResolver(
         DelimiterChecker checker,
         EdgeBehaviour behaviour,
         boolean startIsCursor,
         boolean endIsCursor,
-        boolean accountForExclusiveEnd
+        boolean accountForExclusiveEnd,
+        boolean forceMove
     ) {
         this.checker = checker;
         this.behaviour = behaviour;
         this.startIsCursor = startIsCursor;
         this.endIsCursor = endIsCursor;
         this.accountForExclusiveEnd = accountForExclusiveEnd;
+        this.forceMove = forceMove;
     }
 
     public static DelimiterRangeResolver makeForward(DelimiterChecker checker, EdgeBehaviour behaviour) {
-        return new DelimiterRangeResolver(checker, behaviour, true, false, false);
+        return new DelimiterRangeResolver(checker, behaviour, true, false, false, true);
     }
 
     public static DelimiterRangeResolver makeBackward(DelimiterChecker checker, EdgeBehaviour behaviour) {
-        return new DelimiterRangeResolver(checker, behaviour, false, true, false);
+        return new DelimiterRangeResolver(checker, behaviour, false, true, false, true);
     }
 
     public static DelimiterRangeResolver makeBidirectional(DelimiterChecker checker, EdgeBehaviour behaviour) {
-        return new DelimiterRangeResolver(checker, behaviour, false, false,  true);
+        return new DelimiterRangeResolver(checker, behaviour, false, false,  true, true);
+    }
+
+    public static DelimiterRangeResolver makeWordUnderCursor() {
+        return new DelimiterRangeResolver(
+            new WordDelimiterChecker(),
+            EdgeBehaviour.BEFORE,
+            false,
+            false,
+            true,
+            false
+        );
     }
 
     @Override
@@ -52,7 +66,7 @@ public class DelimiterRangeResolver implements RangeResolver {
     }
 
     private TextPosition walkBackward(ViewPort viewPort, TextFile file) {
-        boolean hasMoved = false;
+        boolean hasMoved = !forceMove;
         boolean hasSeenDelimiter = false;
 
         TextPosition current = viewPort.getLogicalCursorPosition();
@@ -90,7 +104,7 @@ public class DelimiterRangeResolver implements RangeResolver {
     }
 
     private TextPosition walkForward(ViewPort viewPort, TextFile file) {
-        boolean hasMoved = false;
+        boolean hasMoved = !forceMove;
         boolean hasSeenNonDelimiter = false;
         boolean hasSeenDelimiter = false;
 

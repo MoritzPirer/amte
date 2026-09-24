@@ -88,6 +88,6 @@ public class TypingMode implements ModeState {
     @Override
     public String getName() {
         LanguageProvider provider = new LanguageProvider();
-        return provider.get("modeIdentifierTyping");
+        return provider.get("ui/mode/typing");
     }
 }

@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 //NOTE: warnings only temporarily suppressed until more settings are added that require unrestricted numbers
-@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 class DefaultSettings implements SettingStorage {
     private final Map<String, Boolean> booleanSettings;
-    private final Map<String, Integer> intSettings = new HashMap<>();
+    private final Map<String, Integer> intSettings;
     private final Map<String, RestrictedValue<Integer>> restrictedIntSettings;
     private final Map<String, String> stringSettings;
     private final Map<String, RestrictedValue<String>> restrictedStringSettings;
@@ -26,7 +25,10 @@ class DefaultSettings implements SettingStorage {
         booleanSettings.put("showParagraphCount", true);
         booleanSettings.put("copyOnDelete", true);
         booleanSettings.put("yankToSystemClipboard", true);
+        booleanSettings.put("doSpellCheck", true);
 
+        intSettings = new HashMap<>();
+        intSettings.put("maxCorrections", 5);
         restrictedIntSettings = new HashMap<>();
         restrictedIntSettings.put("tabWidth", new RestrictedValue<>(4, new Integer[]{2, 4}));
 

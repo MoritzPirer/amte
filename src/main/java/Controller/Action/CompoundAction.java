@@ -36,7 +36,8 @@ public class CompoundAction extends Action {
 
     @Override
     public void undo(ViewPort viewPort, TextFile file) {
-        for (Action action : actions) {
+        for (int i = actions.size() - 1; i >= 0; i--) {
+            Action action = actions.get(i);
             if (action.canBeUndone()) {
                 action.undo(viewPort, file);
             }

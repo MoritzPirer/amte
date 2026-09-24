@@ -9,7 +9,7 @@ import Controller.SizeConfiguration;
 import java.io.IOException;
 
 public abstract class Display {
-    protected Controller controller;
+    protected final Controller controller;
 
     public static void main(String[] args) {
         if (args.length > 1) {

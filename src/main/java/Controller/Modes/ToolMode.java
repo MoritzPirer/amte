@@ -27,9 +27,12 @@ class ToolMode implements ModeState, ChordParser {
     public Action parseInput(Input input, ViewPort viewPort, TextFile file) {
         ParsingContext context = new ParsingContext(viewPort, file, modeManager);
 
+        DebugLogger.info("DEBUG", "input " + input + " is here in tool mode");
         if (input.isSpecialInput()) {
+            DebugLogger.info("DEBUG", "input " + input + " is special input");
             if (buffer.length() > 0) {
                 buffer.clear();
+                reset(viewPort);
                 return new NullAction();
             }
             else {
@@ -52,7 +55,7 @@ class ToolMode implements ModeState, ChordParser {
     @Override
     public String getName() {
         LanguageProvider provider = new LanguageProvider();
-        return provider.get("modeIdentifierTool");
+        return provider.get("ui/mode/tool");
     }
 
     @Override
@@ -61,6 +64,9 @@ class ToolMode implements ModeState, ChordParser {
     }
 
     private Action parseSpecialInput(SpecialInput input, ViewPort viewPort, TextFile file) {
+        reset(viewPort);
+
+        DebugLogger.warn("DEBUG", "here");
         switch (input) {
             case ARROW_LEFT -> {
                 return new MoveAction(Direction.LEFT);
@@ -76,12 +82,12 @@ class ToolMode implements ModeState, ChordParser {
             }
             case TAB -> {
                 TextPosition position = new TextPosition(
-                        viewPort.getLogicalCursorPosition().paragraph(),
-                        0
+                    viewPort.getLogicalCursorPosition().paragraph(),
+                    0
                 );
                 return new CompoundAction(
-                        new InsertAction("\t", position),
-                        new JumpAction(new FixedRangeResolver(null, viewPort.getLogicalCursorPosition().offset(0, 1)))
+                    new InsertAction("\t", position),
+                    new JumpAction(new FixedRangeResolver(null, viewPort.getLogicalCursorPosition().offset(0, 1)))
                 );
             }
             case SHIFT_TAB -> {
@@ -98,8 +104,14 @@ class ToolMode implements ModeState, ChordParser {
             }
 
             default -> {
+
                 return new NullAction();
             }
         }
+    }
+
+    private void reset(ViewPort viewPort) {
+        changeState(new ExpectOperatorState(this));
+        viewPort.clearTemporaryMessages();
     }
 }

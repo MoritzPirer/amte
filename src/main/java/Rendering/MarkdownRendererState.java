@@ -2,12 +2,9 @@ package Rendering;
 
 import Controller.View.RenderStyle;
 import Controller.View.Style;
-import Debugging.DebugLogger;
 import Settings.SettingsMaster;
 import Shared.Utility.StringUtility;
-import SpellChecking.SpellCheckerLoader;
-import SpellChecking.Trie.Trie;
-import SpellChecking.WordChecker;
+import SpellChecking.SpellChecker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,26 +28,20 @@ class MarkdownRendererState implements RendererState {
         CODE_BLOCK_INDICATOR
     );
 
-    private static final int MIN_SPELLCHECK_LENGTH = 3;
-
+    private boolean doSpellCheck;
     private boolean isBold = false;
     private boolean isItalic = false;
     private boolean isVerbatim = false;
 
     private final RendererStateManager manager;
 
-    private static WordChecker wordChecker = null;
-
     public MarkdownRendererState(RendererStateManager manager) {
         this.manager = manager;
-        if (wordChecker == null) {
-            wordChecker = new Trie();
-            SpellCheckerLoader.populate(wordChecker, SettingsMaster.instance().getString("spellCheckLanguage"));
-        }
+        this.doSpellCheck = SettingsMaster.instance().getBoolean("doSpellCheck");
     }
 
     @Override
-    public StyleData[] parse(String paragraph) {
+    public StyleData[] parse(String paragraph, SpellChecker spellChecker) {
         if (paragraph.endsWith("\n")) {
             paragraph = paragraph.substring(0, paragraph.length() - 1);
         }
@@ -66,7 +57,7 @@ class MarkdownRendererState implements RendererState {
 
         List<StyleData> styles = new ArrayList<>();
         for (String token : tokenized) {
-            styles.addAll(parseToken(token, baseStyle));
+            styles.addAll(parseToken(token, baseStyle, spellChecker));
         }
         return styles.toArray(StyleData[]::new);
     }
@@ -138,29 +129,35 @@ class MarkdownRendererState implements RendererState {
         return StringUtility.removeWhiteSpace(tokens.get(1));
     }
 
-    private List<StyleData> parseToken(String token, Style baseStyle) {
+    private List<StyleData> parseToken(String token, Style baseStyle, SpellChecker spellChecker) {
         Style currentStyle = getCurrentStyle(baseStyle);
 
         if (token.equals(VERBATIM_INDICATOR)) {
             isVerbatim = !isVerbatim;
-            return List.of(new StyleData[]{new StyleData(currentStyle, token.length())});
+            return List.of(new StyleData(currentStyle, token.length()));
         }
 
         // never change bold or italic in a verbatim section
         if (isVerbatim) {
-            return List.of(new StyleData[]{new StyleData(currentStyle, token.length())});
+            return List.of(new StyleData(currentStyle, token.length()));
         }
 
         switch (token) {
             case BOLD_INDICATOR -> {
                 isBold = !isBold;
-                return List.of(new StyleData[]{new StyleData(new Style(isItalic, true, RenderStyle.TEXT), token.length())});
+                return List.of(new StyleData(new Style(isItalic, true, RenderStyle.TEXT), token.length()));
             }
             case ITALIC_INDICATOR -> {
                 isItalic = !isItalic;
-                return List.of(new StyleData[]{new StyleData(new Style(true, isBold, RenderStyle.TEXT), token.length())});
+                return List.of(new StyleData(new Style(true, isBold, RenderStyle.TEXT), token.length()));
             }
-            default -> { return applySpellCheck(token, currentStyle); }
+            default -> {
+                if (doSpellCheck) {
+                    return applySpellCheck(token, currentStyle, spellChecker);
+                }
+
+                return List.of(new StyleData(currentStyle, token.length()));
+            }
         }
     }
 
@@ -177,75 +174,26 @@ class MarkdownRendererState implements RendererState {
         );
     }
 
-    private List<StyleData> applySpellCheck(String token, Style currentStyle) {
-        if (shouldSplit(token)) {
-            DebugLogger.info("DEBUG", "splitting token " + token);
-            String[] tokens = split(token);
+    private List<StyleData> applySpellCheck(String token, Style currentStyle, SpellChecker spellChecker) {
+        if (SpellChecker.shouldSplit(token)) {
+            String[] tokens = SpellChecker.split(token);
             List<StyleData> styles = new ArrayList<>();
 
             for (String t : tokens) {
-                styles.addAll(applySpellCheck(t, currentStyle));
+                styles.addAll(applySpellCheck(t, currentStyle, spellChecker));
             }
 
             return styles;
         }
 
-        if (!canBeSpellChecked(token)) {
-            return List.of(new StyleData[]{new StyleData(currentStyle, token.length())});
+        if (!SpellChecker.canBeSpellChecked(token)) {
+            return List.of(new StyleData(currentStyle, token.length()));
         }
 
-        if (wordChecker.contains(token.toLowerCase())) {
-            return List.of(new StyleData[]{new StyleData(currentStyle, token.length())});
+        if (spellChecker.check(token)) {
+            return List.of(new StyleData(currentStyle, token.length()));
         }
 
-        return List.of(new StyleData[]{new StyleData(getCurrentStyle(Style.ERROR), token.length())});
-    }
-
-    private boolean shouldSplit(String token) {
-        if (token.length() == 1) {
-            return false;
-        }
-        for (char c : token.toCharArray()) {
-            if (!Character.isAlphabetic(c) || Character.isWhitespace(c)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private String[] split(String token) {
-        List<String> tokens = new ArrayList<>();
-        StringBuilder currentToken = new StringBuilder();
-
-        for (char c : token.toCharArray()) {
-            if (Character.isAlphabetic(c)) {
-                currentToken.append(c);
-            }
-            else {
-                tokens.add(currentToken.toString());
-                tokens.add(String.valueOf(c));
-                currentToken.delete(0, currentToken.length());
-            }
-        }
-
-        if (!currentToken.isEmpty()) {
-            tokens.add(currentToken.toString());
-        }
-        return tokens.toArray(String[]::new);
-    }
-
-    private boolean canBeSpellChecked(String token) {
-        if (token.length() < MIN_SPELLCHECK_LENGTH) {
-            return false;
-        }
-
-        for (char c : token.toCharArray()) {
-            if (!Character.isAlphabetic(c)) {
-                return false;
-            }
-        }
-
-        return true;
+        return List.of(new StyleData(getCurrentStyle(Style.ERROR), token.length()));
     }
 }

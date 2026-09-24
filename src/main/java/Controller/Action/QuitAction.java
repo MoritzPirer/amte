@@ -24,19 +24,24 @@ public class QuitAction extends Action {
     @Override
     public void apply(ViewPort viewPort, TextFile file) {
         if (abortOnUnsavedChanges) {
-            DebugLogger.info("ACTIONS", "attempting soft quit");
-            if (file.isSaved()) {
-                viewPort.stop();
-            }
-            else {
-                DebugLogger.info("ACTIONS", "aborting soft quit due to unsaved changes");
-                LanguageProvider provider = new LanguageProvider();
-                viewPort.addTemporaryMessage(provider.get("softQuitAbort"));
-            }
+            softQuit(viewPort, file);
         }
         else {
             DebugLogger.info("ACTIONS", "force quitting");
             viewPort.stop();
+        }
+    }
+
+    private void softQuit(ViewPort viewPort, TextFile file) {
+        DebugLogger.info("ACTIONS", "attempting soft quit");
+
+        if (file.isSaved()) {
+            viewPort.stop();
+        }
+        else {
+            DebugLogger.info("ACTIONS", "aborting soft quit due to unsaved changes");
+            LanguageProvider provider = new LanguageProvider();
+            viewPort.addTemporaryMessage(provider.get("command/quit/abort"));
         }
     }
 }

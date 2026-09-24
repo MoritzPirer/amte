@@ -26,10 +26,10 @@ public class CommandMode implements ModeState {
     private Map<String, Action> createSimpleCommands() {
         Map<String, Action> commands = new HashMap<>();
 
-        addWithAliases(commands, new SaveAction(), new String[]{"save", "s", "w"});
+        addWithAliases(commands, new SaveAction(), new String[]{"save", "s", "write", "w"});
         addWithAliases(commands, QuitAction.makeForceQuit(), new String[]{"exit", "forcequit", "force-quit", "force quit", "e"});
         addWithAliases(commands, QuitAction.makeSoftQuit(), new String[]{"quit", "q", "close"});
-        addWithAliases(commands, new CompoundAction(new SaveAction(), QuitAction.makeSoftQuit()), new String[]{"save quit", "sq", "save-quit"});
+        addWithAliases(commands, new CompoundAction(new SaveAction(), QuitAction.makeSoftQuit()), new String[]{"save quit", "sq", "save-quit", "wq"});
 
         return commands;
     }
@@ -79,7 +79,7 @@ public class CommandMode implements ModeState {
         }
 
         if (!command.contains(" ")) {
-            return new NotifyAction(provider.get("unknownCommand"));
+            return new NotifyAction(provider.get("command/unknown"));
         }
 
         return processWithArguments(command);
@@ -94,7 +94,7 @@ public class CommandMode implements ModeState {
 
         return switch (keyword) {
             case "rename", "r" -> new RenameAction(arguments);
-            default -> new NotifyAction(provider.get("unknownCommand"));
+            default -> new NotifyAction(provider.get("command/unknown"));
         };
     }
 
@@ -104,6 +104,6 @@ public class CommandMode implements ModeState {
 
     @Override
     public String getName() {
-        return new LanguageProvider().get("modeIdentifierCommand");
+        return new LanguageProvider().get("ui/mode/command");
     }
 }

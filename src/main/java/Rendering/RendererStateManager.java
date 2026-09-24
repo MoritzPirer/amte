@@ -1,5 +1,7 @@
 package Rendering;
 
+import SpellChecking.SpellChecker;
+
 class RendererStateManager {
     private RendererState currentState;
 
@@ -7,8 +9,8 @@ class RendererStateManager {
         this.currentState = new MarkdownRendererState(this);
     }
 
-    StyleData[] parse(String text) {
-        return currentState.parse(text);
+    StyleData[] parse(String text, SpellChecker spellChecker) {
+        return currentState.parse(text, spellChecker);
     }
 
     /**

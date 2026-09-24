@@ -1,11 +1,14 @@
 package FileStorage;
 
+import Controller.Action.Ranges.Range;
 import Controller.View.Line;
 import FileStorage.FileIO.DiskFileLoader;
 import FileStorage.FileIO.FileLoader;
 import Rendering.DoubleBufferRenderer;
 import Rendering.Renderer;
+import Settings.SettingsMaster;
 import Shared.TextPosition;
+import SpellChecking.SpellChecker;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,16 +24,19 @@ public class TextFile {
 
     private SaveState saveState;
 
+    private final SpellChecker spellChecker;
     private final Renderer renderer;
 
-    public TextFile(Path filePath, String fileName, FileBuffer buffer, FileMetadataTracker tracker, SaveState saveState) {
+    public TextFile(Path filePath, String fileName, FileMetadataTracker tracker, SaveState saveState, SpellChecker spellChecker) {
         this.filePath = filePath;
         this.fileName = fileName;
-        this.buffer = buffer;
         this.tracker = tracker;
+        this.buffer = tracker.getTrackedFileBuffer();
         this.saveState = saveState;
+        this.spellChecker = spellChecker;
 
-        renderer = new DoubleBufferRenderer(buffer, fileName.substring(fileName.lastIndexOf('.') + 1));
+        String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+        renderer = new DoubleBufferRenderer(buffer, extension, spellChecker);
         renderer.start();
     }
 
@@ -129,13 +135,13 @@ public class TextFile {
 
     public TextPosition nextPosition(TextPosition position) {
         if (buffer.isEmpty()) {
-            return new TextPosition(position.paragraph(), position.character() + 1);
+            return position.offset(0, 1);
         }
         if (position.paragraph() < buffer.length() && position.character() >= buffer.lengthOfParagraph(position.paragraph()) - 1) {
             return new TextPosition(position.paragraph() + 1, 0);
         }
 
-        return new TextPosition(position.paragraph(), position.character() + 1);
+        return position.offset(0, 1);
     }
 
     public TextPosition previousPosition(TextPosition position) {
@@ -161,4 +167,17 @@ public class TextFile {
         return buffer.isEmpty();
     }
 
+    public String[] generateCorrections(Range range) {
+        String word = buffer.readRange(range.start(), range.end()).getFirst();
+
+        int maxResults = SettingsMaster.instance().getInt("maxCorrections");
+        return spellChecker.correct(word, maxResults);
+    }
+
+    public boolean addToDictionary(String word) {
+        boolean result = spellChecker.add(word);
+        renderer.requestRefresh();
+
+        return result;
+    }
 }

@@ -2,6 +2,7 @@ package Rendering;
 
 import Debugging.DebugLogger;
 import FileStorage.ReadableBuffer;
+import SpellChecking.SpellChecker;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -25,12 +26,15 @@ public class DoubleBufferRenderer implements Renderer {
     private final ReadableBuffer reference;
     private final RendererStateManager stateManager = new RendererStateManager();
 
-    public DoubleBufferRenderer(ReadableBuffer reference, String fileExtension) {
+    private final SpellChecker spellChecker;
+
+    public DoubleBufferRenderer(ReadableBuffer reference, String fileExtension, SpellChecker spellChecker) {
         front = new RenderingBuffer();
         back = new RenderingBuffer();
 
         this.reference = reference;
         this.fileExtension = fileExtension;
+        this.spellChecker = spellChecker;
     }
 
     @Override
@@ -41,6 +45,7 @@ public class DoubleBufferRenderer implements Renderer {
 
     @Override
     public void requestRefresh() {
+        DebugLogger.info("DEBUG", "refresh requested");
         lock.lock();
         refreshRequested = true;
         needsRefresh.signal();
@@ -58,10 +63,11 @@ public class DoubleBufferRenderer implements Renderer {
         front = back;
         back = temp;
 
-        refreshRequested = false;
         while (!refreshRequested) {
+            //boolean ignored = needsRefresh.await(5, TimeUnit.SECONDS);
             needsRefresh.await();
         }
+        refreshRequested = false;
 
         lock.unlock();
     }
@@ -105,7 +111,7 @@ public class DoubleBufferRenderer implements Renderer {
 
             for (int paragraph = 0; paragraph < snapshot.length(); paragraph++) {
                 String text = snapshot.readParagraph(paragraph);
-                StyleData[] data = stateManager.parse(text);
+                StyleData[] data = stateManager.parse(text, spellChecker);
                 back.addParagraph(data);
             }
 

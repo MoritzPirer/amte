@@ -3,6 +3,7 @@ package Rendering;
 import Controller.View.Style;
 import Shared.Utility.NumberUtility;
 import Shared.Utility.StringUtility;
+import SpellChecking.SpellChecker;
 
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +33,7 @@ class CodeBlockRendererState implements RendererState{
     }
 
     @Override
-    public StyleData[] parse(String paragraph) {
+    public StyleData[] parse(String paragraph, SpellChecker spellChecker) {
         if (paragraph.endsWith("\n")) {
             paragraph = paragraph.substring(0, paragraph.length() - 1);
         }
