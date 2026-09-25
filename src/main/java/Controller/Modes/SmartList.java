@@ -28,13 +28,20 @@ class SmartList {
 
     private static final String DYNAMIC_LIST_INDICATORS = ".)";
 
+    /**
+     * if the cursor's paragraph has a list entry (e.g. a bullet point, checkbox or numbered list), generate an Action
+     * to continue or exit the list. Otherwise, generate an action to split the current paragraph at the cursor position
+     * (i.e. normal enter behaviour).
+     * @param context the context in which the decision should be made
+     * @return an action that extends or exits the list, or an action for normal enter-key behaviour
+     */
     public static Action trySmartListInsertion(ParsingContext context) {
         DebugLogger.info("SMARTLIST", "Attempting a smart list insertion");
         TextPosition cursor = context.viewPort().getLogicalCursorPosition();
 
         if (!shouldTrySmartList(context)) {
             DebugLogger.info("SMARTLIST", "not eligible for smart list insertion based on file type and position in file");
-            return basicParagraphSplit(cursor);
+            return makeBasicParagraphSplit(cursor);
         }
 
         if (canDoStaticList(context)) {
@@ -49,20 +56,31 @@ class SmartList {
 
 
         DebugLogger.info("SMARTLIST", "not eligible for smart list insertion based on content");
-        return basicParagraphSplit(cursor);
+        return makeBasicParagraphSplit(cursor);
     }
 
+    /**
+     * checks if a smart list insertion should even be attempted. Smart list only be done in .md or .txt files,
+     * and not within code blocks
+     * @param context the context in which the decision should be made
+     * @return true if file type and position within file allow for smart lists, false otherwise
+     */
     private static boolean shouldTrySmartList(ParsingContext context) {
         String fileName = context.textFile().getFileName();
         String extension = StringUtility.fileNameToExtension(fileName);
 
-        if (extension.equals("md") || extension.equals("txt")) {
+        if (extension.equals("md")) {
             return !isWithinCodeBlock(context);
         }
         
-        return false;
+        return extension.equals("txt");
     }
 
+    /**
+     * checks if the cursor is within a markdown codeblock
+     * @param context the context in which the decision should be made
+     * @return true if the cursor is within a codeblock, false otherwise
+     */
     private static boolean isWithinCodeBlock(ParsingContext context) {
         boolean isWithinCodeBlock = false;
 
@@ -81,23 +99,42 @@ class SmartList {
         return isWithinCodeBlock;
     }
 
+    /**
+     * @return true if the paragraph maks the beginning of a code block, false otherwise
+     */
     private static boolean isStartOfCodeBlock(String paragraph) {
         return paragraph.startsWith(CODE_BLOCK_FENCE);
     }
 
+    /**
+     * @return true if the paragraph maks the end of a code block, false otherwise
+     */
     private static boolean isEndOfCodeBlock(String paragraph) {
         return paragraph.endsWith(CODE_BLOCK_FENCE)
             && StringUtility.containsOnlyIgnoringWhitespace(paragraph, CODE_BLOCK_FENCE);
     }
 
-    private static Action basicParagraphSplit(TextPosition cursor) {
+    /**
+     * generate an action that splits the current paragraph at the cursor position (i.e. basic behavior for enter-key)
+     * @param cursor the current position of the cursor
+     */
+    private static Action makeBasicParagraphSplit(TextPosition cursor) {
         return new InsertAction("\n",  cursor);
     }
 
+    /**
+     * checks whether a static list (i.e. a list where the followup does not depend on the previous entry of the list, e.g. checkboxes)
+     * can be extended
+     * @return true if a static list can be extended, false otherwise
+     */
     private static boolean canDoStaticList(ParsingContext context) {
         return findStaticListType(context) != null;
     }
 
+    /**
+     * finds the type of list (of STATIC_LIST_AND_CONTINUATION that can be extended at the cursor position
+     * @return the entry that can be used, or null if none can be used
+     */
     private static StringPair findStaticListType(ParsingContext context) {
         TextPosition cursor = context.viewPort().getLogicalCursorPosition();
         String paragraph = context.textFile().readRawParagraph(cursor.paragraph());
@@ -112,6 +149,9 @@ class SmartList {
         return null;
     }
 
+    /**
+     * generate an action to extend or exit the static list the cursor is currently in
+     */
     private static Action makeStaticListInsertion(ParsingContext context) {
         StringPair listType = findStaticListType(context);
         assert listType != null;
@@ -132,6 +172,9 @@ class SmartList {
         return new InsertAction("\n" + continuation,  cursor);
     }
 
+    /**
+     * generate an action to exit the list
+     */
     private static Action abortList(TextPosition cursor, String paragraph) {
         return new DeleteAction(
             new TextPosition(cursor.paragraph(), 0),
