@@ -1,12 +1,12 @@
 package Rendering;
 
 import Controller.View.Style;
+import Shared.StringPair;
 import Shared.Utility.NumberUtility;
 import Shared.Utility.StringUtility;
 import SpellChecking.SpellChecker;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 class CodeBlockRendererState implements RendererState{
@@ -61,16 +61,17 @@ class CodeBlockRendererState implements RendererState{
         }
 
         // start of a string
-        if (containsAsFirst(info.stringLiterals(), token)) {
+
+        if (StringPair.containsAsFirst(info.stringLiterals(), token)) {
             isWithinStringLiteral = true;
-            requiredClosingToken = getClosing(info.stringLiterals(), token);
+            requiredClosingToken = StringPair.getSecond(info.stringLiterals(), token);
             return new StyleData(Style.CODE_STRING_LITERAL, token.length());
         }
 
         // start of a ranged comment
-        if (containsAsFirst(info.rangedComments(), token)) {
+        if (StringPair.containsAsFirst(info.rangedComments(), token)) {
             isWithinRangedComment = true;
-            requiredClosingToken = getClosing(info.rangedComments(), token);
+            requiredClosingToken = StringPair.getSecond(info.rangedComments(), token);
             return new StyleData(Style.CODE_COMMENT, token.length());
         }
 
@@ -129,37 +130,5 @@ class CodeBlockRendererState implements RendererState{
             isWithinRangedComment = false;
         }
         return new StyleData(Style.CODE_COMMENT, token.length());
-    }
-
-    /**
-     * checks if the given target is the first element of a StringPair in container
-     * @param container the container to look through
-     * @param target the target to look for
-     * @return true if container has target as a first element, false otherwise
-     */
-    private boolean containsAsFirst(Set<StringPair> container, String target) {
-        for (StringPair pair : container) {
-            if (target.equals(pair.first())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * assuming that container has a pair that has opening as its first element, find the matching second element
-     * @param container the container to look through
-     * @param opening the opening token for which the closing counterpart should be found
-     * @return the token that matches opening, or null if no such token exists
-     */
-    private String getClosing(Set<StringPair> container, String opening) {
-        for (StringPair pair : container) {
-            if (opening.equals(pair.first())) {
-                return pair.second();
-            }
-        }
-
-        return null;
     }
 }

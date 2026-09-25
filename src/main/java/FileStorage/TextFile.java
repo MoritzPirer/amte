@@ -96,6 +96,10 @@ public class TextFile {
         return Line.of(buffer.readParagraph(paragraphIndex), renderer.getStyle(paragraphIndex));
     }
 
+    public String readRawParagraph(int index) {
+        return buffer.readParagraph(index);
+    }
+
     public String readRange(TextPosition start, TextPosition end) {
         //TODO WHEN [anytime] DO [rewrite FileBuffer interface (and corresponding tests) to return String, not List<String>]
         List<String> list = buffer.readRange(start, end);
@@ -180,4 +184,5 @@ public class TextFile {
 
         return result;
     }
+
 }

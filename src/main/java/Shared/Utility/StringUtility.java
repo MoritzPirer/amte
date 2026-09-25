@@ -3,7 +3,6 @@ package Shared.Utility;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class StringUtility {
 
@@ -181,7 +180,7 @@ public class StringUtility {
         return lines;
     }
 
-    public static int countLeadingWhiteSpace(String text) {
+    public static int countLeadingWhitespace(String text) {
         int count = 0;
         for (int i = 0; i < text.length(); i++) {
             if (Character.isWhitespace(text.charAt(i))) {
@@ -193,7 +192,7 @@ public class StringUtility {
         return count;
     }
 
-    public static int countTrailingWhiteSpace(String text) {
+    public static int countTrailingWhitespace(String text) {
         int count = 0;
         for (int i = text.length() - 1; i >= 0; i--) {
             if (Character.isWhitespace(text.charAt(i))) {
@@ -270,6 +269,12 @@ public class StringUtility {
         return best;
     }
 
+    /**
+     * return a new string that consists of all non-whitespace characters in s. See Character.isWhitespace() for what
+     * is considered to be whitespace
+     * @param s the string to remove whitespace from
+     * @return a new string with all non-whitespace characters of s
+     */
     public static String removeWhiteSpace(String s) {
         StringBuilder builder = new StringBuilder();
         for (char c : s.toCharArray()) {
@@ -279,5 +284,89 @@ public class StringUtility {
         }
 
         return builder.toString();
+    }
+
+    /**
+     * return the extension of a file name in the form 'name.extension'. if no such extension exists, an empty string
+     * is returned
+     * @param fileName the file name to extract from
+     * @return the file extension
+     */
+    public static String fileNameToExtension(String fileName) {
+        int dot = fileName.lastIndexOf('.');
+        if (dot == -1) {
+            return "";
+        }
+
+        return fileName.substring(dot + 1);
+    }
+
+    public static boolean containsOnlyIgnoringWhitespace(String paragraph, String allowed) {
+        for (char character : paragraph.toCharArray()) {
+            if (Character.isWhitespace(character)) {
+                continue;
+            }
+            if (allowed.contains(String.valueOf(character))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * checks if text starts with prefix, ignoring any whitespace at the start of text and prefix
+     * @param text the text to check
+     * @param prefix the prefix to look for in text
+     * @return true if text starts with prefix, ignoring leading whitespace
+     */
+    public static boolean startsWithIgnoringWhitespace(String text, String prefix) {
+        String trimmedText = text.substring(countLeadingWhitespace(text));
+        String trimmedPrefix = prefix.substring(countLeadingWhitespace(prefix));
+
+        return trimmedText.startsWith(trimmedPrefix);
+    }
+
+    public static int findFirstNonDigit(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            if (!Character.isDigit(text.charAt(i))) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * find the first character of targets to occur in text
+     * @param text the text to look through
+     * @param targets the characters to look through
+     * @return the first character contained in targets to occur in text, or null if no character in targets occurs in text.
+     */
+    public static Character findFirstOf(String text, String targets) {
+        int index = findFirstIndexOf(text, targets);
+
+        if (index == -1) {
+            return null;
+        }
+
+        return text.charAt(index);
+    }
+
+    /**
+     * find the first index in text for at which any of the characters is written
+     * @param text the text to look through
+     * @param targets the characters to look for
+     * @return the smallest i such that text.charAt(i) is a character contained in targets
+     */
+    public static int findFirstIndexOf(String text, String targets) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (targets.contains(String.valueOf(c))) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 }

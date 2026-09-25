@@ -37,7 +37,8 @@ public class TypingMode implements ModeState {
                 return createBackSpaceAction(viewPort, file);
             }
             case ENTER -> {
-                return new InsertAction("\n",  viewPort.getLogicalCursorPosition());
+                return SmartList.trySmartListInsertion(new ParsingContext(viewPort, file, null));
+                //return new InsertAction("\n",  viewPort.getLogicalCursorPosition());
             }
             case TAB -> {
                 TextPosition position = new TextPosition(

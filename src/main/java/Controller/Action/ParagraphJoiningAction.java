@@ -1,6 +1,5 @@
 package Controller.Action;
 
-import Controller.View.Line;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 import Shared.TextPosition;
@@ -27,8 +26,8 @@ public class ParagraphJoiningAction extends Action {
         String first = file.readParagraph(upperParagraph).toString();
         String second = file.readParagraph(upperParagraph + 1).toString();
 
-        int firstTrailingWhiteSpace = StringUtility.countTrailingWhiteSpace(first);
-        int secondLeadingWhiteSpace = StringUtility.countLeadingWhiteSpace(second);
+        int firstTrailingWhiteSpace = StringUtility.countTrailingWhitespace(first);
+        int secondLeadingWhiteSpace = StringUtility.countLeadingWhitespace(second);
 
         removedFromFirst = first.substring(first.length() - firstTrailingWhiteSpace);
         first = first.substring(0, first.length() - firstTrailingWhiteSpace);
