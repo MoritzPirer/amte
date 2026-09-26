@@ -44,6 +44,8 @@ class ExpectOperatorState implements ChordParserState {
             case 'J' -> joinParagraphs(context);
             case 'k' -> new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.UP));
             case 'l' -> new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.RIGHT));
+            case 'n' -> makeRepeatFindOperator(context, false);
+            case 'N' -> makeRepeatFindOperator(context, true);
             case 'o' -> parseCreateParagraphBelow(context);
             case 'O' -> parseCreateParagraphAbove(context);
             case 'p' -> parsePasteBelow(context);
@@ -63,6 +65,7 @@ class ExpectOperatorState implements ChordParserState {
             default -> ParseSnapshot.INVALID;
         };
     }
+
 
     private ParseSnapshot parseTypingModeAfterCursor(ParsingContext context) {
         context.modeManager().setMode(new TypingMode(context.modeManager()));
@@ -294,5 +297,14 @@ class ExpectOperatorState implements ChordParserState {
 
         chordParser.changeState(new ExpectSelectionState(chordParser, word, corrections));
         return new ParseSnapshot(ParseStatus.UNFINISHED, action);
+    }
+
+    private ParseSnapshot makeRepeatFindOperator(ParsingContext context, boolean reversed) {
+        String target = context.modeManager().getLastFindTarget();
+        if (target == null) {
+            return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(provider.get("tool/nextFind/noTarget")));
+        }
+
+        return new ParseSnapshot(ParseStatus.FINISHED, new FindAction(target, reversed));
     }
 }

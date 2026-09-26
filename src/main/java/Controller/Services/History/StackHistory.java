@@ -17,8 +17,8 @@ public class StackHistory implements History {
 
     @Override
     public void add(Action action) {
+        DebugLogger.info("HISTORY", action.getClass().getSimpleName());
         if (!action.canBeUndone()) {
-            DebugLogger.warn("HISTORY", action.getClass().getSimpleName());
             DebugLogger.info("HISTORY", "action not added to history because it is not undoable");
             isMergePossible = false;
             return;

@@ -369,4 +369,8 @@ public class StringUtility {
 
         return -1;
     }
+
+    public static String reverse(String target) {
+        return new StringBuilder(target).reverse().toString();
+    }
 }

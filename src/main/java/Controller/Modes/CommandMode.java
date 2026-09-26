@@ -111,6 +111,8 @@ public class CommandMode implements ModeState {
             case "rename", "r" -> new RenameAction(arguments);
             case "info" -> makeInfoCommand(arguments);
             case "help" -> makeHelpCommand(arguments);
+            case "find", "f" -> makeFindCommand(arguments, false);
+            case "FIND", "F" -> makeFindCommand(arguments, true);
             default -> new NotifyAction(provider.get("command/unknown"));
         };
     }
@@ -135,6 +137,14 @@ public class CommandMode implements ModeState {
         }
 
         return new NotifyAction(provider.get("command/unknown"));
+    }
+
+    private Action makeFindCommand(String argument, boolean reversed) {
+        if (argument.isEmpty()) {
+            return new NotifyAction(provider.get("command/find/empty"));
+        }
+        modeManager.setLastFindTarget(argument);
+        return new FindAction(argument, reversed);
     }
 
     private Action showUnfinishedCommand() {

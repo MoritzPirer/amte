@@ -8,6 +8,7 @@ import FileStorage.TextFile;
 
 public class ModeManager {
     private ModeState currentMode;
+    private String lastFindTarget = null;
 
     public ModeManager() {
         currentMode = new ToolMode(this);
@@ -25,4 +26,13 @@ public class ModeManager {
     public void setMode(ModeState mode) {
         currentMode = mode;
     }
+
+    public String getLastFindTarget() {
+        return lastFindTarget;
+    }
+
+    public void setLastFindTarget(String lastFindTarget) {
+        this.lastFindTarget = lastFindTarget;
+    }
+
 }
