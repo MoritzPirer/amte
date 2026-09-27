@@ -1,6 +1,9 @@
 package Controller.Services.History;
 
 import Controller.Action.Action;
+import Controller.TemporaryMessages.Message;
+import Controller.TemporaryMessages.MessageType;
+import Controller.TemporaryMessages.TimeDuration;
 import Controller.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
@@ -43,7 +46,11 @@ public class StackHistory implements History {
     @Override
     public void undo(ViewPort viewPort, TextFile textFile) {
         if (undoableActions.isEmpty()) {
-            viewPort.addTemporaryMessage(provider.get("tool/history/nothingToUndo"));
+            viewPort.addTemporaryMessage(new Message(
+                provider.get("tool/history/nothingToUndo"),
+                MessageType.ERROR,
+                TimeDuration.seconds(2)
+            ));
             return;
         }
 
@@ -56,7 +63,11 @@ public class StackHistory implements History {
     @Override
     public void redo(ViewPort viewPort, TextFile textFile) {
         if (redoableActions.isEmpty()) {
-            viewPort.addTemporaryMessage(provider.get("tool/history/nothingToRedo"));
+            viewPort.addTemporaryMessage(new Message(
+                    provider.get("tool/history/nothingToRedo"),
+                    MessageType.ERROR,
+                    TimeDuration.seconds(2)
+            ));
             return;
         }
 

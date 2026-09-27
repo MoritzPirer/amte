@@ -4,13 +4,15 @@ package Controller.Modes;
 import Controller.Action.*;
 import Controller.Input;
 import Controller.SpecialInput;
+import Controller.TemporaryMessages.InputCountDuration;
+import Controller.TemporaryMessages.Message;
+import Controller.TemporaryMessages.MessageType;
+import Controller.TemporaryMessages.TimeDuration;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
-import Settings.SettingsMaster;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CommandMode implements ModeState {
     private final StringBuilder buffer;
@@ -49,7 +51,7 @@ public class CommandMode implements ModeState {
 
         List<Action> actions = new ArrayList<>(names.length);
         for (String name : names) {
-            actions.add(new NotifyAction(name));
+            actions.add(new NotifyAction(new Message(name, MessageType.INFO, new InputCountDuration(1))));
         }
 
         return new CompoundAction(actions);
@@ -61,7 +63,7 @@ public class CommandMode implements ModeState {
             switch (input.getSpecialInput()) {
                 case SpecialInput.ESCAPE -> {
                     modeManager.setMode(new ToolMode(modeManager));
-                    viewPort.clearTemporaryMessages();
+                    viewPort.refreshTemporaryMessages();
                     return new NullAction();
                 }
                 case ENTER -> {
@@ -70,7 +72,7 @@ public class CommandMode implements ModeState {
                 case BACK_SPACE -> {
                     if (buffer.isEmpty()) {
                         modeManager.setMode(new ToolMode(modeManager));
-                        viewPort.clearTemporaryMessages();
+                        viewPort.refreshTemporaryMessages();
                         return new NullAction();
                     }
                     buffer.deleteCharAt(buffer.length() - 1);
@@ -94,7 +96,7 @@ public class CommandMode implements ModeState {
         }
 
         if (!command.contains(" ")) {
-            return new NotifyAction(provider.get("command/unknown"));
+            return new NotifyAction(new Message(provider.get("command/unknown"), MessageType.ERROR, new InputCountDuration(2)));
         }
 
         return processWithArguments(command);
@@ -113,7 +115,7 @@ public class CommandMode implements ModeState {
             case "help" -> makeHelpCommand(arguments);
             case "find", "f" -> makeFindCommand(arguments, false);
             case "FIND", "F" -> makeFindCommand(arguments, true);
-            default -> new NotifyAction(provider.get("command/unknown"));
+            default -> new NotifyAction(new Message(provider.get("command/unknown"), MessageType.ERROR, new InputCountDuration(2)));
         };
     }
 
@@ -123,32 +125,36 @@ public class CommandMode implements ModeState {
         );
 
         if (validArguments.contains(argument)) {
-            return new NotifyAction(provider.get("command/info/" + argument));
+            return new NotifyAction(new Message(
+                provider.get("command/info/" + argument),
+                MessageType.INFO,
+                new InputCountDuration(1)
+            ));
         }
 
-        return new NotifyAction(provider.get("command/unknown"));
+        return new NotifyAction(new Message(provider.get("command/unknown"), MessageType.ERROR, new InputCountDuration(2)));
     }
 
     private Action makeHelpCommand(String argument) {
         String validTools = "aAbBcCdDeEfFhiIjJkloOpPstTuUwWxXyY:?";
 
         if (argument.length() == 1 && validTools.contains(argument)) {
-            return new NotifyAction(provider.get("command/help/" + argument));
+            return new NotifyAction(new Message(provider.get("command/help/" + argument), MessageType.INFO, new InputCountDuration(1)));
         }
 
-        return new NotifyAction(provider.get("command/unknown"));
+        return new NotifyAction(new Message(provider.get("command/unknown"), MessageType.ERROR, new InputCountDuration(1)));
     }
 
     private Action makeFindCommand(String argument, boolean reversed) {
         if (argument.isEmpty()) {
-            return new NotifyAction(provider.get("command/find/empty"));
+            return new NotifyAction(new Message(provider.get("command/find/empty"), MessageType.ERROR, TimeDuration.seconds(2)));
         }
         modeManager.setLastFindTarget(argument);
         return new FindAction(argument, reversed);
     }
 
     private Action showUnfinishedCommand() {
-        return new NotifyAction(":" + buffer);
+        return new NotifyAction(new Message(":" + buffer,  MessageType.INFO, new InputCountDuration(1)));
     }
 
     @Override

@@ -1,5 +1,9 @@
 package Controller.Action;
 
+import Controller.TemporaryMessages.InputCountDuration;
+import Controller.TemporaryMessages.Message;
+import Controller.TemporaryMessages.MessageDuration;
+import Controller.TemporaryMessages.MessageType;
 import Controller.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
@@ -41,7 +45,12 @@ public class QuitAction extends Action {
         else {
             DebugLogger.info("ACTIONS", "aborting soft quit due to unsaved changes");
             LanguageProvider provider = new LanguageProvider();
-            viewPort.addTemporaryMessage(provider.get("command/quit/abort"));
+            Message message = new Message(
+                provider.get("command/quit/abort"),
+                MessageType.ERROR,
+                new InputCountDuration(1)
+            );
+            viewPort.addTemporaryMessage(message);
         }
     }
 }

@@ -7,6 +7,9 @@ import Controller.Action.NotifyAction;
 import Controller.Action.Ranges.DelimiterRangeResolver;
 import Controller.Action.Ranges.Range;
 import Controller.Action.Ranges.RangeResolver;
+import Controller.TemporaryMessages.Message;
+import Controller.TemporaryMessages.MessageType;
+import Controller.TemporaryMessages.TimeDuration;
 import LanguageSupport.LanguageProvider;
 
 class ExpectSelectionState implements ChordParserState {
@@ -35,7 +38,11 @@ class ExpectSelectionState implements ChordParserState {
         }
 
         if (!Character.isDigit(selection)) {
-            return new ParseSnapshot(ParseStatus.INVALID, new NotifyAction(provider.get("tool/correct/invalidSelection")));
+            return new ParseSnapshot(ParseStatus.INVALID, new NotifyAction(new Message(
+                provider.get("tool/correct/invalidSelection"),
+                MessageType.ERROR,
+                TimeDuration.seconds(2)
+            )));
         }
 
         int acceptedIndex = Character.getNumericValue(selection);
@@ -53,10 +60,17 @@ class ExpectSelectionState implements ChordParserState {
     private ParseSnapshot parseAddToDictionary(String word, ParsingContext context) {
         boolean success = context.textFile().addToDictionary(word);
 
-        String message = success ?
-            String.format(provider.get("tool/correct/addedToDictionary"), word) :
-            String.format(provider.get("tool/correct/failedToAddToDictionary"), word);
-
-        return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(message));
+        if (success) {
+            return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(new Message(
+                String.format(provider.get("tool/correct/addedToDictionary"), word),
+                MessageType.INFO,
+                TimeDuration.seconds(2)
+            )));
+        }
+        return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(new Message(
+                String.format(provider.get("tool/correct/failedToAddToDictionary"), word),
+                MessageType.ERROR,
+                TimeDuration.seconds(2)
+        )));
     }
 }

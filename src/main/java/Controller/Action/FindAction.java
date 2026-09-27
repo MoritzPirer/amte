@@ -1,5 +1,8 @@
 package Controller.Action;
 
+import Controller.TemporaryMessages.InputCountDuration;
+import Controller.TemporaryMessages.Message;
+import Controller.TemporaryMessages.MessageType;
 import Controller.ViewPort;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
@@ -25,7 +28,12 @@ public class FindAction extends Action {
             knuthMorrisPratt(iterator, target);
 
         if (match == null) {
-            viewPort.addTemporaryMessage(String.format(new LanguageProvider().get("command/find/notFound"), target));
+            Message message = new Message(
+                String.format(new LanguageProvider().get("command/find/notFound"), target),
+                MessageType.ERROR,
+                new InputCountDuration(1) //ANCHOR
+            );
+            viewPort.addTemporaryMessage(message);
         }
         else {
             viewPort.moveCursorTo(match);

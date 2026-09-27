@@ -74,7 +74,7 @@ public class ModalController implements Controller{
     public void applyInput(Input input) {
         Action action = modeManager.parseInput(input, viewPort, file);
         if (!(action instanceof NullAction)) {
-            viewPort.clearTemporaryMessages();
+            viewPort.refreshTemporaryMessages();
         }
 
         action.apply(viewPort, file);

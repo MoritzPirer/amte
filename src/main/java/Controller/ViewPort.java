@@ -4,6 +4,8 @@ import Controller.Services.Clipbobard.ClipboardHandler;
 import Controller.Services.Clipbobard.CopyType;
 import Controller.Services.History.History;
 import Controller.Services.History.StackHistory;
+import Controller.TemporaryMessages.Message;
+import Controller.TemporaryMessages.TemporaryMessageManager;
 import Controller.View.Line;
 import Controller.View.Style;
 import Controller.View.TextSpan;
@@ -27,7 +29,7 @@ public class ViewPort {
     private TextPosition top;
     private Size textAreaSize;
     private final List<String> temporaryMessages = new ArrayList<>();
-
+    private final TemporaryMessageManager messageManager = new TemporaryMessageManager();
     private final History history = new StackHistory();
     private final ClipboardHandler clipboardHandler = new ClipboardHandler();
 
@@ -99,6 +101,7 @@ public class ViewPort {
 
     public ViewComponent getTextArea(Size size) {
         this.textAreaSize = size;
+        messageManager.updateWidth(textAreaSize.width());
 
         Line[] lines = new Line[size.height()];
         int visualLinesUsed = 0;
@@ -264,22 +267,16 @@ public class ViewPort {
         return visualColumn;
     }
 
-    public void addTemporaryMessage(String message) {
-        temporaryMessages.addAll(StringUtility.splitByLength(message, textAreaSize.width()));
+    public void addTemporaryMessage(Message message) {
+        messageManager.add(message);
     }
 
-    public void clearTemporaryMessages() {
-        temporaryMessages.clear();
+    public void refreshTemporaryMessages() {
+        messageManager.refresh();
     }
 
     public ViewComponent getTemporaryMessages() {
-        Size size = new Size(temporaryMessages.size(), textAreaSize.width());
-        Line[] lines = temporaryMessages.stream()
-            .map(message -> new TextSpan(Style.TEXT_STYLE, message))
-            .map(span -> new Line(new TextSpan[]{span}))
-            .toArray(Line[]::new);
-
-        return new ViewComponent(size, lines);
+        return messageManager.get();
     }
 
     public History getHistory() {
@@ -296,9 +293,5 @@ public class ViewPort {
 
     public void copy(CopyType type, String content) {
         clipboardHandler.copy(type, content);
-    }
-
-    public String getExternalClipboard() {
-        return ClipboardHandler.getSystemClipboardContent();
     }
 }

@@ -2,6 +2,10 @@ package Controller.Modes;
 
 import Controller.Action.*;
 import Controller.Action.Ranges.*;
+import Controller.TemporaryMessages.InputCountDuration;
+import Controller.TemporaryMessages.Message;
+import Controller.TemporaryMessages.MessageType;
+import Controller.TemporaryMessages.TimeDuration;
 import Debugging.DebugLogger;
 import LanguageSupport.LanguageProvider;
 import Shared.Direction;
@@ -261,7 +265,11 @@ class ExpectOperatorState implements ChordParserState {
 
     private ParseSnapshot enterCommandMode(ParsingContext context) {
         context.modeManager().setMode(new CommandMode(context.modeManager()));
-        return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(":"));
+        return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(new Message(
+            ":",
+            MessageType.INFO,
+            new InputCountDuration(1)
+        )));
     }
 
     private ParseSnapshot joinParagraphs(ParsingContext context) {
@@ -278,20 +286,34 @@ class ExpectOperatorState implements ChordParserState {
         String[] corrections = context.textFile().generateCorrections(range);
 
         if (corrections == null) {
-            return new ParseSnapshot(ParseStatus.FINISHED,
-                new NotifyAction(provider.get("tool/correct/alreadyCorrect")));
+            return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(new Message(
+                provider.get("tool/correct/alreadyCorrect"),
+                MessageType.ERROR,
+                TimeDuration.seconds(2)
+            )));
         }
         if (corrections.length == 0) {
-            return new ParseSnapshot(ParseStatus.FINISHED,
-                new NotifyAction(provider.get("tool/correct/noCorrectionsFound")));
+            return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(new Message(
+                    provider.get("tool/correct/noCorrectionsFound"),
+                    MessageType.ERROR,
+                    TimeDuration.seconds(2)
+            )));
         }
 
         List<Action> actions = new ArrayList<>(corrections.length);
         for (int i = 0; i < corrections.length; i++) {
             String message = (i + 1) + ": " + corrections[i];
-            actions.add(new NotifyAction(message));
+            actions.add(new NotifyAction(new Message(
+                message,
+                MessageType.INFO,
+                new InputCountDuration(1)
+            )));
         }
-        actions.add(new NotifyAction(provider.get("tool/correct/addToDictionaryHint")));
+        actions.add(new NotifyAction(new Message(
+            provider.get("tool/correct/addToDictionaryHint"),
+            MessageType.INFO,
+            new InputCountDuration(1)
+        )));
 
         Action action = new CompoundAction(actions);
 
@@ -302,7 +324,11 @@ class ExpectOperatorState implements ChordParserState {
     private ParseSnapshot makeRepeatFindOperator(ParsingContext context, boolean reversed) {
         String target = context.modeManager().getLastFindTarget();
         if (target == null) {
-            return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(provider.get("tool/nextFind/noTarget")));
+            return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(new Message(
+                provider.get("tool/nextFind/noTarget"),
+                MessageType.ERROR,
+                TimeDuration.seconds(2)
+            )));
         }
 
         return new ParseSnapshot(ParseStatus.FINISHED, new FindAction(target, reversed));

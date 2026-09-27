@@ -112,6 +112,6 @@ class ToolMode implements ModeState, ChordParser {
 
     private void reset(ViewPort viewPort) {
         changeState(new ExpectOperatorState(this));
-        viewPort.clearTemporaryMessages();
+        viewPort.refreshTemporaryMessages();
     }
 }
