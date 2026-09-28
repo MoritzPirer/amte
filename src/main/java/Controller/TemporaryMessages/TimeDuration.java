@@ -17,7 +17,7 @@ public class TimeDuration implements MessageDuration {
     }
 
     @Override
-    public boolean shouldRemove() {
+    public boolean shouldRemove(boolean inputHappened) {
         long currentTime = System.currentTimeMillis();
         long elapsedTime = currentTime - startTime;
 

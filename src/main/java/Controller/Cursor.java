@@ -7,7 +7,7 @@ import Shared.TextPosition;
 
 public class Cursor {
     private TextPosition position;
-    private final ReadableBuffer buffer;
+    private ReadableBuffer buffer;
 
     public Cursor(TextPosition position, ReadableBuffer buffer) {
         this.position = position;
@@ -16,6 +16,10 @@ public class Cursor {
 
     public TextPosition getPosition() {
         return position;
+    }
+
+    public void setBuffer(ReadableBuffer buffer) {
+        this.buffer = buffer;
     }
 
     public void moveTo(TextPosition position) {

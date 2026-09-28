@@ -32,4 +32,9 @@ public interface Controller {
      * @param sizeConfiguration the sizes of the ui components
      */
     void updateSizeConfiguration(SizeConfiguration sizeConfiguration);
+
+    /**
+     * perform any calculations or checks needed to be done every frame, independently of rending tasks
+     */
+    void update();
 }

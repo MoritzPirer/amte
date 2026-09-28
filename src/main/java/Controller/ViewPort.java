@@ -18,9 +18,7 @@ import Shared.TextPosition;
 import Shared.Utility.NumberUtility;
 import Shared.Utility.StringUtility;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class ViewPort {
     private final TextFile file;
@@ -28,7 +26,6 @@ public class ViewPort {
     private final Cursor cursor;
     private TextPosition top;
     private Size textAreaSize;
-    private final List<String> temporaryMessages = new ArrayList<>();
     private final TemporaryMessageManager messageManager = new TemporaryMessageManager();
     private final History history = new StackHistory();
     private final ClipboardHandler clipboardHandler = new ClipboardHandler();
@@ -99,6 +96,15 @@ public class ViewPort {
         file.stop();
     }
 
+    public void handleFileChange() {
+        Message message = file.handleFileChange();
+        if (message != null) {
+            cursor.setBuffer(file.getBuffer());
+            moveCursorTo(new TextPosition(0, 0));
+            messageManager.add(message);
+        }
+    }
+
     public ViewComponent getTextArea(Size size) {
         this.textAreaSize = size;
         messageManager.updateWidth(textAreaSize.width());
@@ -136,7 +142,7 @@ public class ViewPort {
 
     public ViewComponent getNumberPanel(Size size) {
         Line[] lines = new Line[size.height()];
-        
+
         int visualLinesUsed = 0;
 
         int currentIndex = top.paragraph();
@@ -272,11 +278,15 @@ public class ViewPort {
     }
 
     public void refreshTemporaryMessages() {
-        messageManager.refresh();
+        messageManager.acknowledgeInput();
     }
 
     public ViewComponent getTemporaryMessages() {
         return messageManager.get();
+    }
+
+    public void tickTemporaryMessages() {
+        messageManager.tick();
     }
 
     public History getHistory() {
@@ -294,4 +304,5 @@ public class ViewPort {
     public void copy(CopyType type, String content) {
         clipboardHandler.copy(type, content);
     }
+
 }

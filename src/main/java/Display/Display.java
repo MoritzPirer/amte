@@ -38,6 +38,7 @@ public abstract class Display {
             while (controller.isRunning()) {
                 updateSize();
                 redraw();
+                controller.update();
                 if (parseInput()) {
                     Thread.sleep(50);
                 }

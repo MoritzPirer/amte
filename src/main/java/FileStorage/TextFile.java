@@ -1,13 +1,19 @@
 package FileStorage;
 
 import Controller.Action.Ranges.Range;
+import Controller.TemporaryMessages.Message;
+import Controller.TemporaryMessages.MessageType;
+import Controller.TemporaryMessages.TimeDuration;
 import Controller.View.Line;
 import FileStorage.FileIO.DiskFileLoader;
+import FileStorage.FileIO.FileChangeMonitor;
 import FileStorage.FileIO.FileLoader;
+import LanguageSupport.LanguageProvider;
 import Rendering.DoubleBufferRenderer;
 import Rendering.Renderer;
 import Settings.SettingsMaster;
 import Shared.TextPosition;
+import Shared.Utility.StringUtility;
 import SpellChecking.SpellChecker;
 
 import java.io.File;
@@ -19,13 +25,14 @@ public class TextFile {
     private Path filePath;
     private String fileName;
 
-    private final FileBuffer buffer;
-    private final FileMetadataTracker tracker;
+    private FileBuffer buffer;
+    private FileMetadataTracker tracker;
 
     private SaveState saveState;
 
     private final SpellChecker spellChecker;
     private final Renderer renderer;
+    private final FileChangeMonitor fileChangeMonitor;
 
     public TextFile(Path filePath, String fileName, FileMetadataTracker tracker, SaveState saveState, SpellChecker spellChecker) {
         this.filePath = filePath;
@@ -34,6 +41,7 @@ public class TextFile {
         this.buffer = tracker.getTrackedFileBuffer();
         this.saveState = saveState;
         this.spellChecker = spellChecker;
+        this.fileChangeMonitor = new FileChangeMonitor(filePath);
 
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
         renderer = new DoubleBufferRenderer(buffer, extension, spellChecker);
@@ -45,15 +53,53 @@ public class TextFile {
     }
 
     public void setFileName(String fileName) {
-        if (fileName != null && !fileName.isEmpty()) {
-            this.fileName = fileName;
-            String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
-            renderer.registerFileTypeChange(extension);
+        if (fileName == null || fileName.isEmpty()) {
+            return;
         }
+
+        this.fileName = fileName;
+        filePath = this.filePath.getParent().resolve(fileName).normalize();
+        fileChangeMonitor.changePath(filePath);
+
+        String extension = StringUtility.fileNameToExtension(fileName);
+        renderer.registerFileTypeChange(extension);
     }
 
     public String getFileName() {
         return fileName;
+    }
+
+    public Message handleFileChange() {
+        if (!fileChangeMonitor.hasChanged()) {
+            return null;
+        }
+
+        LanguageProvider provider = new LanguageProvider();
+        if (saveState == SaveState.SAVED) {
+            reloadBuffer();
+            return new Message(
+                provider.get("file/hotLoadApplied"),
+                MessageType.INFO,
+                TimeDuration.seconds(5)
+            );
+        }
+
+        return new Message(
+            provider.get("file/hotLoadSuppressed"),
+            MessageType.ERROR,
+            TimeDuration.seconds(5)
+        );
+    }
+
+    private void reloadBuffer() {
+        try {
+            FileMetadataTracker temp = new WrapperMetadataTracker(new ListFileBuffer());
+            new DiskFileLoader().load(filePath.toString(), temp.getTrackedFileBuffer());
+
+            buffer = temp.getTrackedFileBuffer();
+            tracker = temp;
+        }
+        catch (IOException ignored) { }
     }
 
     public void save() {
@@ -184,5 +230,4 @@ public class TextFile {
 
         return result;
     }
-
 }

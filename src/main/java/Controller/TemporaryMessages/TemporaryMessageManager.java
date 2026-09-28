@@ -26,8 +26,18 @@ public class TemporaryMessageManager {
         this.width = newWidth;
     }
 
-    public void refresh() {
-        messages.removeIf(message -> message.duration().shouldRemove());
+    /**
+     * call after user input to remove input count-based messages
+     */
+    public void acknowledgeInput() {
+        messages.removeIf(message -> message.duration().shouldRemove(true));
+    }
+
+    /**
+     * call periodically to remove time-based messages
+     */
+    public void tick() {
+        messages.removeIf(message -> message.duration().shouldRemove(false));
     }
 
     public ViewComponent get() {
@@ -40,7 +50,7 @@ public class TemporaryMessageManager {
 
             List<String> lines = StringUtility.splitByLength(message.content(), width);
             for (String line : lines) {
-                TextSpan span = new TextSpan(style, message.content());
+                TextSpan span = new TextSpan(style, line);
                 Line current = new Line(new TextSpan[]{span});
                 result.add(current);
             }

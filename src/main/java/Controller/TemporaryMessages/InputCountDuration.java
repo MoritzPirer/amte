@@ -11,7 +11,10 @@ public class InputCountDuration implements MessageDuration {
     }
 
     @Override
-    public boolean shouldRemove() {
+    public boolean shouldRemove(boolean inputHappened) {
+        if (!inputHappened) {
+            return false;
+        }
         return --count >= 0;
     }
 }

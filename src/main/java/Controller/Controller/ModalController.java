@@ -73,12 +73,14 @@ public class ModalController implements Controller{
     @Override
     public void applyInput(Input input) {
         Action action = modeManager.parseInput(input, viewPort, file);
+
         if (!(action instanceof NullAction)) {
             viewPort.refreshTemporaryMessages();
         }
 
         action.apply(viewPort, file);
         viewPort.getHistory().add(action);
+
     }
 
     @Override
@@ -236,5 +238,11 @@ public class ModalController implements Controller{
     @Override
     public void updateSizeConfiguration(SizeConfiguration sizeConfiguration) {
         this.sizeConfiguration = sizeConfiguration;
+    }
+
+    @Override
+    public void update() {
+        viewPort.tickTemporaryMessages();
+        viewPort.handleFileChange();
     }
 }
