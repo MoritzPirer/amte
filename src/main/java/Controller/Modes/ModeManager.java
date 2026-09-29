@@ -2,7 +2,7 @@ package Controller.Modes;
 
 import Controller.Action.Action;
 import Controller.Input;
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 

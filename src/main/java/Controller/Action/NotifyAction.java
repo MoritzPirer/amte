@@ -1,7 +1,7 @@
 package Controller.Action;
 
 import Controller.TemporaryMessages.Message;
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 

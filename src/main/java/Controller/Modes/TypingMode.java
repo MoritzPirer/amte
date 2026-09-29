@@ -6,7 +6,7 @@ import Controller.Input;
 import Controller.Services.Clipbobard.ClipboardHandler;
 import Controller.SpecialInput;
 import Controller.View.Line;
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 import Shared.TextPosition;

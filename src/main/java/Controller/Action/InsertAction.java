@@ -1,12 +1,10 @@
 package Controller.Action;
 
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
-
-import java.util.Arrays;
 
 public class InsertAction extends Action {
     private String content;

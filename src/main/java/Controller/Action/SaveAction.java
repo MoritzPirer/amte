@@ -3,7 +3,7 @@ package Controller.Action;
 import Controller.TemporaryMessages.Message;
 import Controller.TemporaryMessages.MessageType;
 import Controller.TemporaryMessages.TimeDuration;
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;

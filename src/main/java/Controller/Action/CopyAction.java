@@ -4,7 +4,7 @@ import Controller.Action.Ranges.Range;
 import Controller.Action.Ranges.RangeResolver;
 import Controller.Services.Clipbobard.ClipboardHandler;
 import Controller.Services.Clipbobard.CopyType;
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import FileStorage.TextFile;
 import Settings.SettingsMaster;
 

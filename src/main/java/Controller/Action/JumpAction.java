@@ -2,10 +2,9 @@ package Controller.Action;
 
 import Controller.Action.Ranges.Range;
 import Controller.Action.Ranges.RangeResolver;
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
-import Shared.TextPosition;
 
 public class JumpAction extends Action {
 

@@ -1,5 +1,6 @@
-package Controller;
+package Controller.ViewPortManager;
 
+import Controller.Cursor;
 import Controller.Services.Clipbobard.ClipboardHandler;
 import Controller.Services.Clipbobard.CopyType;
 import Controller.Services.History.History;
@@ -37,6 +38,10 @@ public class ViewPort {
 
         cursor = new Cursor(new TextPosition(0, 0), file.getBuffer());
         top = new TextPosition(0, 0);
+    }
+
+    public TextFile getFile() {
+        return file;
     }
 
     private static int visualLinesNeeded(Line line, Size size) {

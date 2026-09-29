@@ -2,9 +2,8 @@ package Controller.Action;
 
 import Controller.TemporaryMessages.InputCountDuration;
 import Controller.TemporaryMessages.Message;
-import Controller.TemporaryMessages.MessageDuration;
 import Controller.TemporaryMessages.MessageType;
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;

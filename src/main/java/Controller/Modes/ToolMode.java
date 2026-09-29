@@ -5,7 +5,7 @@ import Controller.Action.Ranges.FixedRangeResolver;
 import Controller.Input;
 import Controller.SpecialInput;
 import Controller.View.Line;
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;

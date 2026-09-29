@@ -1,6 +1,6 @@
 package Controller.Action.Ranges;
 
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import FileStorage.TextFile;
 
 public interface RangeResolver {

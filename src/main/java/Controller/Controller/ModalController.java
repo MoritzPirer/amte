@@ -5,8 +5,9 @@ import Controller.Action.NullAction;
 import Controller.Modes.ModeManager;
 import Controller.View.*;
 import Controller.Input;
-import Controller.ViewPort;
+import Controller.ViewPortManager.ViewPort;
 import Controller.SizeConfiguration;
+import Controller.ViewPortManager.ViewPortManager;
 import FileStorage.*;
 import FileStorage.FileIO.DiskFileLoader;
 import LanguageSupport.LanguageProvider;
@@ -24,9 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ModalController implements Controller{
-    private final TextFile file;
     private SizeConfiguration sizeConfiguration = null;
-    private final ViewPort viewPort;
+    private final ViewPortManager viewPortManager;
     private final ModeManager modeManager = new ModeManager();
     private final LanguageProvider provider = new LanguageProvider();
 
@@ -39,8 +39,7 @@ public class ModalController implements Controller{
 
         SpellChecker checker = SpellCheckerLoader.load(SettingsMaster.instance().getString("spellCheckLanguage"));
         TextFile file = new TextFile(null, "", tracker, SaveState.CREATED, checker);
-        this.viewPort = new ViewPort(file);
-        this.file = file;
+        this.viewPortManager = new ViewPortManager(new ViewPort(file));
     }
 
     public ModalController(String filePath) {
@@ -61,30 +60,32 @@ public class ModalController implements Controller{
         Path path = Paths.get(filePath);
         String fileName = path.getFileName().toString();
         TextFile file = new TextFile(path, fileName, tracker, SaveState.SAVED, checker);
-        this.viewPort = new ViewPort(file);
-        this.file = file;
+        this.viewPortManager = new ViewPortManager(new ViewPort(file));
     }
 
     @Override
     public boolean isRunning() {
-        return viewPort.isRunning();
+        return viewPortManager.isRunning();
     }
 
     @Override
     public void applyInput(Input input) {
-        Action action = modeManager.parseInput(input, viewPort, file);
+        ViewPort viewPort = viewPortManager.current();
+        Action action = modeManager.parseInput(input, viewPort, viewPort.getFile());
 
         if (!(action instanceof NullAction)) {
             viewPort.refreshTemporaryMessages();
         }
 
-        action.apply(viewPort, file);
+        action.apply(viewPort, viewPort.getFile());
         viewPort.getHistory().add(action);
 
     }
 
     @Override
     public View getView() {
+        ViewPort viewPort = viewPortManager.current();
+
         ViewComponent textArea = viewPort.getTextArea(sizeConfiguration.textAreaSize());
         ViewComponent uiPanel = getUiPanel();
         ViewComponent numberPanel = viewPort.getNumberPanel(sizeConfiguration.numberingSize());
@@ -138,20 +139,29 @@ public class ModalController implements Controller{
 
     private TextSpan getFileName() {
         if (SettingsMaster.instance().getBoolean("showFileName")) {
+            TextFile file = viewPortManager.current().getFile();
             String fileName = file.getFileName();
+
             if (fileName == null || fileName.isEmpty()) {
                 fileName = provider.get("ui/file/untitled");
             }
+
             String text = provider.get("ui/file/nowEditing") + fileName;
             return new TextSpan(Style.FILE_NAME_STYLE, text);
         }
+
         return new TextSpan(Style.FILE_NAME_STYLE, "");
     }
 
     private TextSpan getSaveStateIndicator() {
+        SaveState saveState = viewPortManager
+            .current()
+            .getFile()
+            .getSaveState();
+
         String word = "";
         if (SettingsMaster.instance().getBoolean("showSaveStateWord")) {
-           word = switch (file.getSaveState()) {
+           word = switch (saveState) {
                case SAVED -> provider.get("ui/saveState/saved");
                case MODIFIED -> provider.get("ui/saveState/modified");
                case CREATED -> provider.get("ui/saveState/created");
@@ -160,7 +170,7 @@ public class ModalController implements Controller{
 
         String icon = "";
         if (SettingsMaster.instance().getBoolean("showSaveStateIcon")) {
-            icon = switch (file.getSaveState()) {
+            icon = switch (saveState) {
                 case SAVED -> "[=]";
                 case MODIFIED -> "[+]";
                 case CREATED -> "[!]";
@@ -168,12 +178,12 @@ public class ModalController implements Controller{
         }
 
         String text = (icon.isEmpty() && word.isEmpty()) ? "" : word + " " + icon;
-        return new TextSpan(Style.getSaveStateStyle(file.getSaveState()), text);
+        return new TextSpan(Style.getSaveStateStyle(saveState), text);
     }
 
     private TextSpan getCursorPositionIndicator() {
         if (SettingsMaster.instance().getBoolean("showCursorPosition")) {
-            TextPosition position = viewPort.getLogicalCursorPosition()
+            TextPosition position = viewPortManager.current().getLogicalCursorPosition()
                 .offset(1, 1); // convert from 0-indexed to 1-indexed
 
             return new TextSpan(Style.CURSOR_POSITION_STYLE, position.toString());
@@ -184,6 +194,7 @@ public class ModalController implements Controller{
 
 
     private TextSpan[] getMetadataCounts() {
+        TextFile file = viewPortManager.current().getFile();
         String separator = SettingsMaster.instance().getString("numberSeparator");
         List<TextSpan> textSpans = new ArrayList<>();
 
@@ -232,7 +243,7 @@ public class ModalController implements Controller{
 
     @Override
     public int getRecommendedNumberWidth() {
-        return String.valueOf(file.length()).length();
+        return String.valueOf(viewPortManager.current().getFile().length()).length();
     }
 
     @Override
@@ -242,7 +253,7 @@ public class ModalController implements Controller{
 
     @Override
     public void update() {
-        viewPort.tickTemporaryMessages();
-        viewPort.handleFileChange();
+        viewPortManager.current().tickTemporaryMessages();
+        viewPortManager.current().handleFileChange();
     }
 }
