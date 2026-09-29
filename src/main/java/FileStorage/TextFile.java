@@ -93,11 +93,9 @@ public class TextFile {
 
     private void reloadBuffer() {
         try {
-            FileMetadataTracker temp = new WrapperMetadataTracker(new ListFileBuffer());
-            new DiskFileLoader().load(filePath.toString(), temp.getTrackedFileBuffer());
-
-            buffer = temp.getTrackedFileBuffer();
-            tracker = temp;
+            FileBuffer temp = new DiskFileLoader().load(filePath);
+            buffer = temp;
+            tracker = new WrapperMetadataTracker(temp);
         }
         catch (IOException ignored) { }
     }

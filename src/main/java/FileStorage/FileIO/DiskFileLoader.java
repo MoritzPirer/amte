@@ -1,6 +1,7 @@
 package FileStorage.FileIO;
 
 import FileStorage.FileBuffer;
+import FileStorage.ListFileBuffer;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -32,20 +33,19 @@ public class DiskFileLoader implements FileLoader {
     }
 
     @Override
-    public void load(String path, FileBuffer buffer) throws IOException {
-        if (path == null || path.isEmpty()) {
+    public void load(Path path, FileBuffer buffer) throws IOException {
+        if (path == null) {
             throw new InvalidParameterException("path was null or empty");
         }
         if (buffer == null) {
             throw new InvalidParameterException("buffer was null");
         }
 
-        Path filePath = Paths.get(path);
-        if (!Files.exists(filePath)) {
+        if (!Files.exists(path)) {
             throw new IOException("File does not exist: " + path);
         }
 
-        try (BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (!line.endsWith("\n")) {
@@ -55,5 +55,12 @@ public class DiskFileLoader implements FileLoader {
                 buffer.append(line);
             }
         }
+    }
+
+    @Override
+    public FileBuffer load(Path path) throws IOException {
+        FileBuffer buffer = new ListFileBuffer();
+        load(path, buffer);
+        return buffer;
     }
 }

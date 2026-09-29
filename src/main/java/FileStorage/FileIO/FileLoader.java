@@ -20,5 +20,7 @@ public interface FileLoader {
      * @param buffer the buffer to read to. Existing contents are overwritten
      * @throws IOException if reading failed (e.g. because the file does not exist)
      */
-    void load(String path, FileBuffer buffer) throws IOException;
+    void load(Path path, FileBuffer buffer) throws IOException;
+
+    FileBuffer load(Path path) throws IOException;
 }

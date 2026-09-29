@@ -15,11 +15,28 @@ public class ViewPortManager {
         return viewPorts.get(currentIndex);
     }
 
-    public void next() {
-        currentIndex = (currentIndex + 1) % viewPorts.size();
+    public void add(ViewPort viewPort) {
+        viewPorts.add(currentIndex + 1, viewPort);
     }
+
+    public void next() {
+        currentIndex++;
+        normalizeIndex();
+    }
+
     public void previous() {
-        currentIndex = (currentIndex - 1) % viewPorts.size();
+        currentIndex--;
+        normalizeIndex();
+    }
+
+    /**
+     * ensure the index is in the range [0, number of viewports)
+     */
+    private void normalizeIndex() {
+        currentIndex %= viewPorts.size();
+        if (currentIndex < 0) {
+            currentIndex += viewPorts.size();
+        }
     }
 
     public int size() {

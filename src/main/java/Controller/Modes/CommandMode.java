@@ -11,7 +11,12 @@ import Controller.TemporaryMessages.TimeDuration;
 import Controller.ViewPortManager.ViewPort;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
+import Shared.Direction;
 
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class CommandMode implements ModeState {
@@ -30,9 +35,17 @@ public class CommandMode implements ModeState {
         Map<String, Action> commands = new HashMap<>();
 
         addWithAliases(commands, new SaveAction(), new String[]{"save", "s", "write", "w"});
-        addWithAliases(commands, QuitAction.makeForceQuit(), new String[]{"exit", "forcequit", "force-quit", "force quit", "fq", "e"});
+        addWithAliases(commands, QuitAction.makeForceQuit(), new String[]{
+            "exit", "forcequit", "force-quit", "force quit", "fq", "e"
+        });
         addWithAliases(commands, QuitAction.makeSoftQuit(), new String[]{"quit", "q", "close"});
-        addWithAliases(commands, new CompoundAction(new SaveAction(), QuitAction.makeSoftQuit()), new String[]{"save quit", "sq", "save-quit", "wq"});
+        addWithAliases(commands, new CompoundAction(new SaveAction(), QuitAction.makeSoftQuit()), new String[]{
+            "save quit", "sq", "save-quit", "wq"}
+        );
+        addWithAliases(commands, new SwitchViewPortAction(Direction.LEFT), new String[]{
+            "previous", "prev", "p"
+        });
+        addWithAliases(commands, new SwitchViewPortAction(Direction.RIGHT), new String[]{"next", "n"});
         commands.put("list", makeListCommandAction());
 
         return commands;
@@ -115,9 +128,12 @@ public class CommandMode implements ModeState {
             case "help" -> makeHelpCommand(arguments);
             case "find", "f" -> makeFindCommand(arguments, false);
             case "FIND", "F" -> makeFindCommand(arguments, true);
+            case "open", "o" -> makeOpenCommand(arguments, true);
+            case "OPEN", "O" -> makeOpenCommand(arguments, false);
             default -> new NotifyAction(new Message(provider.get("command/unknown"), MessageType.ERROR, new InputCountDuration(2)));
         };
     }
+
 
     private Action makeInfoCommand(String argument) {
         Set<String> validArguments = Set.of(
@@ -151,6 +167,36 @@ public class CommandMode implements ModeState {
         }
         modeManager.setLastFindTarget(argument);
         return new FindAction(argument, reversed);
+    }
+
+    private Action makeOpenCommand(String arguments, boolean switchToFile) {
+        try {
+            Path path = Paths.get(arguments).toAbsolutePath();
+            if (!Files.exists(path) || Files.isDirectory(path)) {
+                throw new InvalidPathException(arguments, "path does not exist or is not a file");
+            }
+
+            List<Action> actions = new ArrayList<>();
+            actions.add(new OpenFileAction(path));
+            actions.add(new NotifyAction(new Message(
+                provider.get("command/open/success"),
+                MessageType.INFO,
+                TimeDuration.seconds(2)
+            )));
+
+            if (switchToFile) {
+                actions.add(new SwitchViewPortAction(Direction.LEFT));
+            }
+
+            return new CompoundAction(actions);
+        }
+        catch (InvalidPathException e) {
+            return new NotifyAction(new Message(
+                provider.get("command/open/fail"),
+                MessageType.ERROR,
+                TimeDuration.seconds(5)
+            ));
+        }
     }
 
     private Action showUnfinishedCommand() {

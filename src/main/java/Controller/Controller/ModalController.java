@@ -44,8 +44,9 @@ public class ModalController implements Controller{
 
     public ModalController(String filePath) {
         FileBuffer buffer = new ListFileBuffer();
+        Path path = Paths.get(filePath);
         try {
-            new DiskFileLoader().load(filePath, buffer);
+            new DiskFileLoader().load(path, buffer);
         }
         catch (IOException e) {
             buffer.clear();
@@ -53,11 +54,8 @@ public class ModalController implements Controller{
             buffer.append(e.getMessage());
         }
         FileMetadataTracker tracker = new WrapperMetadataTracker(buffer);
-
-
         SpellChecker checker = SpellCheckerLoader.load(SettingsMaster.instance().getString("spellCheckLanguage"));
 
-        Path path = Paths.get(filePath);
         String fileName = path.getFileName().toString();
         TextFile file = new TextFile(path, fileName, tracker, SaveState.SAVED, checker);
         this.viewPortManager = new ViewPortManager(new ViewPort(file));
