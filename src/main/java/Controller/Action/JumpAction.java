@@ -3,6 +3,7 @@ package Controller.Action;
 import Controller.Action.Ranges.Range;
 import Controller.Action.Ranges.RangeResolver;
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 
@@ -26,8 +27,10 @@ public class JumpAction extends Action {
     }
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
-        Range range = resolver.resolve(viewPort, file);
+    public void apply(ViewPortManager viewPortManager) {
+        ViewPort viewPort = viewPortManager.current();
+        Range range = resolver.resolve(viewPort, viewPort.getFile());
+
         if (jumpToStart) {
             DebugLogger.info("ACTIONS", "jumping cursor to " + range.start());
             viewPort.moveCursorTo(range.start());

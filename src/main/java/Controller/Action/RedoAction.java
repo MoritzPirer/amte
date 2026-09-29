@@ -1,12 +1,14 @@
 package Controller.Action;
 
-import Controller.ViewPortManager.ViewPort;
-import FileStorage.TextFile;
+import Controller.ViewPortManager.ViewPortManager;
 
 public class RedoAction extends Action {
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
-        viewPort.getHistory().redo(viewPort, file);
+    public void apply(ViewPortManager viewPortManager) {
+        viewPortManager
+            .current()
+            .getHistory()
+            .redo(viewPortManager);
     }
 }

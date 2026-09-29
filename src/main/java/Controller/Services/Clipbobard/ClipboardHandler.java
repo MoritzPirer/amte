@@ -55,7 +55,7 @@ public class ClipboardHandler {
      * @param content the content to copy
      * @see <a href="https://www.baeldung.com/java-clipboard-copy-paste-text#2-retrieving-from-clipboard">...</a>
      */
-    public static void putSystemClipboardContent(String content) {
+    public static void setSystemClipboardContent(String content) {
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         StringSelection selection = new StringSelection(content);
         clipboard.setContents(selection, null);

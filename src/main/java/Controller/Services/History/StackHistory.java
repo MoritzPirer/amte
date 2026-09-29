@@ -4,9 +4,8 @@ import Controller.Action.Action;
 import Controller.TemporaryMessages.Message;
 import Controller.TemporaryMessages.MessageType;
 import Controller.TemporaryMessages.TimeDuration;
-import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
-import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 
 import java.util.Stack;
@@ -44,9 +43,9 @@ public class StackHistory implements History {
     }
 
     @Override
-    public void undo(ViewPort viewPort, TextFile textFile) {
+    public void undo(ViewPortManager viewPortManager) {
         if (undoableActions.isEmpty()) {
-            viewPort.addTemporaryMessage(new Message(
+            viewPortManager.current().addTemporaryMessage(new Message(
                 provider.get("tool/history/nothingToUndo"),
                 MessageType.ERROR,
                 TimeDuration.seconds(2)
@@ -55,15 +54,15 @@ public class StackHistory implements History {
         }
 
         Action action = undoableActions.pop();
-        action.undo(viewPort, textFile);
+        action.undo(viewPortManager);
 
         redoableActions.push(action);
     }
 
     @Override
-    public void redo(ViewPort viewPort, TextFile textFile) {
+    public void redo(ViewPortManager viewPortManager) {
         if (redoableActions.isEmpty()) {
-            viewPort.addTemporaryMessage(new Message(
+            viewPortManager.current().addTemporaryMessage(new Message(
                     provider.get("tool/history/nothingToRedo"),
                     MessageType.ERROR,
                     TimeDuration.seconds(2)
@@ -72,7 +71,7 @@ public class StackHistory implements History {
         }
 
         Action action = redoableActions.pop();
-        action.apply(viewPort, textFile);
+        action.apply(viewPortManager);
 
         undoableActions.push(action);
     }

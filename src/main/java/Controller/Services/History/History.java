@@ -2,12 +2,13 @@ package Controller.Services.History;
 
 import Controller.Action.Action;
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import FileStorage.TextFile;
 
 public interface History {
     void add(Action action);
 
-    void undo(ViewPort viewPort, TextFile textFile);
+    void undo(ViewPortManager viewPortManager);
 
-    void redo(ViewPort viewPort, TextFile textFile);
+    void redo(ViewPortManager viewPortManager);
 }

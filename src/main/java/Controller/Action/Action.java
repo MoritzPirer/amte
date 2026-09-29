@@ -1,6 +1,7 @@
 package Controller.Action;
 
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import FileStorage.TextFile;
 
 /**
@@ -8,10 +9,9 @@ import FileStorage.TextFile;
  */
 public abstract class Action {
     /**
-     * executes the action by modifying the given viewport.
-     * @param viewPort the viewport the action will be applied to
+     * executes the action by modifying the current viewport or changing what the current viewport is.
      */
-    public abstract void apply(ViewPort viewPort, TextFile file);
+    public abstract void apply(ViewPortManager viewPortManager);
 
     /**
      * decides if the action is undoable. Should always be called before calling undo()
@@ -26,10 +26,9 @@ public abstract class Action {
      * undoes the given action, such that calling apply(x) and undo(x) without any modifications to x in between
      * returns x to its original state. Some implementations are not undoable. calling undo() before apply(), or calling undo()
      * on a viewport that is not in the state it was immediately after apply() can have unpredictable effects or throw exceptions
-     * @param viewPort the viewport that was originally modified
      * @throws UnsupportedOperationException if the implementation cannot be undone. Such implementations will have canBeUndone() returning false
      */
-    public void undo(ViewPort viewPort, TextFile file) {
+    public void undo(ViewPortManager viewPortManager) {
         throw new UnsupportedOperationException("Not undoable!");
     }
 

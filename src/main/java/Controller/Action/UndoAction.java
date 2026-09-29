@@ -1,11 +1,13 @@
 package Controller.Action;
 
-import Controller.ViewPortManager.ViewPort;
-import FileStorage.TextFile;
+import Controller.ViewPortManager.ViewPortManager;
 
 public class UndoAction extends Action {
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
-        viewPort.getHistory().undo(viewPort, file);
+    public void apply(ViewPortManager viewPortManager) {
+        viewPortManager
+            .current()
+            .getHistory()
+            .undo(viewPortManager);
     }
 }

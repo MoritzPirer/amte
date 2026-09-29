@@ -77,7 +77,7 @@ public class ModalController implements Controller{
             viewPort.refreshTemporaryMessages();
         }
 
-        action.apply(viewPort, viewPort.getFile());
+        action.apply(viewPortManager);
         viewPort.getHistory().add(action);
 
     }

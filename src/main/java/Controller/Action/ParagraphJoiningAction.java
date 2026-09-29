@@ -1,6 +1,7 @@
 package Controller.Action;
 
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
@@ -18,7 +19,9 @@ public class ParagraphJoiningAction extends Action {
 
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
+    public void apply(ViewPortManager viewPortManager) {
+        TextFile file = viewPortManager.current().getFile();
+
         if (upperParagraph >= file.length() - 1) {
             return;
         }
@@ -49,7 +52,9 @@ public class ParagraphJoiningAction extends Action {
     }
 
     @Override
-    public void undo(ViewPort viewPort, TextFile file) {
+    public void undo(ViewPortManager viewPortManager) {
+        TextFile file = viewPortManager.current().getFile();
+
         String joined = file.readParagraph(upperParagraph).toString();
         String first = joined.substring(0, joinIndex) + removedFromFirst;
         String second = removedFromSecond + joined.substring(joinIndex + 1);

@@ -4,6 +4,7 @@ import Controller.TemporaryMessages.InputCountDuration;
 import Controller.TemporaryMessages.Message;
 import Controller.TemporaryMessages.MessageType;
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 import Shared.TextPosition;
@@ -20,9 +21,10 @@ public class FindAction extends Action {
     }
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
+    public void apply(ViewPortManager viewPortManager) {
+        ViewPort viewPort = viewPortManager.current();
 
-        TextIterator iterator = new TextIterator(viewPort, file, reversed);
+        TextIterator iterator = new TextIterator(viewPort, reversed);
         TextPosition match = reversed?
             knuthMorrisPratt(iterator, StringUtility.reverse(target)) :
             knuthMorrisPratt(iterator, target);
@@ -115,8 +117,8 @@ public class FindAction extends Action {
         private Character currentCharacter;
         private final boolean reversed;
 
-        TextIterator(ViewPort viewPort, TextFile file, boolean reversed) {
-            this.file = file;
+        TextIterator(ViewPort viewPort, boolean reversed) {
+            this.file = viewPort.getFile();
 
             TextPosition cursor = viewPort.getLogicalCursorPosition();
             this.currentParagraph = file.readRawParagraph(cursor.paragraph());

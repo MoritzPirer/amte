@@ -6,6 +6,7 @@ import Controller.Action.Ranges.Range;
 import Controller.Action.Ranges.RangeResolver;
 import Controller.Services.Clipbobard.CopyType;
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import Settings.SettingsMaster;
@@ -60,7 +61,10 @@ public class DeleteAction extends Action {
     }
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
+    public void apply(ViewPortManager viewPortManager) {
+        ViewPort viewPort = viewPortManager.current();
+        TextFile file = viewPort.getFile();
+
         DebugLogger.info("ACTIONS", "applying DeleteAction");
         if (file.isEmpty()) {
             DebugLogger.info("ACTIONS", "Delete canceled because file is empty");
@@ -98,13 +102,13 @@ public class DeleteAction extends Action {
     }
 
     @Override
-    public void undo(ViewPort viewPort, TextFile file) {
+    public void undo(ViewPortManager viewPortManager) {
         if (content == null) {
             return; // valid state if apply() ended early (e.g. empty file)
         }
 
-        file.insert(content, range.start());
-        viewPort.moveCursorTo(restoreCursorTo);
+        viewPortManager.current().getFile().insert(content, range.start());
+        viewPortManager.current().moveCursorTo(restoreCursorTo);
     }
 
     @Override

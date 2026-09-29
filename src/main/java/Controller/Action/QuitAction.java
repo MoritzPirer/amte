@@ -4,6 +4,7 @@ import Controller.TemporaryMessages.InputCountDuration;
 import Controller.TemporaryMessages.Message;
 import Controller.TemporaryMessages.MessageType;
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
@@ -25,21 +26,23 @@ public class QuitAction extends Action {
 
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
+    public void apply(ViewPortManager viewPortManager) {
         if (abortOnUnsavedChanges) {
-            softQuit(viewPort, file);
+            softQuit(viewPortManager);
         }
         else {
             DebugLogger.info("ACTIONS", "force quitting");
-            viewPort.stop();
+            viewPortManager.closeCurrent();
         }
     }
 
-    private void softQuit(ViewPort viewPort, TextFile file) {
+    private void softQuit(ViewPortManager viewPortManager) {
+       ViewPort viewPort = viewPortManager.current();
+
         DebugLogger.info("ACTIONS", "attempting soft quit");
 
-        if (file.isSaved()) {
-            viewPort.stop();
+        if (viewPort.getFile().isSaved()) {
+            viewPortManager.closeCurrent();
         }
         else {
             DebugLogger.info("ACTIONS", "aborting soft quit due to unsaved changes");

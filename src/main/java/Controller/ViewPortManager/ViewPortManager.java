@@ -35,10 +35,6 @@ public class ViewPortManager {
         }
     }
 
-    public void saveCurrent() {
-
-    }
-
     public boolean isRunning() {
         return !viewPorts.isEmpty();
     }

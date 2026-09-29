@@ -2,6 +2,7 @@ package Controller.Action;
 
 import Controller.TemporaryMessages.Message;
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 
@@ -13,8 +14,8 @@ public class NotifyAction extends Action {
     }
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
+    public void apply(ViewPortManager viewPortManager) {
         DebugLogger.info("ACTIONS", "adding temporary message with content " + message);
-        viewPort.addTemporaryMessage(message);
+        viewPortManager.current().addTemporaryMessage(message);
     }
 }

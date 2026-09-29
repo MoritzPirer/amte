@@ -3,7 +3,7 @@ package Controller.Action;
 import Controller.TemporaryMessages.Message;
 import Controller.TemporaryMessages.MessageType;
 import Controller.TemporaryMessages.TimeDuration;
-import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
@@ -11,8 +11,11 @@ import LanguageSupport.LanguageProvider;
 public class SaveAction extends Action {
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
+    public void apply(ViewPortManager viewPortManager) {
         DebugLogger.info("ACTIONS", "saving file");
+
+        TextFile file = viewPortManager.current().getFile();
+
         file.save();
 
         LanguageProvider provider = new LanguageProvider();
@@ -33,6 +36,7 @@ public class SaveAction extends Action {
                 TimeDuration.seconds(10)
             );
         }
-        viewPort.addTemporaryMessage(message);
+
+        viewPortManager.current().addTemporaryMessage(message);
     }
 }

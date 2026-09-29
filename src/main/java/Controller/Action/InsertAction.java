@@ -1,6 +1,7 @@
 package Controller.Action;
 
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import Shared.TextPosition;
@@ -17,12 +18,12 @@ public class InsertAction extends Action {
     }
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
+    public void apply(ViewPortManager viewPortManager) {
         DebugLogger.info("ACTIONS", "inserting content '" + content + "' at position " + position );
 
-        file.insert(content, position);
+        viewPortManager.current().getFile().insert(content, position);
         firstAfterInsert = findPositionAfterInsert();
-        viewPort.moveCursorTo(firstAfterInsert);
+        viewPortManager.current().moveCursorTo(firstAfterInsert);
     }
 
     private TextPosition findPositionAfterInsert() {
@@ -55,9 +56,9 @@ public class InsertAction extends Action {
     }
 
     @Override
-    public void undo(ViewPort viewPort, TextFile file) {
-        file.deleteRange(position, firstAfterInsert);
-        viewPort.moveCursorTo(position);
+    public void undo(ViewPortManager viewPortManager) {
+        viewPortManager.current().getFile().deleteRange(position, firstAfterInsert);
+        viewPortManager.current().moveCursorTo(position);
     }
 
     @Override

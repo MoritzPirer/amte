@@ -5,7 +5,7 @@ import Controller.Action.Ranges.RangeResolver;
 import Controller.Services.Clipbobard.ClipboardHandler;
 import Controller.Services.Clipbobard.CopyType;
 import Controller.ViewPortManager.ViewPort;
-import FileStorage.TextFile;
+import Controller.ViewPortManager.ViewPortManager;
 import Settings.SettingsMaster;
 
 public class CopyAction extends Action {
@@ -18,14 +18,16 @@ public class CopyAction extends Action {
     }
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
-        Range range = resolver.resolve(viewPort, file);
-        String content = file.readRange(range.start(), range.end());
+    public void apply(ViewPortManager viewPortManager) {
+        ViewPort viewPort = viewPortManager.current();
+
+        Range range = resolver.resolve(viewPort, viewPort.getFile());
+        String content = viewPort.getFile().readRange(range.start(), range.end());
 
         viewPort.copy(type, content);
 
         if (SettingsMaster.instance().getBoolean("yankToSystemClipboard")) {
-            ClipboardHandler.putSystemClipboardContent(content);
+            ClipboardHandler.setSystemClipboardContent(content);
         }
     }
 }

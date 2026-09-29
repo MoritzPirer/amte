@@ -1,6 +1,7 @@
 package Controller.Action;
 
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import FileStorage.TextFile;
 
 import java.util.Arrays;
@@ -18,9 +19,9 @@ public class CompoundAction extends Action {
     }
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
+    public void apply(ViewPortManager viewPortManager) {
         for (Action action : actions) {
-            action.apply(viewPort, file);
+            action.apply(viewPortManager);
         }
     }
 
@@ -36,11 +37,11 @@ public class CompoundAction extends Action {
     }
 
     @Override
-    public void undo(ViewPort viewPort, TextFile file) {
+    public void undo(ViewPortManager viewPortManager) {
         for (int i = actions.size() - 1; i >= 0; i--) {
             Action action = actions.get(i);
             if (action.canBeUndone()) {
-                action.undo(viewPort, file);
+                action.undo(viewPortManager);
             }
         }
     }

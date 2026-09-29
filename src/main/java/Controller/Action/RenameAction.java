@@ -1,6 +1,7 @@
 package Controller.Action;
 
 import Controller.ViewPortManager.ViewPort;
+import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 
@@ -13,8 +14,10 @@ public class RenameAction extends Action {
     }
 
     @Override
-    public void apply(ViewPort viewPort, TextFile file) {
+    public void apply(ViewPortManager viewPortManager) {
         DebugLogger.info("ACTIONS", "renaming file to name " + newName);
+
+        TextFile file = viewPortManager.current().getFile();
 
         if (!newName.contains(".")) {
             String fileExtension = file.getFileName().substring(file.getFileName().lastIndexOf("."));
@@ -31,7 +34,10 @@ public class RenameAction extends Action {
     }
 
     @Override
-    public void undo(ViewPort viewPort, TextFile file) {
-        file.setFileName(previousName);
+    public void undo(ViewPortManager viewPortManager) {
+        viewPortManager
+            .current()
+            .getFile()
+            .setFileName(previousName);
     }
 }
