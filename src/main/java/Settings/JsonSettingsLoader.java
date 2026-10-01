@@ -1,24 +1,28 @@
 package Settings;
 
+import Debugging.DebugLogger;
 import Shared.Utility.FileParsingUtility;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 class JsonSettingsLoader implements SettingsLoader {
 
-    public record SettingItem(String key, String type, String value, String[] options) { }
+    private final DefaultSettings defaultSettings = new DefaultSettings();
+
+    public record SettingItem(String key, String type, String value) { }
 
     @Override
     public SettingStorage load(Path path) {
+
         if (!Files.exists(path)) {
-            return new DefaultSettings();
+            return defaultSettings;
         }
 
         String jsonString;
@@ -26,91 +30,95 @@ class JsonSettingsLoader implements SettingsLoader {
             jsonString = FileParsingUtility.readFile(path);
         }
         catch (IOException e) {
-            return new DefaultSettings();
+            return defaultSettings;
         }
 
         String[] items = FileParsingUtility.splitIntoItems(jsonString);
 
         Map<String, Boolean> booleanSettings = new HashMap<>();
         Map<String, Integer> intSettings = new HashMap<>();
-        Map<String, RestrictedValue<Integer>> restrictedIntSettings = new HashMap<>();
         Map<String, String> stringSettings = new HashMap<>();
-        Map<String, RestrictedValue<String>> restrictedStringSettings = new HashMap<>();
 
         ObjectMapper mapper = new ObjectMapper();
         for (String itemString : items) {
             try {
                 SettingItem item = mapper.readValue(itemString, SettingItem.class);
-                addToMap(item, booleanSettings, intSettings, restrictedIntSettings, stringSettings, restrictedStringSettings);
+                addToMap(item, booleanSettings, intSettings, stringSettings);
             }
-            catch (JacksonException ignored) {
-                //skip invalid settings
-            }
+            catch (JacksonException ignored) { /* skip invalid settings */ }
         }
 
-        return new LoadedSettings(
-                booleanSettings,
-                intSettings,
-                restrictedIntSettings,
-                stringSettings,
-                restrictedStringSettings,
-                new DefaultSettings()
-        );
+        return new LoadedSettings(booleanSettings, intSettings, stringSettings, new DefaultSettings());
     }
 
     private void addToMap(
         SettingItem item,
         Map<String, Boolean> booleanSettings,
         Map<String, Integer> intSettings,
-        Map<String, RestrictedValue<Integer>> restrictedIntSettings,
-        Map<String, String> stringSettings,
-        Map<String, RestrictedValue<String>> restrictedStringSettings) {
+        Map<String, String> stringSettings
+    ) {
+        switch (item.type()) {
+            case "boolean" -> addBoolean(booleanSettings, item);
+            case "integer" -> addInteger(intSettings, item);
+            case "string" -> addString(stringSettings, item);
+            default -> DebugLogger.warn("SETTINGS", "ignoring unknown setting type " + item.type());
+        }
+    }
+
+    private void addBoolean(Map<String, Boolean> map, SettingItem item) {
+        boolean value = Boolean.parseBoolean(item.value());
+
+        if (!defaultSettings.doesBooleanSettingExist(item.key())) {
+            DebugLogger.warn("SETTINGS", "Ignoring unknown setting '" + item.key() + "'!");
+            return;
+        }
+
+        map.put(item.key(), value);
+    }
+
+    private void addInteger(Map<String, Integer> map, SettingItem item) {
+        int value;
 
         try {
-            switch (item.type()) {
-                case "boolean" -> {
-                    booleanSettings.put(item.key(), Boolean.parseBoolean(item.value()));
-                }
-                case "integer" -> {
-                    intSettings.put(item.key(), Integer.parseInt(item.value()));
-                }
-                case "restrictedInteger" -> {
-                    addToRestrictedIntegerMap(item, restrictedIntSettings);
-                }
-                case "string" -> {
-                    stringSettings.put(item.key(), item.value());
-                }
-                case "restrictedString" -> {
-                    addToRestrictedStringMap(item, restrictedStringSettings);
-                }
-                default -> {
-                    System.out.println("ignoring unknown setting type " + item.type());
-                }
-            }
+            value = Integer.parseInt(item.value());
         }
         catch (NumberFormatException ignored) {
-            //skip settings with bad format
-        }
-    }
-
-    private void addToRestrictedIntegerMap(SettingItem item, Map<String, RestrictedValue<Integer>> restrictedIntSettings) {
-        if (item.options() == null || item.options().length == 0) {
+            DebugLogger.warn("SETTINGS", "Ignoring non-integer value'" + item.value()
+                + "' for setting '" + item.key() + "'!");
             return;
         }
 
-        Integer value = Integer.parseInt(item.value());
-        Integer[] options = Arrays.stream(item.options())
-                .map(Integer::parseInt)
-                .toArray(Integer[]::new);
-
-        restrictedIntSettings.put(item.key(), new RestrictedValue<>(value, options));
-    }
-
-    private void addToRestrictedStringMap(SettingItem item, Map<String, RestrictedValue<String>> restrictedStringSettings) {
-        if (item.options() == null || item.options().length == 0) {
+        if (!defaultSettings.doesIntegerSettingExist(item.key)) {
+            DebugLogger.warn("SETTINGS", "Ignoring unknown setting '" + item.key() + "'!");
             return;
         }
-        restrictedStringSettings.put(item.key(), new RestrictedValue<>(item.value(), item.options()));
+        if (defaultSettings.isIntegerAllowed(item.key(), value)) {
+            map.put(item.key(), value);
+        }
+        else {
+            DebugLogger.warn("SETTINGS", "Invalid setting value '" + value
+                + "' for setting '" + item.key() + "'; falling back to default...");
+
+            map.put(item.key(), defaultSettings.getInt(item.key()));
+        }
+    }
+
+    private void addString(Map<String, String> map, SettingItem item) {
+        String value = item.value();
+
+        if (!defaultSettings.doesStringSettingExist(item.key())) {
+            DebugLogger.warn("SETTINGS", "Ignoring unknown setting '" + item.key() + "'!");
+            return;
+        }
+        if (defaultSettings.isStringAllowed(item.key(), value)) {
+            map.put(item.key(), value);
+        }
+        else {
+            DebugLogger.warn("SETTINGS", "Invalid setting value '" + value
+                + "' for setting '" + item.key() + "'; falling back to default...");
+
+            map.put(item.key(), defaultSettings.getString(item.key()));
+        }
     }
 
     @Override

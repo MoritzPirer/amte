@@ -6,25 +6,18 @@ import java.util.Map;
 public class LoadedSettings implements SettingStorage {
     private final Map<String, Boolean> booleanSettings;
     private final Map<String, Integer> integerSettings;
-    private final Map<String, RestrictedValue<Integer>> restrictedIntegerSettings;
-
     private final Map<String, String> stringSettings;
-    private final Map<String, RestrictedValue<String>> restrictedStringSettings;
 
     private final SettingStorage fallback;
 
     LoadedSettings(
         Map<String, Boolean> booleanSettings,
         Map<String, Integer> integerSettings,
-        Map<String, RestrictedValue<Integer>> restrictedIntegerSettings,
         Map<String, String> stringSettings,
-        Map<String, RestrictedValue<String>> restrictedStringSettings,
         SettingStorage fallback) {
         this.booleanSettings = booleanSettings;
         this.integerSettings = integerSettings;
-        this.restrictedIntegerSettings = restrictedIntegerSettings;
         this.stringSettings = stringSettings;
-        this.restrictedStringSettings = restrictedStringSettings;
         this.fallback = fallback;
     }
 
@@ -43,9 +36,6 @@ public class LoadedSettings implements SettingStorage {
         if (integerSettings.containsKey(key)) {
             return integerSettings.get(key);
         }
-        if (restrictedIntegerSettings.containsKey(key)) {
-            return restrictedIntegerSettings.get(key).get();
-        }
 
         System.out.println("falling back for int setting " + key);
         return fallback.getInt(key);
@@ -55,9 +45,6 @@ public class LoadedSettings implements SettingStorage {
     public String getString(String key) {
         if (stringSettings.containsKey(key)) {
             return stringSettings.get(key);
-        }
-        if (restrictedStringSettings.containsKey(key)) {
-            return restrictedStringSettings.get(key).get();
         }
 
         System.out.println("falling back for string setting " + key);
