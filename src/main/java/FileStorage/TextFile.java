@@ -5,6 +5,7 @@ import Controller.TemporaryMessages.Message;
 import Controller.TemporaryMessages.MessageType;
 import Controller.TemporaryMessages.TimeDuration;
 import Controller.View.Line;
+import Debugging.DebugLogger;
 import FileStorage.FileIO.DiskFileLoader;
 import FileStorage.FileIO.FileChangeMonitor;
 import FileStorage.FileIO.FileLoader;
@@ -217,8 +218,10 @@ public class TextFile {
 
     public String[] generateCorrections(Range range) {
         String word = buffer.readRange(range.start(), range.end()).getFirst();
-
         int maxResults = SettingsMaster.instance().getInt("maxCorrections");
+
+        DebugLogger.info("SPELLCHECK", "searching for up to " + maxResults + " corrections for '" + word + "'");
+
         return spellChecker.correct(word, maxResults);
     }
 

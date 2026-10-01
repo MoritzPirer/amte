@@ -41,6 +41,8 @@ class ExpectOperatorState implements ChordParserState {
             case 'E' -> parseEndOfWordMove(new ExpressionDelimiterChecker());
             case 'f' -> parseFindOperator(buffer, Direction.RIGHT);
             case 'F' -> parseFindOperator(buffer, Direction.LEFT);
+            case 'g' -> parseStartOfFileMove();
+            case 'G' -> parseEndOfFileMove(context);
             case 'h' -> new ParseSnapshot(ParseStatus.FINISHED, new MoveAction(Direction.LEFT));
             case 'i' -> parseTypingModeBeforeCursor(context);
             case 'I' -> parseTypingModeBeforeParagraph(context);
@@ -66,10 +68,60 @@ class ExpectOperatorState implements ChordParserState {
             case 'y' -> parseBeginningOfCopyChord(buffer);
             case ':' -> enterCommandMode(context);
             case '?' -> parseSpellCheckOperator(context);
+            case '$' -> parseEndOfParagraphMove(context);
+            case '0' -> parseStartOfParagraphMove(context);
             default -> ParseSnapshot.INVALID;
         };
     }
 
+    private ParseSnapshot parseEndOfParagraphMove(ParsingContext context) {
+        if (context.textFile().isEmpty()) {
+            return ParseSnapshot.FINISHED_NO_OP;
+        }
+
+        int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
+        int character = context.textFile().lengthOfParagraph(paragraph) - 1;
+
+        return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(
+            new FixedRangeResolver( null, new TextPosition(paragraph, character)),
+            false
+        ));
+    }
+
+    private ParseSnapshot parseStartOfParagraphMove(ParsingContext context) {
+        int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
+
+        return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(
+            new FixedRangeResolver(new TextPosition(paragraph, 0), null),
+            true
+        ));
+    }
+
+    private ParseSnapshot parseStartOfFileMove() {
+        return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(
+            new FixedRangeResolver(new TextPosition(0, 0), null),
+            true
+        ));
+    }
+
+    private ParseSnapshot parseEndOfFileMove(ParsingContext context) {
+        if (context.textFile().isEmpty()) {
+            return ParseSnapshot.FINISHED_NO_OP;
+        }
+        int paragraph = context.textFile().length() - 1;
+        int character = context.textFile().lengthOfParagraph(paragraph) - 1;
+
+        TextPosition textPosition = new TextPosition(paragraph, character);
+        if (paragraph < 0 || character < 0) {
+            textPosition = new TextPosition(0, 0);
+        }
+
+
+        return new ParseSnapshot(ParseStatus.FINISHED, new JumpAction(
+            new FixedRangeResolver(null, textPosition),
+            false
+        ));
+    }
 
     private ParseSnapshot parseTypingModeAfterCursor(ParsingContext context) {
         context.modeManager().setMode(new TypingMode(context.modeManager()));
@@ -279,6 +331,10 @@ class ExpectOperatorState implements ChordParserState {
     }
 
     private ParseSnapshot parseSpellCheckOperator(ParsingContext context) {
+        if (context.textFile().isEmpty()) {
+            return ParseSnapshot.FINISHED_NO_OP;
+        }
+        
         RangeResolver currentWord = DelimiterRangeResolver.makeWordUnderCursor();
         Range range = currentWord.resolve(context.viewPort(), context.textFile());
 
