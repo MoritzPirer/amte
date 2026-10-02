@@ -62,7 +62,7 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
             }
             return;
         }
-        if (position.character() < 0 || position.character() >= buffer.lengthOfParagraph(position.paragraph())) {
+        if (position.character() < 0 || position.character() > buffer.lengthOfParagraph(position.paragraph())) {
             throw new InvalidPosition("character " + position.character() + " is out of range");
         }
     }

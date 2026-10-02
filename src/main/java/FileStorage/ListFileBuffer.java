@@ -40,7 +40,7 @@ public class ListFileBuffer implements FileBuffer {
             return;
         }
 
-        if (position.character() < 0 || position.character() >= paragraphs.get(position.paragraph()).length()) {
+        if (position.character() < 0 || position.character() > paragraphs.get(position.paragraph()).length()) {
             throw new InvalidPosition("character " + position.character() + " is out of range");
         }
     }

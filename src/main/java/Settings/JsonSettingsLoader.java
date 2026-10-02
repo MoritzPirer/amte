@@ -57,11 +57,12 @@ class JsonSettingsLoader implements SettingsLoader {
         Map<String, Integer> intSettings,
         Map<String, String> stringSettings
     ) {
-        switch (item.type()) {
+        switch (item.type().toLowerCase()) {
             case "boolean" -> addBoolean(booleanSettings, item);
             case "integer" -> addInteger(intSettings, item);
             case "string" -> addString(stringSettings, item);
-            default -> DebugLogger.warn("SETTINGS", "ignoring unknown setting type " + item.type());
+            default -> DebugLogger.warn("SETTINGS", "ignoring unknown setting type " + item.type()
+                + " requested by " + item.key());
         }
     }
 

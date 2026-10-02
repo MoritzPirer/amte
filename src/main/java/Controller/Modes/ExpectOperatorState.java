@@ -56,6 +56,7 @@ class ExpectOperatorState implements ChordParserState {
             case 'O' -> parseCreateParagraphAbove(context);
             case 'p' -> parsePasteBelow(context);
             case 'P' -> parsePasteAbove(context);
+            case 'r' -> parseReplaceOperator(context, buffer);
             case 's' -> parseCutUnderCursor(context, true);
             case 't' -> parseExclusiveFindOperator(buffer, Direction.RIGHT);
             case 'T' -> parseExclusiveFindOperator(buffer, Direction.LEFT);
@@ -388,5 +389,15 @@ class ExpectOperatorState implements ChordParserState {
         }
 
         return new ParseSnapshot(ParseStatus.FINISHED, new FindAction(target, reversed));
+    }
+
+    private ParseSnapshot parseReplaceOperator(ParsingContext context, ParsingBuffer buffer) {
+        if (context.textFile().isEmpty()) {
+            return ParseSnapshot.FINISHED_NO_OP; //nothing to replace
+        }
+
+        chordParser.changeState(new ExpectReplaceValueState(chordParser));
+
+        return ParseSnapshot.makeUnfinished(buffer.get());
     }
 }
