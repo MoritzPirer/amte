@@ -247,9 +247,10 @@ class ExpectOperatorState implements ChordParserState {
         context.modeManager().setMode(new TypingMode(context.modeManager()));
 
         int paragraph = context.viewPort().getLogicalCursorPosition().paragraph();
-        return new ParseSnapshot(ParseStatus.FINISHED,
-                new InsertAction("\n", new TextPosition(paragraph, 0))
-        );
+        return new ParseSnapshot(ParseStatus.FINISHED, new CompoundAction(
+            new InsertAction("\n", new TextPosition(paragraph, 0)),
+            new MoveAction(Direction.UP)
+        ));
     }
 
     private ParseSnapshot parsePasteBelow(ParsingContext context) {
