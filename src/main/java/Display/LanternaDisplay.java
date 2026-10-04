@@ -209,8 +209,8 @@ public class LanternaDisplay extends Display {
 
     private void renderComponent(ViewComponent component, ScreenElement element, String defaultKey) {
         ColorSetup defaultSetup = ColorMaster.instance().get(defaultKey);
-        TextColor defaultForeground = toTextColor(defaultSetup.foreground());
-        TextColor defaultBackground = toTextColor(defaultSetup.background());
+        TextColor defaultForeground = toTextColor(defaultSetup.foreground(), Color.WHITE);
+        TextColor defaultBackground = toTextColor(defaultSetup.background(), Color.BLACK);
 
         fillBackground(element, defaultBackground);
 
@@ -233,6 +233,13 @@ public class LanternaDisplay extends Display {
         }
     }
 
+    private TextColor toTextColor(Color color, Color fallback) {
+        if (color == null) {
+            return toTextColor(fallback);
+        }
+
+        return toTextColor(color);
+    }
     private TextColor toTextColor(Color color) {
         return new TextColor.RGB(color.getRed(), color.getGreen(), color.getBlue());
     }

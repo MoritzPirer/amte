@@ -3,7 +3,7 @@ package LanguageSupport;
 import java.util.Map;
 
 class Language {
-    private static final boolean THROW_ON_UNKNOWN_KEY = true;
+    private static final boolean THROW_ON_UNKNOWN_KEY = false;
 
     private final Map<String, String> texts;
 
@@ -19,6 +19,6 @@ class Language {
             throw new IllegalArgumentException("Unknown key: " + key);
         }
 
-        return "???";
+        return "<missing entry>";
     }
 }
