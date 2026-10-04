@@ -13,6 +13,9 @@ import Settings.SettingsMaster;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
+/**
+ * Delete some section of text, possibly copying to the internal clipboard
+ */
 public class DeleteAction extends Action {
     private final RangeResolver resolver;
 
@@ -65,17 +68,16 @@ public class DeleteAction extends Action {
         ViewPort viewPort = viewPortManager.current();
         TextFile file = viewPort.getFile();
 
-        DebugLogger.info("ACTIONS", "applying DeleteAction");
         if (file.isEmpty()) {
-            DebugLogger.info("ACTIONS", "Delete canceled because file is empty");
+            DebugLogger.info("ACTIONS/DELETE", "Delete canceled because file is empty");
             return;
         }
 
         range = resolver.resolve(viewPort, file);
-        DebugLogger.info("ACTIONS", "Delete Range evaluates to " + range);
+        DebugLogger.info("ACTIONS/DELETE", "Delete Range evaluates to " + range);
 
         if (range.start().equals(range.end())) {
-            DebugLogger.info("ACTIONS", "Delete canceled because range is empty delete");
+            DebugLogger.info("ACTIONS/DELETE", "Delete canceled because range is empty delete");
             return;
         }
 

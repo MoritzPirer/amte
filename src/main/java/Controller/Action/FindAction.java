@@ -10,41 +10,51 @@ import LanguageSupport.LanguageProvider;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
+/**
+ * move the cursor to the next occurrence of a given target
+ */
 public class FindAction extends Action {
     String target;
-    boolean reversed;
+    boolean doBackwardsSearch;
 
-    public FindAction(String target, boolean reversed) {
+    public FindAction(String target, boolean doBackwardsSearch) {
         assert target != null && !target.isEmpty();
         this.target = target;
-        this.reversed = reversed;
+        this.doBackwardsSearch = doBackwardsSearch;
     }
 
     @Override
     public void apply(ViewPortManager viewPortManager) {
         ViewPort viewPort = viewPortManager.current();
 
-        TextIterator iterator = new TextIterator(viewPort, reversed);
-        TextPosition match = reversed?
-            knuthMorrisPratt(iterator, StringUtility.reverse(target)) :
-            knuthMorrisPratt(iterator, target);
+        TextIterator iterator = new TextIterator(viewPort, doBackwardsSearch);
+        TextPosition match = doBackwardsSearch ?
+            findFirstMatch(iterator, StringUtility.reverse(target)) :
+            findFirstMatch(iterator, target);
 
-        if (match == null) {
-            Message message = new Message(
-                String.format(new LanguageProvider().get("command/find/notFound"), target),
-                MessageType.ERROR,
-                new InputCountDuration(1) //ANCHOR
-            );
-            viewPort.addTemporaryMessage(message);
-        }
-        else {
+        if (match != null) {
             viewPort.moveCursorTo(match);
+            return;
         }
+
+        Message message = new Message(
+            String.format(new LanguageProvider().get("command/find/notFound"), target),
+            MessageType.ERROR,
+            new InputCountDuration(1)
+        );
+        viewPort.addTemporaryMessage(message);
     }
 
-    private TextPosition knuthMorrisPratt(TextIterator iterator, String target) {
+    /**
+     * search the string provided by iterator for the first occurrence of target. Implemented as a
+     * variation of Knuth-Morris-Pratt String matching
+     * @param iterator an iterator over the text to be searched
+     * @param target the target to search for
+     * @return the position where the first match starts, or null if no match was found
+     */
+    private TextPosition findFirstMatch(TextIterator iterator, String target) {
         iterator.next(); //force move if cursor already on match
-        int[] auxiliaryArray = precomputation(target);
+        int[] skipAheadArray = calculateSkipAheadArray(target);
 
         int positionInTarget = 0;
 
@@ -69,7 +79,7 @@ public class FindAction extends Action {
                     iterator.next();
                 }
                 else {
-                    positionInTarget = auxiliaryArray[positionInTarget];
+                    positionInTarget = skipAheadArray[positionInTarget];
                 }
 
                 startOfCurrentMatch = null;
@@ -81,7 +91,13 @@ public class FindAction extends Action {
         return null;
     }
 
-    private static int[] precomputation(String target) {
+    /**
+     * calculates the auxiliary array for the Knuth-Morris-Pratt algorithm, indicating how far the search can skip
+     * ahead on a mismatch, based on shared prefixes
+     * @param target the search target
+     * @return the auxiliary array
+     */
+    private static int[] calculateSkipAheadArray(String target) {
         int[] result = new int[target.length() + 1];
 
         result[0] = -1;
@@ -115,9 +131,9 @@ public class FindAction extends Action {
         private int paragraphIndex;
         private int positionInParagraph;
         private Character currentCharacter;
-        private final boolean reversed;
+        private final boolean doBackwardsSearch;
 
-        TextIterator(ViewPort viewPort, boolean reversed) {
+        TextIterator(ViewPort viewPort, boolean doBackwardsSearch) {
             this.file = viewPort.getFile();
 
             TextPosition cursor = viewPort.getLogicalCursorPosition();
@@ -126,23 +142,27 @@ public class FindAction extends Action {
             this.positionInParagraph = cursor.character();
 
             this.currentCharacter = currentParagraph.charAt(positionInParagraph);
-            this.reversed = reversed;
+            this.doBackwardsSearch = doBackwardsSearch;
         }
 
         Character current() {
             return currentCharacter;
         }
 
+        /**
+         * moves the iterator to the next character to be processed. In a backwards search, this is
+         * the previous character of the Text being iterated over.
+         */
         void next() {
-            if (reversed) {
-                backward();
+            if (doBackwardsSearch) {
+                moveBackward();
             }
             else {
-                forward();
+                moveForward();
             }
         }
 
-        private void forward() {
+        private void moveForward() {
             positionInParagraph++;
 
             if (positionInParagraph < currentParagraph.length()) {
@@ -162,7 +182,7 @@ public class FindAction extends Action {
             currentCharacter = null;
         }
 
-        private void backward() {
+        private void moveBackward() {
             positionInParagraph--;
 
             if (positionInParagraph >= 0) {
@@ -182,6 +202,9 @@ public class FindAction extends Action {
             currentCharacter = null;
         }
 
+        /**
+         * @return the position within the file the iterator is currently over
+         */
         TextPosition position() {
             return new TextPosition(paragraphIndex, positionInParagraph);
         }

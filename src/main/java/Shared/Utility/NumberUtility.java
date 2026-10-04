@@ -20,13 +20,14 @@ public class NumberUtility {
      * @return a Color object representing the same color or null if hex did not contain a valid hex code
      */
     public static Color hexToColor(String hex) {
-        if (hex.isEmpty()) {
+        if (hex == null || hex.isEmpty()) {
             return null;
         }
 
         if (hex.startsWith("#")) {
             hex = hex.substring(1);
         }
+
         try {
             return new Color(Integer.parseInt(hex, 16));
         }

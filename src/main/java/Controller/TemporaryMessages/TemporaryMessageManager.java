@@ -7,7 +7,7 @@ import Controller.View.ViewComponent;
 import Shared.Size;
 import Shared.Utility.StringUtility;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TemporaryMessageManager {
@@ -15,16 +15,18 @@ public class TemporaryMessageManager {
     private int width;
 
     public TemporaryMessageManager() {
-        messages = new LinkedList<>();
+        messages = new ArrayList<>();
     }
 
+    /**
+     * add a new message
+     * @param message the message to add
+     */
     public void add(Message message) {
         messages.add(message);
     }
 
-    public void updateWidth(int newWidth) {
-        this.width = newWidth;
-    }
+
 
     /**
      * call after user input to remove input count-based messages
@@ -40,8 +42,15 @@ public class TemporaryMessageManager {
         messages.removeIf(message -> message.duration().shouldRemove(false));
     }
 
+    /**
+     * change the width the messages will be formatted to when get() is called
+     */
+    public void setWidth(int newWidth) {
+        this.width = newWidth;
+    }
+
     public ViewComponent get() {
-        List<Line> result = new LinkedList<>();
+        List<Line> result = new ArrayList<>();
         for (Message message : messages) {
             Style style = switch (message.type()) {
                 case INFO -> Style.TEXT_STYLE;
@@ -60,5 +69,4 @@ public class TemporaryMessageManager {
 
         return new ViewComponent(size, result.toArray(Line[]::new));
     }
-
 }

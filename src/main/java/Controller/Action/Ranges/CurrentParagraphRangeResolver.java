@@ -4,6 +4,10 @@ import Controller.ViewPortManager.ViewPort;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 
+/**
+ * Resolves to a range that includes the entire paragraph the cursor is in at the time of resolving.
+ * the end of the returned value is the hypothetical position just after the last character of the paragraph
+ */
 public class CurrentParagraphRangeResolver implements RangeResolver {
     @Override
     public Range resolve(ViewPort viewPort, TextFile file) {

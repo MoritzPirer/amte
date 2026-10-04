@@ -1,12 +1,13 @@
 package Controller.Action;
 
-import Controller.ViewPortManager.ViewPort;
 import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
-import FileStorage.TextFile;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
+/**
+ * Insert some text at a specified position
+ */
 public class InsertAction extends Action {
     private String content;
     private TextPosition position;
@@ -19,7 +20,7 @@ public class InsertAction extends Action {
 
     @Override
     public void apply(ViewPortManager viewPortManager) {
-        DebugLogger.info("ACTIONS", "inserting content '" + content + "' at position " + position );
+        DebugLogger.info("ACTIONS/INSERT", "inserting content '" + content + "' at position " + position );
 
         viewPortManager.current().getFile().insert(content, position);
         firstAfterInsert = findPositionAfterInsert();
@@ -64,20 +65,17 @@ public class InsertAction extends Action {
     @Override
     public boolean canAbsorb(Action action) {
         if (!(action instanceof InsertAction insertAction)) {
-            DebugLogger.info("HISTORY", "not merging because new action is not InsertAction");
+            DebugLogger.info("HISTORY/ABSORB", "not merging because new action is not InsertAction");
             return false;
         }
 
         if (content.isEmpty() || insertAction.content.isEmpty()) {
-            DebugLogger.info("HISTORY", "not merging because one or both actions do not have content");
+            DebugLogger.info("HISTORY/ABSORB", "not merging because one or both actions do not have content");
             return false;
         }
 
-        //THIS CHECK IS WRONG. SHOULD check if a.position is directly after b. firstafterinsert
         if (!this.position.equals(insertAction.firstAfterInsert) && !insertAction.position.equals(this.firstAfterInsert)) {
-            DebugLogger.info("HISTORY", "not merging because inserts are not adjacent");
-            DebugLogger.warn("HISTORY", "this.position" + this.position + " this.firstAfterInsert" + this.firstAfterInsert);
-            DebugLogger.warn("HISTORY", "other.position" + insertAction.position + " other.firstAfterInsert" + insertAction.firstAfterInsert);
+            DebugLogger.info("HISTORY/ABSORB", "not merging because inserts are not adjacent");
             return false;
         }
 
@@ -94,7 +92,7 @@ public class InsertAction extends Action {
         }
 
         if (!StringUtility.isAlphanumeric(endOfFirst) || !StringUtility.isAlphanumeric(startOfSecond)) {
-            DebugLogger.info("HISTORY", "not merging because the merging point is the end of a word");
+            DebugLogger.info("HISTORY/ABSORB", "not merging because the merging point is the end of a word");
             return false;
         }
 

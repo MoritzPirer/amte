@@ -1,12 +1,16 @@
 package Controller.Action;
 
+import Controller.Action.Ranges.FixedRangeResolver;
 import Controller.Action.Ranges.Range;
 import Controller.Action.Ranges.RangeResolver;
 import Controller.ViewPortManager.ViewPort;
 import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
-import FileStorage.TextFile;
+import Shared.TextPosition;
 
+/**
+ * jump to specified position in the file
+ */
 public class JumpAction extends Action {
 
     private final RangeResolver resolver;
@@ -24,6 +28,11 @@ public class JumpAction extends Action {
 
     public JumpAction(RangeResolver resolver) {
         this(resolver, false);
+    }
+
+    public JumpAction(TextPosition position) {
+        this.resolver = new FixedRangeResolver(null, position);
+        this.jumpToStart = false;
     }
 
     @Override

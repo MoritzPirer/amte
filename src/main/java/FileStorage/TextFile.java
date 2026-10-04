@@ -54,16 +54,23 @@ public class TextFile {
     }
 
     public void setFileName(String fileName) {
+        DebugLogger.info("TEXTFILE", "renaming file to " + fileName);
+
         if (fileName == null || fileName.isEmpty()) {
             return;
         }
 
         this.fileName = fileName;
-        filePath = this.filePath.getParent().resolve(fileName).normalize();
+        filePath = constructFilePath(fileName);
         fileChangeMonitor.changePath(filePath);
 
         String extension = StringUtility.fileNameToExtension(fileName);
         renderer.registerFileTypeChange(extension);
+    }
+
+    private Path constructFilePath(String fileName) {
+        Path folder = filePath == null ? Path.of(System.getProperty("user.dir")) : filePath.getParent();
+        return folder.resolve(fileName).normalize();
     }
 
     public String getFileName() {

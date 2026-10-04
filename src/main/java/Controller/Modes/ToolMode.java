@@ -1,10 +1,8 @@
 package Controller.Modes;
 
 import Controller.Action.*;
-import Controller.Action.Ranges.FixedRangeResolver;
 import Controller.Input;
 import Controller.SpecialInput;
-import Controller.View.Line;
 import Controller.ViewPortManager.ViewPort;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
@@ -27,9 +25,7 @@ class ToolMode implements ModeState, ChordParser {
     public Action parseInput(Input input, ViewPort viewPort, TextFile file) {
         ParsingContext context = new ParsingContext(viewPort, file, modeManager);
 
-        DebugLogger.info("DEBUG", "input " + input + " is here in tool mode");
         if (input.isSpecialInput()) {
-            DebugLogger.info("DEBUG", "input " + input + " is special input");
             if (buffer.length() > 0) {
                 buffer.clear();
                 reset(viewPort);
@@ -42,8 +38,9 @@ class ToolMode implements ModeState, ChordParser {
 
         buffer.add(input.getCharacter());
         ParseSnapshot result = state.parse(buffer, context);
-        DebugLogger.info("PARSING", "input chord is " + result.status()
-            + ", evaluated to " + result.action().getClass().getSimpleName());
+
+        DebugLogger.info("PARSING", "input chord '" + result.status()
+            + "' evaluated to '" + result.action().getClass().getSimpleName() + "'");
 
         if (result.status() != ParseStatus.UNFINISHED) {
             buffer.clear();
@@ -66,48 +63,37 @@ class ToolMode implements ModeState, ChordParser {
     private Action parseSpecialInput(SpecialInput input, ViewPort viewPort, TextFile file) {
         reset(viewPort);
 
-        DebugLogger.warn("DEBUG", "here");
         switch (input) {
-            case ARROW_LEFT -> {
-                return new MoveAction(Direction.LEFT);
-            }
-            case ARROW_DOWN -> {
-                return new MoveAction(Direction.DOWN);
-            }
-            case ARROW_UP -> {
-                return new MoveAction(Direction.UP);
-            }
-            case ARROW_RIGHT -> {
-                return new MoveAction(Direction.RIGHT);
-            }
-            case TAB -> {
-                TextPosition position = new TextPosition(
-                    viewPort.getLogicalCursorPosition().paragraph(),
-                    0
-                );
-                return new CompoundAction(
-                    new InsertAction("\t", position),
-                    new JumpAction(new FixedRangeResolver(null, viewPort.getLogicalCursorPosition().offset(0, 1)))
-                );
-            }
+            case ARROW_LEFT -> { return new MoveAction(Direction.LEFT); }
+            case ARROW_DOWN -> { return new MoveAction(Direction.DOWN); }
+            case ARROW_UP -> { return new MoveAction(Direction.UP); }
+            case ARROW_RIGHT -> { return new MoveAction(Direction.RIGHT); }
+            case TAB -> { return createIndentAction(viewPort); }
             case SHIFT_TAB -> {
                 int paragraph = viewPort.getLogicalCursorPosition().paragraph();
-                Line line = file.readParagraph(paragraph);
-                if (line.textSpans().length == 0 || !line.textSpans()[0].text().startsWith("\t")) {
+                String line = file.readRawParagraph(paragraph);
+
+                if (!line.startsWith("\t")) {
                     return new NullAction();
                 }
 
-                return new DeleteAction(new FixedRangeResolver(
-                        new TextPosition(paragraph, 0),
-                        new TextPosition(paragraph, 1))
+                return new DeleteAction(
+                    new TextPosition(paragraph, 0),
+                    new TextPosition(paragraph, 1)
                 );
             }
 
-            default -> {
-
-                return new NullAction();
-            }
+            default -> { return new NullAction(); }
         }
+    }
+
+    private Action createIndentAction(ViewPort viewPort) {
+        TextPosition position = new TextPosition(viewPort.getLogicalCursorPosition().paragraph(), 0);
+
+        return new CompoundAction(
+            new InsertAction("\t", position),
+            new JumpAction(viewPort.getLogicalCursorPosition().offset(0, 1)
+        ));
     }
 
     private void reset(ViewPort viewPort) {

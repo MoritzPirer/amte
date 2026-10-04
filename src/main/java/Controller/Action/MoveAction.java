@@ -4,6 +4,9 @@ import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
 import Shared.Direction;
 
+/**
+ * move the cursor one character to the side or one paragraph up or down
+ */
 public class MoveAction extends Action {
 
     private final Direction direction;

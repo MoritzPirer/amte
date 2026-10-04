@@ -10,6 +10,7 @@ import java.io.IOException;
 
 public abstract class Display {
     protected final Controller controller;
+    private boolean delayNextIteration = false;
 
     public static void main(String[] args) {
         if (args.length > 1) {
@@ -36,10 +37,11 @@ public abstract class Display {
             init();
             controller.updateSizeConfiguration(initialSizeConfiguration());
             while (controller.isRunning()) {
-                updateSize();
+                update();
                 redraw();
-                controller.update();
-                if (parseInput()) {
+                parseInput();
+                if (delayNextIteration) {
+                    delayNextIteration = false;
                     Thread.sleep(50);
                 }
             }
@@ -52,7 +54,8 @@ public abstract class Display {
         catch (InterruptedException ignored) {}
     }
 
-    private void updateSize() {
+    private void update() {
+        controller.update();
         SizeConfiguration sizeConfiguration = checkSizeConfiguration(controller.getRecommendedNumberWidth());
         if (sizeConfiguration != null) {
             controller.updateSizeConfiguration(sizeConfiguration);
@@ -64,14 +67,15 @@ public abstract class Display {
         render(view);
     }
 
-    private boolean parseInput() throws IOException {
+    private void parseInput() throws IOException {
         Input input = checkInput();
-        if (input != null) {
-            controller.applyInput(input);
-            return false;
+        if (input == null) {
+            delayNextIteration = true;
+            return;
         }
 
-        return true;
+        controller.applyInput(input);
+        delayNextIteration = false;
     }
 
     /**

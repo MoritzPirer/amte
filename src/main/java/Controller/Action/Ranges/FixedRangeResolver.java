@@ -4,6 +4,9 @@ import Controller.ViewPortManager.ViewPort;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 
+/**
+  Resolved to a specific range defined at construction
+ */
 public class FixedRangeResolver implements RangeResolver {
 
     private final Range range;

@@ -11,24 +11,29 @@ public class FileChangeMonitor {
     private boolean isActive;
 
     public FileChangeMonitor(Path path) {
-        assert Files.exists(path) && !Files.isDirectory(path);
-
-        this.isActive = true;
         track(path);
     }
 
     public void changePath(Path path) {
-        assert Files.exists(path) && !Files.isDirectory(path);
         track(path);
     }
 
+    private boolean isValidPath(Path path) {
+        return path != null && Files.exists(path) && !Files.isDirectory(path);
+    }
+
     private void track(Path path) {
+        if (!isValidPath(path)) {
+            DebugLogger.warn("HOT_LOADING", "file path '" + path + "' is not trackable");
+            isActive = false;
+            return;
+        }
         try {
             this.path = path.toAbsolutePath();
             this.watcher = FileSystems.getDefault().newWatchService();
             this.path.getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
             this.isActive = true;
-            DebugLogger.info("HOT_LOADING", "Set up WatchService");
+            DebugLogger.info("HOT_LOADING", "Set up WatchService for " + this.path);
         }
         catch (IOException e) {
             DebugLogger.warn("HOT_LOADING", "Failed to set up watch service for " + this.path);
@@ -39,7 +44,6 @@ public class FileChangeMonitor {
 
     public boolean hasChanged() {
         if (!isActive) {
-            DebugLogger.warn("HOT_LOADING", "Not checking for change because setup failed");
             return false;
         }
 

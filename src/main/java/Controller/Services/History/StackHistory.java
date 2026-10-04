@@ -63,9 +63,9 @@ public class StackHistory implements History {
     public void redo(ViewPortManager viewPortManager) {
         if (redoableActions.isEmpty()) {
             viewPortManager.current().addTemporaryMessage(new Message(
-                    provider.get("tool/history/nothingToRedo"),
-                    MessageType.ERROR,
-                    TimeDuration.seconds(2)
+                provider.get("tool/history/nothingToRedo"),
+                MessageType.ERROR,
+                TimeDuration.seconds(2)
             ));
             return;
         }

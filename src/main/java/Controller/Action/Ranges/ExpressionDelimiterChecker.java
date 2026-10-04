@@ -5,6 +5,7 @@ public class ExpressionDelimiterChecker implements DelimiterChecker {
     public boolean isLeftDelimiter(char c) {
         return Character.isWhitespace(c);
     }
+
     @Override
     public boolean isRightDelimiter(char c) {
         return Character.isWhitespace(c);

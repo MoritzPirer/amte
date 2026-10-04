@@ -26,7 +26,12 @@ public interface Controller {
      */
     View getView();
 
+    /**
+     * @return how wide the number panel should be based on the length of the file. Does not account for padding or
+     * disabling the number panel in the setting
+     */
     int getRecommendedNumberWidth();
+
     /**
      * updates the stored size of individual components to account for window resizing
      * @param sizeConfiguration the sizes of the ui components

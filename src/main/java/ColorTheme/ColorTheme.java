@@ -1,6 +1,6 @@
 package ColorTheme;
 
-import Shared.Utility.NumberUtility;
+import Debugging.DebugLogger;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class ColorTheme {
     private final Map<String, ColorSetup> colors;
-    private static final ColorSetup defaultSetup = new ColorSetup(
+    private static final ColorSetup DEFAULT_SETUP = new ColorSetup(
         "",
         Color.WHITE,
         Color.BLACK,
@@ -29,7 +29,7 @@ public class ColorTheme {
             return colors.get(key);
         }
 
-        System.err.println("falling back to default for unknown key " + key);
-        return defaultSetup;
+        DebugLogger.warn("COLOR", "falling back for unknown key " + key);
+        return DEFAULT_SETUP;
     }
 }

@@ -8,6 +8,9 @@ import Controller.ViewPortManager.ViewPort;
 import Controller.ViewPortManager.ViewPortManager;
 import Settings.SettingsMaster;
 
+/**
+ * copy a section of text to the internal clipboard (optionally also to the system clipboard)
+ */
 public class CopyAction extends Action {
     private final RangeResolver resolver;
     private final CopyType type;

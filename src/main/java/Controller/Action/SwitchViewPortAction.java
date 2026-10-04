@@ -3,6 +3,9 @@ package Controller.Action;
 import Controller.ViewPortManager.ViewPortManager;
 import Shared.Direction;
 
+/**
+ * changes the active viewport
+ */
 public class SwitchViewPortAction extends Action {
     Direction direction;
 

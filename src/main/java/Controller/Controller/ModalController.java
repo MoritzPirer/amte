@@ -34,9 +34,6 @@ public class ModalController implements Controller{
     public ModalController() {
         FileBuffer buffer = new ListFileBuffer();
         FileMetadataTracker tracker = new WrapperMetadataTracker(buffer);
-
-        //TODO WHEN [anytime] DO [pass working directory as filepath s.t. it can be saved OR make FileLoader default to wd if filepath is null]
-
         SpellChecker checker = SpellCheckerLoader.load(SettingsMaster.instance().getString("spellCheckLanguage"));
         TextFile file = new TextFile(null, "", tracker, SaveState.CREATED, checker);
         this.viewPortManager = new ViewPortManager(new ViewPort(file));

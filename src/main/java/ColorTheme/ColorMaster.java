@@ -5,10 +5,13 @@ import Shared.Utility.FileParsingUtility;
 
 import java.nio.file.Path;
 
+/**
+ * read-only singleton object storing color theme information loaded once on startup
+ */
 public class ColorMaster {
     private static ColorMaster instance = null;
-
     private final ColorTheme theme;
+
     private ColorMaster() {
         String colorThemePath = FileParsingUtility.getColorThemesFolder()
             + SettingsMaster.instance().getString("activeColorTheme");

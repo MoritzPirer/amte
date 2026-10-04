@@ -5,7 +5,6 @@ import Controller.Action.Ranges.FixedRangeResolver;
 import Controller.Input;
 import Controller.Services.Clipbobard.ClipboardHandler;
 import Controller.SpecialInput;
-import Controller.View.Line;
 import Controller.ViewPortManager.ViewPort;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
@@ -33,47 +32,47 @@ public class TypingMode implements ModeState {
                 modeManager.setMode(new ToolMode(modeManager));
                 return new NullAction();
             }
-            case BACK_SPACE -> {
-                return createBackSpaceAction(viewPort, file);
-            }
+            case BACK_SPACE -> { return createBackSpaceAction(viewPort, file); }
             case ENTER -> {
                 return SmartList.trySmartListInsertion(new ParsingContext(viewPort, file, null));
-                //return new InsertAction("\n",  viewPort.getLogicalCursorPosition());
             }
-            case TAB -> {
-                TextPosition position = new TextPosition(
-                    viewPort.getLogicalCursorPosition().paragraph(),
-                    0
-                );
-                return new CompoundAction(
-                    new InsertAction("\t", position),
-                    new JumpAction(new FixedRangeResolver(null, viewPort.getLogicalCursorPosition().offset(0, 1)))
-                );
-            }
-            case SHIFT_TAB -> {
-                int paragraph = viewPort.getLogicalCursorPosition().paragraph();
-                Line line = file.readParagraph(paragraph);
-                if (line.textSpans().length == 0 || !line.textSpans()[0].text().startsWith("\t")) {
-                    return new NullAction();
-                }
-
-                return new DeleteAction(new FixedRangeResolver(
-                    new TextPosition(paragraph, 0),
-                    new TextPosition(paragraph, 1))
-                );
-            }
-            case PASTE -> {
-                String content = ClipboardHandler.getSystemClipboardContent();
-                if (content == null) {
-                    return new NullAction();
-                }
-
-                return new InsertAction(content, viewPort.getLogicalCursorPosition());
-            }
-            default -> {
-                return new NullAction();
-            }
+            case TAB -> { return createIndentAction(viewPort); }
+            case SHIFT_TAB -> { return createUnindentAction(viewPort, file); }
+            case PASTE -> { return createPasteAction(viewPort); }
+            default -> { return new NullAction(); }
         }
+    }
+
+    private Action createIndentAction(ViewPort viewPort) {
+        TextPosition position = new TextPosition(viewPort.getLogicalCursorPosition().paragraph(), 0);
+
+        return new CompoundAction(
+            new InsertAction("\t", position),
+            new JumpAction(new FixedRangeResolver(null, viewPort.getLogicalCursorPosition().offset(0, 1)))
+        );
+    }
+
+    private Action createUnindentAction(ViewPort viewPort, TextFile file) {
+        int paragraphIndex = viewPort.getLogicalCursorPosition().paragraph();
+        String paragraph = file.readRawParagraph(paragraphIndex);
+
+        if (!paragraph.startsWith("\t")) {
+            return new NullAction();
+        }
+
+        return new DeleteAction(
+            new TextPosition(paragraphIndex, 0),
+            new TextPosition(paragraphIndex, 1)
+        );
+    }
+
+    private Action createPasteAction(ViewPort viewPort) {
+        String content = ClipboardHandler.getSystemClipboardContent();
+        if (content == null) {
+            return new NullAction();
+        }
+
+        return new InsertAction(content, viewPort.getLogicalCursorPosition());
     }
 
     private Action createBackSpaceAction(ViewPort viewPort, TextFile file) {

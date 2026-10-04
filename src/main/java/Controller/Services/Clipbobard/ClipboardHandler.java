@@ -10,11 +10,6 @@ public class ClipboardHandler {
     private String content = null;
 
     public ClipboardHandler() {}
-    public ClipboardHandler(CopyType type, String content) {
-        this.type = type;
-        this.content = content;
-    }
-
 
     public CopyType getType() {
         return type;

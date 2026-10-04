@@ -112,7 +112,7 @@ public class ViewPort {
 
     public ViewComponent getTextArea(Size size) {
         this.textAreaSize = size;
-        messageManager.updateWidth(textAreaSize.width());
+        messageManager.setWidth(textAreaSize.width());
 
         Line[] lines = new Line[size.height()];
         int visualLinesUsed = 0;

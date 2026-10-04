@@ -1,11 +1,12 @@
 package Controller.Action;
 
 import Controller.TemporaryMessages.Message;
-import Controller.ViewPortManager.ViewPort;
 import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
-import FileStorage.TextFile;
 
+/**
+ * Display a message to the user
+ */
 public class NotifyAction extends Action {
     private final Message message;
 

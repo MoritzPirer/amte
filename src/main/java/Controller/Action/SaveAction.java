@@ -8,6 +8,9 @@ import Debugging.DebugLogger;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 
+/**
+ * saves the file associated with the active viewport
+ */
 public class SaveAction extends Action {
 
     @Override

@@ -6,9 +6,11 @@ import Controller.TemporaryMessages.MessageType;
 import Controller.ViewPortManager.ViewPort;
 import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
-import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
 
+/**
+ * Closes the active viewPort
+ */
 public class QuitAction extends Action {
     private final boolean abortOnUnsavedChanges;
 

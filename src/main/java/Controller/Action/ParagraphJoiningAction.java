@@ -1,11 +1,13 @@
 package Controller.Action;
 
-import Controller.ViewPortManager.ViewPort;
 import Controller.ViewPortManager.ViewPortManager;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
+/**
+ * join two neighbouring paragraphs into one
+ */
 public class ParagraphJoiningAction extends Action {
     private final int upperParagraph;
 
@@ -55,7 +57,7 @@ public class ParagraphJoiningAction extends Action {
     public void undo(ViewPortManager viewPortManager) {
         TextFile file = viewPortManager.current().getFile();
 
-        String joined = file.readParagraph(upperParagraph).toString();
+        String joined = file.readRawParagraph(upperParagraph);
         String first = joined.substring(0, joinIndex) + removedFromFirst;
         String second = removedFromSecond + joined.substring(joinIndex + 1);
 

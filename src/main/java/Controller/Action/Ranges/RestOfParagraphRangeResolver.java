@@ -4,6 +4,9 @@ import Controller.ViewPortManager.ViewPort;
 import FileStorage.TextFile;
 import Shared.TextPosition;
 
+/**
+ * Generates a range from the current cursor position to the end of the current paragraph
+ */
 public class RestOfParagraphRangeResolver implements RangeResolver {
     @Override
     public Range resolve(ViewPort viewPort, TextFile file) {

@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * opens a new file as the next file in the list of viewPorts.
+ */
 public class OpenFileAction extends Action {
     private final Path absolutePath;
 

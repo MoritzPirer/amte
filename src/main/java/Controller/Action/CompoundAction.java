@@ -1,13 +1,14 @@
 package Controller.Action;
 
-import Controller.ViewPortManager.ViewPort;
 import Controller.ViewPortManager.ViewPortManager;
-import FileStorage.TextFile;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Allows for multiple actions to be treated as a single action to allow for composing of more complicated modifications
+ */
 public class CompoundAction extends Action {
     private final List<Action> actions;
 
@@ -38,8 +39,10 @@ public class CompoundAction extends Action {
 
     @Override
     public void undo(ViewPortManager viewPortManager) {
+        //iterate in reverse for stack-like behavior, i.e. last to be applied must be undone first
         for (int i = actions.size() - 1; i >= 0; i--) {
             Action action = actions.get(i);
+
             if (action.canBeUndone()) {
                 action.undo(viewPortManager);
             }

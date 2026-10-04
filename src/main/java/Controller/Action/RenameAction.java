@@ -1,10 +1,12 @@
 package Controller.Action;
 
-import Controller.ViewPortManager.ViewPort;
 import Controller.ViewPortManager.ViewPortManager;
 import Debugging.DebugLogger;
 import FileStorage.TextFile;
 
+/**
+ * Renames the file associated with the active viewport
+ */
 public class RenameAction extends Action {
     private String previousName;
     private String newName;
