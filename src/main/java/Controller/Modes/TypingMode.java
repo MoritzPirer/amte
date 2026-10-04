@@ -8,6 +8,7 @@ import Controller.SpecialInput;
 import Controller.ViewPortManager.ViewPort;
 import FileStorage.TextFile;
 import LanguageSupport.LanguageProvider;
+import Shared.Direction;
 import Shared.TextPosition;
 
 public class TypingMode implements ModeState {
@@ -28,6 +29,10 @@ public class TypingMode implements ModeState {
 
     private Action parseSpecialInput(SpecialInput input, ViewPort viewPort, TextFile file) {
         switch (input) {
+            case ARROW_LEFT -> { return new MoveAction(Direction.LEFT); }
+            case ARROW_DOWN -> { return new MoveAction(Direction.DOWN); }
+            case ARROW_UP -> { return new MoveAction(Direction.UP); }
+            case ARROW_RIGHT -> { return new MoveAction(Direction.RIGHT); }
             case ESCAPE -> {
                 modeManager.setMode(new ToolMode(modeManager));
                 return new NullAction();
