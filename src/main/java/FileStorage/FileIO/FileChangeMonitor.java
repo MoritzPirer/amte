@@ -9,6 +9,7 @@ public class FileChangeMonitor {
     private Path path;
     private WatchService watcher;
     private boolean isActive;
+    private boolean supressNextModification = false;
 
     public FileChangeMonitor(Path path) {
         track(path);
@@ -42,6 +43,14 @@ public class FileChangeMonitor {
         }
     }
 
+    /**
+     * the next modification that is detected will be ignored. This prevents saves made by the editor from being
+     * interpreted as external modifications
+     */
+    public void supressNextModification() {
+        supressNextModification = true;
+    }
+
     public boolean hasChanged() {
         if (!isActive) {
             return false;
@@ -53,7 +62,14 @@ public class FileChangeMonitor {
         }
 
         for (WatchEvent<?> event : key.pollEvents()) {
-            assert event.kind() == StandardWatchEventKinds.ENTRY_MODIFY;
+            if (event.kind() != StandardWatchEventKinds.ENTRY_MODIFY) {
+                continue;
+            }
+
+            if (supressNextModification) {
+                supressNextModification = false;
+                continue;
+            }
 
             if (event.context().equals(path.getFileName())) {
                 DebugLogger.warn("HOT_LOADING", "change to registered file " + event.context());

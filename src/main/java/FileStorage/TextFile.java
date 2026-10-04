@@ -113,11 +113,10 @@ public class TextFile {
 
         FileLoader loader = new DiskFileLoader();
         try {
+            fileChangeMonitor.supressNextModification();
             loader.save(filePath, buffer);
             saveState = SaveState.SAVED;
-        } catch (IOException ignored) {
-            // user will be informed that saving failed based on saveState
-        }
+        } catch (IOException ignored) { /* user will be informed that saving failed based on saveState */ }
     }
 
     public boolean isSaved() {
