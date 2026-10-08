@@ -41,7 +41,7 @@ public class LanternaDisplay extends Display {
     private TextGraphics graphics = null;
     Size screenSize;
 
-    protected LanternaDisplay(Controller controller) {
+    public LanternaDisplay(Controller controller) {
         super(controller);
     }
 
