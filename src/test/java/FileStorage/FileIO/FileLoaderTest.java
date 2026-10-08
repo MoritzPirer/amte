@@ -38,7 +38,7 @@ class FileLoaderTest {
 
     @Test
     void testLoad() throws Exception {
-        final String LOAD_FILE = getResourcePath("FileStorage/testLoad.txt");
+        final Path LOAD_FILE = Path.of(getResourcePath("FileStorage/testLoad.txt"));
 
         for (FileLoader fileLoader : getImplementations()) {
             FileBuffer buffer = new ListFileBuffer();
@@ -54,7 +54,7 @@ class FileLoaderTest {
 
     @Test
     void testLoadEmpty() throws Exception {
-        final String EMPTY_FILE = getResourcePath("FileStorage/testEmpty.txt");
+        final Path EMPTY_FILE = Path.of(getResourcePath("FileStorage/testEmpty.txt"));
 
         for (FileLoader fileLoader : getImplementations()) {
             FileBuffer buffer = new ListFileBuffer();
@@ -69,14 +69,14 @@ class FileLoaderTest {
 
         for (FileLoader fileLoader : getImplementations()) {
             assertThrows(IOException.class, () ->
-                    fileLoader.load(NON_EXISTING_LOAD_FILE, new ListFileBuffer())
+                    fileLoader.load(Path.of(NON_EXISTING_LOAD_FILE), new ListFileBuffer())
             );
         }
     }
 
     @Test
     void testLoadNullHandling() throws Exception {
-        final String LOAD_FILE = getResourcePath("FileStorage/testLoad.txt");
+        final Path LOAD_FILE = Path.of(getResourcePath("FileStorage/testLoad.txt"));
 
         for (FileLoader fileLoader : getImplementations()) {
             assertThrows(Exception.class, () -> fileLoader.load(LOAD_FILE, null));
@@ -86,13 +86,13 @@ class FileLoaderTest {
 
     @Test
     void testSave() throws Exception {
-        final String SAVE_FILE = tempDir.resolve("testSave.txt").toString();
+        final Path SAVE_FILE = tempDir.resolve("testSave.txt");
 
         for (FileLoader fileLoader : getImplementations()) {
             FileBuffer buffer = new ListFileBuffer();
             buffer.append("Line 1\nLine 2\nLine 3");
 
-            fileLoader.save(Path.of(SAVE_FILE), buffer);
+            fileLoader.save(SAVE_FILE, buffer);
 
             buffer.clear();
             fileLoader.load(SAVE_FILE, buffer);
@@ -118,10 +118,10 @@ class FileLoaderTest {
 
     @Test
     void testSaveEmpty() throws Exception {
-        final String saveFile = tempDir.resolve("SaveEmptyFile.txt").toString();
+        final Path saveFile = tempDir.resolve("SaveEmptyFile.txt");
 
         for (FileLoader fileLoader : getImplementations()) {
-            fileLoader.save(Path.of(saveFile), new ListFileBuffer());
+            fileLoader.save(saveFile, new ListFileBuffer());
 
             FileBuffer verificationBuffer = new ListFileBuffer();
             fileLoader.load(saveFile, verificationBuffer);

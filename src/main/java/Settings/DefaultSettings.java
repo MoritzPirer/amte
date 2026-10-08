@@ -55,7 +55,6 @@ class DefaultSettings implements SettingStorage {
         if (container.containsKey(key)) {
             return container.get(key).value();
         }
-
         throw new IllegalArgumentException("No such key: " + key);
     }
 
@@ -74,7 +73,7 @@ class DefaultSettings implements SettingStorage {
 
         throw new IllegalArgumentException("No such key: " + key);
     }
-
+    
     public boolean doesBooleanSettingExist(String key) {
         return booleanSettings.containsKey(key);
     }

@@ -97,19 +97,18 @@ class Trie implements WordChecker, WordCorrecter, WordAddable {
      * @return a set of valid words
      */
     private SortedSet<String> testInsertions(String word) {
-        //TODO
-        // When [anytime]
-        // Do [adjust this function to loop through prefixes like testReplacements
-
         TreeSet<String> result = new TreeSet<>();
 
-        TrieNode lastMatch = root.lastMatch(word);
         String matched = root.getMatchedPrefix(word);
-        String unmatched = word.substring(matched.length());
+        for (int i = 0; i < matched.length(); i++) {
+            String currentPrefix = matched.substring(0, i);
+            String unmatched = word.substring(currentPrefix.length());
+            TrieNode lastMatch = root.lastMatch(currentPrefix);
 
-        for (TrieNode child : lastMatch.children) {
-            if (child.contains(unmatched)) {
-                result.add(matched + child.letter + unmatched);
+            for (TrieNode child : lastMatch.children) {
+                if (child.contains(unmatched)) {
+                    result.add(currentPrefix + child.letter + unmatched);
+                }
             }
         }
 

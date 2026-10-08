@@ -42,6 +42,10 @@ class JsonLanguageLoader implements LanguageLoader {
             return null;
         }
 
+        return convert(items);
+    }
+
+    private Language convert(String[] items) {
         Map<String, String> texts = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
 
@@ -54,9 +58,7 @@ class JsonLanguageLoader implements LanguageLoader {
 
                 texts.put(item.key(), item.value());
             }
-            catch (JacksonException ignored) {
-                //ignore misformatted entries
-            }
+            catch (JacksonException ignored) { /* ignore misformatted entries*/ }
         }
 
         return new Language(texts);

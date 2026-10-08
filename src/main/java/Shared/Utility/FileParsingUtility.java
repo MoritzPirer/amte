@@ -59,7 +59,7 @@ public class FileParsingUtility {
      * @return a string containing a filepath to the data folder
      */
     public static String getBaseFolder() {
-        String baseFolder = System.getProperty("user.home") + File.separator + ".strato" + File.separator;
+        String baseFolder = System.getProperty("user.home") + File.separator + ".amte" + File.separator;
         ensureDirectoryExists(baseFolder);
 
         return baseFolder;

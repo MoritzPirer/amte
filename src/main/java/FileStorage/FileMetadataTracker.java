@@ -5,17 +5,17 @@ public interface FileMetadataTracker {
     /**
      * @return the number of words in the buffer
      */
-    long getWordCount();
+    int getWordCount();
 
     /**
      * @return the number of characters in the buffer
      */
-    long getCharacterCount();
+    int getCharacterCount();
 
     /**
      * @return the number of paragraphs in the buffer
      */
-    long getParagraphCount();
+    int getParagraphCount();
 
     /**
      * @return the FileBuffer object that this object tracks metadata of

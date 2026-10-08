@@ -20,7 +20,6 @@ import SpellChecking.SpellChecker;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 
 public class TextFile {
     private Path filePath;
@@ -152,14 +151,7 @@ public class TextFile {
     }
 
     public String readRange(TextPosition start, TextPosition end) {
-        //TODO WHEN [anytime] DO [rewrite FileBuffer interface (and corresponding tests) to return String, not List<String>]
-        List<String> list = buffer.readRange(start, end);
-        StringBuilder builder = new StringBuilder();
-        for (String string : list) {
-            builder.append(string);
-        }
-
-        return builder.toString();
+        return buffer.readRange(start, end);
     }
 
     public void deleteRange(TextPosition start, TextPosition end) {
@@ -176,16 +168,15 @@ public class TextFile {
     }
 
     public int getWordCount() {
-        //TODO WHEN [anytime] DO [change tracker interface to return int instead of long]
-        return (int) tracker.getWordCount();
+        return tracker.getWordCount();
     }
 
     public int getCharacterCount() {
-        return (int) tracker.getCharacterCount();
+        return tracker.getCharacterCount();
     }
 
     public int getParagraphCount() {
-        return (int) tracker.getParagraphCount();
+        return tracker.getParagraphCount();
     }
 
     public TextPosition nextPosition(TextPosition position) {
@@ -223,7 +214,8 @@ public class TextFile {
     }
 
     public String[] generateCorrections(Range range) {
-        String word = buffer.readRange(range.start(), range.end()).getFirst();
+        String word = buffer.readRange(range.start(), range.end()).split("\\s")[0];
+
         int maxResults = SettingsMaster.instance().getInt("maxCorrections");
 
         DebugLogger.info("SPELLCHECK", "searching for up to " + maxResults + " corrections for '" + word + "'");

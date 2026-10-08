@@ -3,8 +3,6 @@ package FileStorage;
 import Shared.TextPosition;
 import Shared.Utility.StringUtility;
 
-import java.util.List;
-
 /**
  * tracks the metadata of a buffer by implementing the FileBuffer interface and wrapping a different buffer.
  * all modification calls are made to the Wrapper, update the internal metadata counts and are forwarded to the inner buffer
@@ -12,9 +10,9 @@ import java.util.List;
 public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
     private final FileBuffer buffer;
 
-    private long wordCount = 0;
-    private long characterCount = 0;
-    private long paragraphCount = 0;
+    private int wordCount = 0;
+    private int characterCount = 0;
+    private int paragraphCount = 0;
 
     public WrapperMetadataTracker(FileBuffer buffer) {
         assert buffer != null;
@@ -174,7 +172,7 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
     }
 
     @Override
-    public List<String> readRange(TextPosition start, TextPosition end) throws InvalidPosition {
+    public String readRange(TextPosition start, TextPosition end) throws InvalidPosition {
         return buffer.readRange(start, end);
     }
 
@@ -199,17 +197,17 @@ public class WrapperMetadataTracker implements FileBuffer, FileMetadataTracker {
     }
 
     @Override
-    public long getWordCount() {
+    public int getWordCount() {
         return wordCount;
     }
 
     @Override
-    public long getCharacterCount() {
+    public int getCharacterCount() {
         return characterCount;
     }
 
     @Override
-    public long getParagraphCount() {
+    public int getParagraphCount() {
         return paragraphCount;
     }
 

@@ -52,7 +52,7 @@ public class LanternaDisplay extends Display {
         Font font = new Font("Courier New", Font.PLAIN, 12);
         SwingTerminalFontConfiguration c = SwingTerminalFontConfiguration.newInstance(font);
         this.screen = new DefaultTerminalFactory()
-            .setTerminalEmulatorTitle("strato")
+            .setTerminalEmulatorTitle("AMTE")
             .setTerminalEmulatorFontConfiguration(c)
             .createScreen();
 

@@ -3,7 +3,6 @@ package FileStorage;
 import Shared.TextPosition;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -173,15 +172,15 @@ class FileBufferTest {
             fileBuffer.insert("Alpha\n\nGamma", new TextPosition(0, 0));
 
             // Standard multi-line read
-            List<String> result = fileBuffer.readRange(new TextPosition(0, 0), new TextPosition(2, 6));
-            assertIterableEquals(List.of("Alpha\n", "\n", "Gamma\n"), result);
+            String result = fileBuffer.readRange(new TextPosition(0, 0), new TextPosition(2, 6));
+            assertEquals("Alpha\n\nGamma\n", result);
 
             // Read starting from an empty line
-            List<String> emptyLineRead = fileBuffer.readRange(new TextPosition(1, 0), new TextPosition(2, 0));
-            assertIterableEquals(List.of("\n"), emptyLineRead);
+            String emptyLineRead = fileBuffer.readRange(new TextPosition(1, 0), new TextPosition(2, 0));
+            assertEquals("\n", emptyLineRead);
 
             // End position beyond actual buffer end (contract specifies: returns up to available bounds)
-            List<String> beyondEndRead = fileBuffer.readRange(new TextPosition(0, 0), new TextPosition(99, 99));
+            String beyondEndRead = fileBuffer.readRange(new TextPosition(0, 0), new TextPosition(99, 99));
             assertFalse(beyondEndRead.isEmpty(), "Reading beyond buffer end should return existing rows");
 
             // Negative start position

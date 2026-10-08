@@ -27,8 +27,9 @@ class MarkdownRendererState implements RendererState {
         VERBATIM_INDICATOR,
         CODE_BLOCK_INDICATOR
     );
+    private static final int MAX_HEADING_DEPTH = 6;
 
-    private boolean doSpellCheck;
+    private final boolean doSpellCheck;
     private boolean isBold = false;
     private boolean isItalic = false;
     private boolean isVerbatim = false;
@@ -89,10 +90,7 @@ class MarkdownRendererState implements RendererState {
             return false;
         }
 
-        //TODO
-        // WHEN [anytime]
-        // DO [introduce 6 heading limit]
-        Pattern pattern = Pattern.compile("^\\s*" + HEADING_INDICATOR + "+\\s+.*", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("^\\s*" + HEADING_INDICATOR + "{1," + MAX_HEADING_DEPTH + "}\\s+.*", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(tokens.getFirst());
 
         return matcher.find();

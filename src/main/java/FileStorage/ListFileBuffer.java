@@ -177,13 +177,13 @@ public class ListFileBuffer implements FileBuffer {
     }
 
     @Override
-    public List<String> readRange(TextPosition start, TextPosition end) throws InvalidPosition {
+    public String readRange(TextPosition start, TextPosition end) throws InvalidPosition {
         checkPosition(start);
         if (!end.isAfter(start)) {
             throw new InvalidPosition("start (" + start + ") is after end (" + end + ")");
         }
 
-        List<String> result = new ArrayList<>();
+        StringBuilder result = new StringBuilder();
 
         for (int paragraph = start.paragraph(); paragraph <= end.paragraph(); paragraph++) {
             if (paragraph >= paragraphs.size()) {
@@ -197,10 +197,10 @@ public class ListFileBuffer implements FileBuffer {
                 continue;
             }
 
-            result.add(paragraphs.get(paragraph).substring(startIndex, endIndex));
+            result.append(paragraphs.get(paragraph), startIndex, endIndex);
         }
 
-        return result;
+        return result.toString();
     }
 
     @Override
