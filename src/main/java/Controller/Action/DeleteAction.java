@@ -85,7 +85,19 @@ public class DeleteAction extends Action {
         content = file.readRange(range.start(), range.end());
         file.deleteRange(range.start(), range.end());
 
-        viewPort.moveCursorTo(range.start());
+        if (file.positionExists(range.start())) {
+            viewPort.moveCursorTo(range.start());
+        }
+        else if (file.isEmpty()) {
+            viewPort.moveCursorTo(new TextPosition(0, 0));
+        }
+        else {
+            TextPosition last = new TextPosition(
+                file.length() - 1,
+               file.lengthOfParagraph(file.length() - 1) - 1
+            );
+            viewPort.moveCursorTo(last);
+        }
 
         handleCopy(viewPort);
     }

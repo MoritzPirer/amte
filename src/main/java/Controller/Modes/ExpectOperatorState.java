@@ -351,7 +351,9 @@ class ExpectOperatorState implements ChordParserState {
             )));
         }
         if (corrections.length == 0) {
-            return new ParseSnapshot(ParseStatus.FINISHED, new NotifyAction(new Message(
+
+            chordParser.changeState(new ExpectSelectionState(chordParser, word, corrections));
+            return new ParseSnapshot(ParseStatus.UNFINISHED, new NotifyAction(new Message(
                     provider.get("tool/correct/noCorrectionsFound"),
                     MessageType.ERROR,
                     TimeDuration.seconds(2)

@@ -31,8 +31,6 @@ public class ViewPort {
     private final History history = new StackHistory();
     private final ClipboardHandler clipboardHandler = new ClipboardHandler();
 
-    private boolean isRunning = true;
-
     public ViewPort(TextFile file) {
         this.file = file;
 
@@ -92,12 +90,7 @@ public class ViewPort {
         }
     }
 
-    public boolean isRunning() {
-        return isRunning;
-    }
-
     public void stop() {
-        isRunning = false;
         file.stop();
     }
 
@@ -232,6 +225,12 @@ public class ViewPort {
             int visualLinesOfParagraph = visualLinesNeeded(currentParagraph, size);
             visualLine += visualLinesOfParagraph;
         }
+/*
+        if (cursor.getPosition().paragraph() >= file.length()) {
+            return new TextPosition(visualLine, 0); //MARK
+        }
+
+ */
 
         int tabAwareColumn = tabAwareColumn(cursor.getPosition().paragraph(),cursor.getPosition().character());
         int lineOfCursorInParagraph = visualLinesNeeded(

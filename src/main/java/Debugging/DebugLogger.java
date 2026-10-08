@@ -1,7 +1,7 @@
 package Debugging;
 
 public class DebugLogger {
-    private static final boolean ENABLED = false;
+    private static final boolean ENABLED = true;
 
     private static DebugLogger instance;
 
