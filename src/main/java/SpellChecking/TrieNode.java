@@ -13,7 +13,7 @@ class TrieNode {
 
     /**
      * null is used by the root node, which doesn't have a letter, and as a sentinel value to designate
-     * the end of a word (to prevent an invalid word being matched because it is the prefix of a valid word
+     * the end of a word (to prevent an invalid word being matched because it is the prefix of a valid word)
      */
     public TrieNode() {
         this.letter = null; // null

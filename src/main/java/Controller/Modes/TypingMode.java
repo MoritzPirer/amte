@@ -58,16 +58,19 @@ public class TypingMode implements ModeState {
     }
 
     private Action createUnindentAction(ViewPort viewPort, TextFile file) {
-        int paragraphIndex = viewPort.getLogicalCursorPosition().paragraph();
-        String paragraph = file.readRawParagraph(paragraphIndex);
+        TextPosition cursor = viewPort.getLogicalCursorPosition();
+        String paragraph = file.readRawParagraph(cursor.paragraph());
 
         if (!paragraph.startsWith("\t")) {
             return new NullAction();
         }
 
-        return new DeleteAction(
-            new TextPosition(paragraphIndex, 0),
-            new TextPosition(paragraphIndex, 1)
+        return new CompoundAction(
+            new DeleteAction(
+                new TextPosition(cursor.paragraph(), 0),
+                new TextPosition(cursor.paragraph(), 1)
+            ),
+            new JumpAction(cursor.offset(0, -1))
         );
     }
 

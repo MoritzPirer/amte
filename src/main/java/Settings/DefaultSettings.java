@@ -73,7 +73,7 @@ class DefaultSettings implements SettingStorage {
 
         throw new IllegalArgumentException("No such key: " + key);
     }
-    
+
     public boolean doesBooleanSettingExist(String key) {
         return booleanSettings.containsKey(key);
     }

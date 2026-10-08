@@ -70,16 +70,19 @@ class ToolMode implements ModeState, ChordParser {
             case ARROW_RIGHT -> { return new MoveAction(Direction.RIGHT); }
             case TAB -> { return createIndentAction(viewPort); }
             case SHIFT_TAB -> {
-                int paragraph = viewPort.getLogicalCursorPosition().paragraph();
-                String line = file.readRawParagraph(paragraph);
+                TextPosition cursor = viewPort.getLogicalCursorPosition();
+                String paragraph = file.readRawParagraph(cursor.paragraph());
 
-                if (!line.startsWith("\t")) {
+                if (!paragraph.startsWith("\t")) {
                     return new NullAction();
                 }
 
-                return new DeleteAction(
-                    new TextPosition(paragraph, 0),
-                    new TextPosition(paragraph, 1)
+                return new CompoundAction(
+                    new DeleteAction(
+                        new TextPosition(cursor.paragraph(), 0),
+                        new TextPosition(cursor.paragraph(), 1)
+                    ),
+                    new JumpAction(cursor.offset(0, -1))
                 );
             }
 
@@ -87,7 +90,7 @@ class ToolMode implements ModeState, ChordParser {
         }
     }
 
-    private Action createIndentAction(ViewPort viewPort) {
+private Action createIndentAction(ViewPort viewPort) {
         TextPosition position = new TextPosition(viewPort.getLogicalCursorPosition().paragraph(), 0);
 
         return new CompoundAction(
